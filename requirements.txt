@@ -1,0 +1,9 @@
+# This machine runs Python 3.14. Use >= constraints only, never exact pins:
+# exact pins have already caused binary-wheel resolution failures on this
+# project. Let pip pick the newest compatible build for the interpreter.
+
+pytest>=8.3
+
+# Added later for the simulator (delay curve, benchmark classifier):
+# numpy>=2.1
+# scikit-learn>=1.5
