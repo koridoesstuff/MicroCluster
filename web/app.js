@@ -21,6 +21,10 @@ const els = {
   plan: document.getElementById("plan"),
   emptyNote: document.getElementById("empty-note"),
   disclaimer: document.getElementById("disclaimer"),
+  resSlider: document.getElementById("res-slider"),
+  resReadout: document.getElementById("res-readout"),
+  gateDay: document.getElementById("gate-day"),
+  gateBody: document.getElementById("gate-body"),
 };
 
 const state = {
@@ -31,9 +35,16 @@ const state = {
   timer: null,
   agentCells: new Map(), // key `${suite}#${i}` -> <div class="agent">
   suiteEls: new Map(),   // suite id -> <div class="suite">
+  evals: [],           // current day's candidate scopes, coarsest -> finest
+  wallIdx: -1,         // first index that FAILED the privacy gate, or -1
+  maxResIdx: 0,        // furthest the slider may travel (the wall, inclusive)
+  resIdx: 0,           // slider position
 };
 
-const STATES = ["susceptible", "incubating", "symptomatic", "recovered"];
+// scope ids nest by "-" prefix: "C-B1-F2" covers "C-B1-F2-S1".
+function scopeCoversSuite(scopeId, suiteId) {
+  return scopeId === suiteId || String(suiteId).startsWith(scopeId + "-");
+}
 
 function setPlaybackEnabled(on) {
   for (const b of [els.play, els.pause, els.step, els.reset]) b.disabled = !on;
@@ -128,10 +139,18 @@ function paintDay(n) {
     if (cell) cell.className = "agent s-" + a.state;
   }
 
+  renderResolution(frame);
+  renderGateTable(frame);
+
+  const d = frame.disclosure;
+  const resScope = state.evals[state.resIdx];
   for (const [suiteId, suiteEl] of state.suiteEls) {
-    const d = frame.disclosure;
-    const hit = d && (d.scope_id === suiteId || String(suiteId).startsWith(d.scope_id + "-"));
-    suiteEl.classList.toggle("disclosed", Boolean(hit));
+    suiteEl.classList.toggle(
+      "disclosed", Boolean(d && scopeCoversSuite(d.scope_id, suiteId))
+    );
+    suiteEl.classList.toggle(
+      "resolution", Boolean(resScope && scopeCoversSuite(resScope.scope_id, suiteId))
+    );
   }
 
   const c = frame.counts;
@@ -142,7 +161,6 @@ function paintDay(n) {
   els.dayLabel.textContent = String(n);
   els.scrub.value = String(n);
 
-  const d = frame.disclosure;
   if (d) {
     els.status.textContent =
       `System says: ${d.level} ${d.label} disclosed` +
@@ -158,6 +176,139 @@ function paintDay(n) {
   }
 }
 
+// ---- resolution slider -------------------------------------------------
+
+// The slider walks the candidate scopes from coarsest to finest. It may
+// travel up to and including the first scope that FAILED the privacy gate
+// (state.wallIdx); dragging further snaps back to it. The engine already
+// decided pass/fail -- this only reads frame.evaluations.
+function renderResolution(frame) {
+  const evals = frame.evaluations || [];
+  state.evals = evals;
+
+  if (evals.length === 0) {
+    state.wallIdx = -1;
+    state.maxResIdx = 0;
+    state.resIdx = 0;
+    els.resSlider.disabled = true;
+    els.resSlider.min = "0";
+    els.resSlider.max = "0";
+    els.resSlider.value = "0";
+    els.resReadout.className = "res-readout";
+    els.resReadout.textContent = frame.detection.fired
+      ? "Detection fired but no scope had a qualifying report this day."
+      : "No candidate scopes — detection has not fired on this day.";
+    return;
+  }
+
+  state.wallIdx = evals.findIndex((e) => !e.privacy_pass);
+  state.maxResIdx = state.wallIdx === -1 ? evals.length - 1 : state.wallIdx;
+  const selIdx = evals.findIndex((e) => e.selected);
+  state.resIdx = selIdx !== -1 ? selIdx : state.maxResIdx;
+
+  els.resSlider.disabled = false;
+  els.resSlider.min = "0";
+  els.resSlider.max = String(evals.length - 1);
+  els.resSlider.value = String(state.resIdx);
+  renderResReadout();
+}
+
+function renderResReadout() {
+  const e = state.evals[state.resIdx];
+  if (!e) return;
+  const atWall = state.wallIdx !== -1 && state.resIdx === state.wallIdx;
+  els.resReadout.classList.toggle("wall", atWall);
+
+  if (atWall) {
+    els.resReadout.textContent =
+      `Resolution stops at ${e.level} ${e.label}. ${e.reason}`;
+  } else if (e.selected) {
+    els.resReadout.textContent =
+      `Resolution: ${e.level} ${e.label} — the scope the system disclosed.`;
+  } else if (e.eligible) {
+    els.resReadout.textContent =
+      `Resolution: ${e.level} ${e.label} — passes both gates; a finer scope was disclosed.`;
+  } else {
+    els.resReadout.textContent =
+      `Resolution: ${e.level} ${e.label} — passes the privacy gate. ${e.reason}`;
+  }
+}
+
+function applyResolutionHighlight() {
+  const resScope = state.evals[state.resIdx];
+  for (const [suiteId, suiteEl] of state.suiteEls) {
+    suiteEl.classList.toggle(
+      "resolution", Boolean(resScope && scopeCoversSuite(resScope.scope_id, suiteId))
+    );
+  }
+}
+
+els.resSlider.addEventListener("input", () => {
+  let v = Number(els.resSlider.value);
+  if (v > state.maxResIdx) {
+    v = state.maxResIdx;                 // hard stop at the privacy wall
+    els.resSlider.value = String(v);
+  }
+  state.resIdx = v;
+  renderResReadout();
+  applyResolutionHighlight();
+});
+
+// ---- gate table ------------------------------------------------------
+
+function td(text) {
+  const el = document.createElement("td");
+  el.textContent = text;
+  return el;
+}
+
+function gateCell(pass, sub) {
+  const el = document.createElement("td");
+  el.className = "gate-cell";
+  const verdict = document.createElement("span");
+  verdict.className = pass ? "pass" : "fail";
+  verdict.textContent = pass ? "PASS" : "FAIL";
+  const note = document.createElement("small");
+  note.textContent = sub;
+  el.append(verdict, note);
+  return el;
+}
+
+function renderGateTable(frame) {
+  els.gateDay.textContent = String(frame.day);
+  const body = els.gateBody;
+  body.innerHTML = "";
+  const evals = frame.evaluations || [];
+
+  if (evals.length === 0) {
+    const tr = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = 6;
+    cell.className = "muted";
+    cell.textContent =
+      "No candidate scopes evaluated" +
+      (frame.detection.fired ? "." : " (detection did not fire).");
+    tr.appendChild(cell);
+    body.appendChild(tr);
+    return;
+  }
+
+  for (const e of evals) {
+    const tr = document.createElement("tr");
+    if (e.selected) tr.className = "selected";
+    tr.appendChild(td(`${e.level} ${e.label}`));
+    tr.appendChild(td(String(e.population)));
+    tr.appendChild(td(e.qualifying_band));
+    tr.appendChild(gateCell(e.statistical_pass, `need ≥ ${e.statistical_threshold}`));
+    const privSub = e.privacy_pass
+      ? "within minimum size and share"
+      : (!e.min_population_pass ? "population below minimum" : "share of group too large");
+    tr.appendChild(gateCell(e.privacy_pass, privSub));
+    tr.appendChild(td(e.reason));
+    body.appendChild(tr);
+  }
+}
+
 // ---- run + playback -----------------------------------------------------
 
 async function startRun() {
@@ -168,11 +319,28 @@ async function startRun() {
   renderSkeleton();
   els.status.textContent = "System says: —";
   els.status.classList.remove("flagged");
+  els.resSlider.disabled = true;
+  els.resReadout.className = "res-readout";
+  els.resReadout.textContent = "Loading…";
+  els.gateBody.innerHTML = "";
+  els.gateDay.textContent = "–";
 
   const body = {
     seed: Number(els.seed.value) || 0,
     days: Math.max(1, Math.min(120, Number(els.days.value) || 30)),
   };
+  // Optional illustrative overrides via URL, e.g.
+  // ?suite_transmission_probability=0.03&reporting_probability_min=0.85
+  const qs = new URLSearchParams(location.search);
+  for (const key of [
+    "suite_transmission_probability", "floor_transmission_probability",
+    "building_transmission_probability", "reporting_probability_min",
+    "reporting_probability_max", "background_noise_daily_rate", "seed_infections",
+  ]) {
+    if (qs.has(key)) body[key] = Number(qs.get(key));
+  }
+  if (qs.has("seed")) { body.seed = Number(qs.get("seed")); els.seed.value = body.seed; }
+  if (qs.has("days")) { body.days = Number(qs.get("days")); els.days.value = body.days; }
 
   let meta;
   try {
@@ -251,5 +419,10 @@ if (auto !== null) {
     if (auto === "end") paintDay(state.totalDays);
     else if (m) paintDay(Math.min(state.totalDays, Number(m[1])));
     else play();
+    // ?res=wall drives the slider to its hard stop (for screenshots).
+    if (new URLSearchParams(location.search).get("res") === "wall") {
+      els.resSlider.value = String(state.maxResIdx);
+      els.resSlider.dispatchEvent(new Event("input"));
+    }
   });
 }

@@ -39,6 +39,8 @@ from simulation.config import (
     DEFAULT_SIMULATION_CONFIG,
     SimulationConfig,
 )
+
+from .bands import band, sanitize_reason
 from simulation.contact import suite_ancestor_ids
 from simulation.pipeline import (
     DailyRecord,
@@ -259,6 +261,32 @@ def get_day(run_id: str, n: int) -> dict:
             "level": scope.level.name,
         }
 
+    # The gate table (rule 12), ordered coarsest -> finest so the
+    # resolution slider can walk it directly. Exact qualifying counts and
+    # the exact report fraction are dropped here and never sent; only the
+    # band leaves the server (see api/bands.py).
+    evaluations = [
+        {
+            "scope_id": ev.scope_id,
+            "label": ev.scope_label,
+            "level": ev.scope_level.name,
+            "population": ev.population,
+            "qualifying_band": band(ev.qualifying_reports),
+            "statistical_threshold": ev.statistical_threshold,
+            "statistical_pass": ev.statistical_pass,
+            "min_population_pass": ev.min_population_pass,
+            "report_fraction_pass": ev.report_fraction_pass,
+            "privacy_pass": ev.privacy_pass,
+            "eligible": ev.disclosure_eligible,
+            "selected": ev.selected,
+            "reason": sanitize_reason(ev.disclosure_reason),
+        }
+        for ev in sorted(
+            record.disclosure_evaluations,
+            key=lambda e: (int(e.scope_level), -e.population, e.scope_id),
+        )
+    ]
+
     return {
         "day": n,
         "counts": {state.value: snapshot.counts[state] for state in snapshot.counts},
@@ -269,6 +297,7 @@ def get_day(run_id: str, n: int) -> dict:
             "absolute": record.absolute_fired,
         },
         "disclosure": disclosure,
+        "evaluations": evaluations,
         "first_fired_day": record.first_fired_day,
         "first_disclosed_day": record.first_disclosed_day,
         "disclaimer": DISCLAIMER,

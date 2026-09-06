@@ -26,7 +26,7 @@ html, body {
   line-height: 1.4;
 }
 
-header, .controls, .legend, .status, main {
+header, .controls, .legend, .status, main, .resolution, .gates {
   padding-left: 20px;
   padding-right: 20px;
 }
@@ -110,10 +110,38 @@ input[type="range"] {
 }
 .status.flagged { border-left-color: var(--flag); color: var(--flag); }
 
+.resolution {
+  padding-top: 6px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line-soft);
+  max-width: 900px;
+}
+.res-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.res-row label { font-weight: 600; }
+.res-end { font-size: 12px; color: var(--line-soft); }
+#res-slider { flex: 1; accent-color: var(--ink); }
+.res-readout {
+  margin: 8px 0 0;
+  font-size: 13px;
+  border-left: 3px solid var(--line-soft);
+  padding-left: 10px;
+  min-height: 1.4em;
+}
+.res-readout.wall {
+  border-left-color: var(--flag);
+  color: var(--flag);
+  font-weight: 600;
+}
+
 .legend {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 20px;
+  padding-top: 12px;
   padding-bottom: 12px;
   font-size: 13px;
 }
@@ -164,6 +192,7 @@ input[type="range"] {
   min-width: 120px;
 }
 .suite.disclosed { border-color: var(--flag); border-width: 2px; padding: 7px; }
+.suite.resolution { outline: 2px solid var(--ink); outline-offset: 1px; }
 .suite-label {
   font-size: 11px;
   color: var(--line-soft);
@@ -185,6 +214,42 @@ input[type="range"] {
 .agent.s-incubating { background: var(--incubating); }
 .agent.s-symptomatic { background: var(--symptomatic); }
 .agent.s-recovered { background: var(--recovered); }
+
+.gates {
+  padding-top: 16px;
+  padding-bottom: 48px;
+}
+.gates h2 {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 4px;
+}
+.gates-note { margin: 0 0 10px; font-size: 12px; color: var(--line-soft); max-width: 70ch; }
+#gate-table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 1100px;
+  font-size: 13px;
+}
+#gate-table th, #gate-table td {
+  border: 1px solid var(--line-soft);
+  padding: 5px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+#gate-table th {
+  background: #e7e4db;
+  border-color: var(--line);
+  font-weight: 600;
+}
+#gate-table td.muted { color: var(--line-soft); }
+#gate-table tr.selected td { border-color: var(--flag); }
+#gate-table tr.selected td:first-child { font-weight: 600; }
+.pass { color: #1a1a1a; font-weight: 600; }
+.fail { color: var(--flag); font-weight: 600; }
+.gate-cell small { display: block; color: var(--line-soft); font-weight: 400; }
 
 /* skeleton loader for the async run */
 .plan.loading .floor,

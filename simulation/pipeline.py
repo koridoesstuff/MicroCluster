@@ -19,6 +19,7 @@ from datetime import timedelta
 from microcluster.config import DEFAULT_DETECTION_CONFIG, DEFAULT_DISCLOSURE_CONFIG
 from microcluster.config import DetectionConfig, DisclosureConfig
 from microcluster.detection import HysteresisState
+from microcluster.disclosure import ScopeEvaluation
 from microcluster.engine import analyze
 from microcluster.models import Report
 
@@ -62,6 +63,13 @@ class DailyRecord:
     disclosed_scope_id: str | None
     first_fired_day: int | None
     first_disclosed_day: int | None
+
+    # The complete disclosure gate table for this day (rule 12): a
+    # ScopeEvaluation for every candidate scope, winner and rejected
+    # alike, exactly as disclosure.evaluate returned it. Empty on days the
+    # detector did not fire (disclosure does not run). The presentation
+    # layer renders these and never recomputes a gate.
+    disclosure_evaluations: tuple[ScopeEvaluation, ...] = ()
 
 
 @dataclass
@@ -197,6 +205,7 @@ def analyze_report_stream(
                 disclosed_scope_id=analysis.disclosed_scope_id,
                 first_fired_day=first_fired_day,
                 first_disclosed_day=first_disclosed_day,
+                disclosure_evaluations=analysis.disclosure.evaluations,
             )
         )
     return daily_records

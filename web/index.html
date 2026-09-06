@@ -46,6 +46,16 @@
 
 <p id="status" class="status" role="status">System says: &mdash;</p>
 
+<section class="resolution" aria-label="privacy / resolution control">
+  <div class="res-row">
+    <label for="res-slider">Resolution</label>
+    <span class="res-end">coarsest</span>
+    <input type="range" id="res-slider" min="0" max="0" value="0" step="1" disabled>
+    <span class="res-end">finest</span>
+  </div>
+  <p id="res-readout" class="res-readout">Run a simulation to explore the candidate scopes.</p>
+</section>
+
 <section class="legend" aria-label="colour key">
   <span class="key"><span class="dot s-susceptible"></span>susceptible</span>
   <span class="key"><span class="dot s-incubating"></span>incubating</span>
@@ -57,6 +67,29 @@
 <main id="plan" class="plan" aria-label="floor plan">
   <p class="empty-note" id="empty-note">Set a seed and press Run to start an outbreak.</p>
 </main>
+
+<section class="gates" aria-label="gate table for the current day">
+  <h2>Gate table &mdash; day <output id="gate-day">&ndash;</output></h2>
+  <p class="gates-note">
+    Every candidate scope the engine evaluated, refused ones included.
+    Report counts are shown as bands, never exact numbers.
+  </p>
+  <table id="gate-table">
+    <thead>
+      <tr>
+        <th>Scope</th>
+        <th>Population</th>
+        <th>Qualifying</th>
+        <th>Statistical gate</th>
+        <th>Privacy gate</th>
+        <th>Reason</th>
+      </tr>
+    </thead>
+    <tbody id="gate-body">
+      <tr><td colspan="6" class="muted">No run yet.</td></tr>
+    </tbody>
+  </table>
+</section>
 
 <script src="app.js"></script>
 </body>

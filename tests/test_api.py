@@ -10,9 +10,23 @@ from __future__ import annotations
 
 import unittest
 
+import re
+
 from fastapi.testclient import TestClient
 
 from api.app import DISCLAIMER, app
+
+# High transmission + near-certain reporting: a suite reliably blows past
+# the report-fraction cap and fails the privacy gate (the "roster" refusal).
+_ROSTER_PARAMS = {
+    "suite_transmission_probability": 0.03,
+    "floor_transmission_probability": 0.002,
+    "building_transmission_probability": 0.0005,
+    "reporting_probability_min": 0.85,
+    "reporting_probability_max": 1.0,
+    "background_noise_daily_rate": 0.003,
+}
+_BAND_RE = re.compile(r"^(0|\d+-\d+|\d+\+)$")
 
 
 class ApiTest(unittest.TestCase):
@@ -77,6 +91,7 @@ class ApiTest(unittest.TestCase):
                 "agents",
                 "detection",
                 "disclosure",
+                "evaluations",
                 "first_fired_day",
                 "first_disclosed_day",
                 "disclaimer",
@@ -107,6 +122,78 @@ class ApiTest(unittest.TestCase):
             json={"seed": 1, "reporting_probability_min": 0.9, "reporting_probability_max": 0.1},
         )
         self.assertEqual(bad.status_code, 422)
+
+    def test_evaluations_shape_and_ordering(self) -> None:
+        data = self._run(seed=4, days=30)
+        rid = data["run_id"]
+        levels_rank = {"CAMPUS": 1, "BUILDING": 2, "FLOOR": 3, "SUITE": 4}
+        saw_a_firing_day = False
+        for n in range(31):
+            day = self.client.get(f"/api/run/{rid}/day/{n}").json()
+            evs = day["evaluations"]
+            if day["detection"]["fired"] and day["disclosure"] is not None:
+                saw_a_firing_day = saw_a_firing_day or len(evs) > 0
+            order_key = [(levels_rank[e["level"]], -e["population"]) for e in evs]
+            self.assertEqual(
+                order_key, sorted(order_key),
+                "evaluations must be ordered coarsest -> finest",
+            )
+            for e in evs:
+                self.assertEqual(
+                    set(e),
+                    {
+                        "scope_id", "label", "level", "population", "qualifying_band",
+                        "statistical_threshold", "statistical_pass", "min_population_pass",
+                        "report_fraction_pass", "privacy_pass", "eligible", "selected",
+                        "reason",
+                    },
+                )
+                self.assertNotIn("qualifying_reports", e)
+                self.assertNotIn("report_fraction", e)
+                self.assertRegex(e["qualifying_band"], _BAND_RE)
+        self.assertTrue(saw_a_firing_day)
+
+    def test_exact_qualifying_count_never_appears_in_a_reason(self) -> None:
+        # Cross-check against the engine's own numbers, computed here.
+        from simulation.config import SimulationConfig
+        from simulation.pipeline import run_with_detection
+
+        run = run_with_detection(seed=4, days=30, config=SimulationConfig())
+        data = self._run(seed=4, days=30)
+        rid = data["run_id"]
+        for record in run.daily_records:
+            if not record.disclosure_evaluations:
+                continue
+            day = self.client.get(f"/api/run/{rid}/day/{record.day}").json()
+            api_reasons = " || ".join(e["reason"] for e in day["evaluations"])
+            for ev in record.disclosure_evaluations:
+                exact = ev.qualifying_reports
+                self.assertNotIn(f"({exact} qualifying reports", api_reasons)
+                self.assertNotIn(f"qualifying count ({exact})", api_reasons)
+
+    def test_slider_wall_data_exists_when_a_suite_fails_privacy(self) -> None:
+        data = self._run(seed=4, days=30, **_ROSTER_PARAMS)
+        rid = data["run_id"]
+        found_wall = False
+        for n in range(31):
+            evs = self.client.get(f"/api/run/{rid}/day/{n}").json()["evaluations"]
+            passed_then_failed = any(
+                evs[i]["privacy_pass"] and not evs[j]["privacy_pass"]
+                for i in range(len(evs))
+                for j in range(i + 1, len(evs))
+            )
+            suite_roster_fail = [
+                e for e in evs
+                if e["level"] == "SUITE"
+                and not e["privacy_pass"]
+                and e["min_population_pass"]
+                and not e["report_fraction_pass"]
+            ]
+            if passed_then_failed and suite_roster_fail:
+                found_wall = True
+                self.assertIn("over the limit", suite_roster_fail[0]["reason"])
+                break
+        self.assertTrue(found_wall, "expected a day with a coarser pass then a suite privacy fail")
 
     def test_web_index_is_served(self) -> None:
         res = self.client.get("/")
