@@ -4,6 +4,9 @@
 
 pytest>=8.3
 
-# Added later for the simulator (delay curve, benchmark classifier):
-# numpy>=2.1
-# scikit-learn>=1.5
+# The simulator's benchmark (simulation/benchmark.py) trains a small
+# classifier on simulated ground truth and scores it against the
+# hand-authored threshold rules. numpy is scikit-learn's own dependency
+# and is also used directly for the feature matrices.
+numpy>=2.1
+scikit-learn>=1.5

@@ -76,6 +76,33 @@ MIN_RELATIVE_CLUSTER_REPORTS: int = 3
 
 
 # ---------------------------------------------------------------------------
+# Detection hysteresis
+# ---------------------------------------------------------------------------
+#
+# detection.evaluate() is otherwise a pure, single-instant function: fired
+# is recomputed from scratch each call, from whatever happens to be in the
+# window that instant. Called once a day over a live event, that means an
+# ordinary day-to-day wobble in which reports happen to fall inside a
+# rolling 72h window can flip "fired" off and back on in the middle of one
+# ongoing event -- not because anything really went away, but because the
+# window's edge moved. Hysteresis smooths that out. It does not change what
+# a single evaluation computes; it changes how a SEQUENCE of evaluations
+# (threaded via ``HysteresisState``) is allowed to report "fired".
+
+# Once fired, "fired" is held True for at least this many consecutive
+# evaluations, even on a day where the raw relative/absolute check alone
+# would say no. Policy choice.
+HYSTERESIS_MIN_FIRED_DAYS: int = 3
+
+# ...unless the window's qualifying report count drops to this floor or
+# below, in which case the hold releases immediately regardless of the
+# minimum above -- a count this low means the event is genuinely over, and
+# holding "fired" would describe a signal that is no longer there. Policy
+# choice.
+HYSTERESIS_RELEASE_THRESHOLD: int = 3
+
+
+# ---------------------------------------------------------------------------
 # Disclosure -- statistical gate (rule 8)
 # ---------------------------------------------------------------------------
 
@@ -102,6 +129,30 @@ MIN_SCOPE_POPULATION: int = 20
 # declared population. If half of a declared group is "reporting", naming
 # the group tells you a lot about specific people in it. Policy choice.
 MAX_REPORT_FRACTION: float = 0.5
+
+
+# ---------------------------------------------------------------------------
+# Disclosure -- scope stability across a sequence of disclosures
+# ---------------------------------------------------------------------------
+#
+# disclosure.evaluate() is otherwise a pure, single-instant function too:
+# on each call it picks the finest scope passing both gates *that instant*,
+# with no memory of what was disclosed last time. Called once a day over a
+# live event, that means the named scope can wander from suite to suite as
+# the evidence shifts night to night. Each individual disclosure still
+# passes both gates on its own, but the SEQUENCE leaks far more than any
+# one of them does: an observer who watches it wander learns about every
+# group it ever names, not just one. Once a scope has been named, evaluate()
+# keeps naming that scope (or a coarser ancestor of it, if the exact scope
+# stops qualifying) unless a different scope's qualifying count clearly
+# outweighs it.
+
+# How much a candidate OUTSIDE the currently disclosed scope's own lineage
+# (itself or its ancestors) must exceed the current scope's qualifying
+# count by before disclosure is allowed to switch to it. Below this margin,
+# disclosure stays put -- it never silently hops between sibling scopes on
+# a small, possibly noisy, difference in count. Policy choice.
+SIBLING_SWITCH_MARGIN: int = 5
 
 
 # ---------------------------------------------------------------------------
@@ -134,6 +185,8 @@ class DetectionConfig:
     relative_excess_ratio: float = RELATIVE_EXCESS_RATIO
     relative_smoothing: float = RELATIVE_SMOOTHING
     min_relative_cluster_reports: int = MIN_RELATIVE_CLUSTER_REPORTS
+    hysteresis_min_fired_days: int = HYSTERESIS_MIN_FIRED_DAYS
+    hysteresis_release_threshold: int = HYSTERESIS_RELEASE_THRESHOLD
 
 
 @dataclass(frozen=True)
@@ -144,6 +197,7 @@ class DisclosureConfig:
     statistical_gate_floor: int = STATISTICAL_GATE_FLOOR
     min_scope_population: int = MIN_SCOPE_POPULATION
     max_report_fraction: float = MAX_REPORT_FRACTION
+    sibling_switch_margin: int = SIBLING_SWITCH_MARGIN
 
 
 DEFAULT_DETECTION_CONFIG = DetectionConfig()

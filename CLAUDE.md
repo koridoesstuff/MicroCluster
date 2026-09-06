@@ -205,6 +205,46 @@ theorem about this problem.
 
 ---
 
+## Detection hysteresis and disclosure scope stability
+
+`detection.evaluate` and `disclosure.evaluate` are each still, in
+isolation, a pure single-instant computation. Called in a SEQUENCE (once a
+day over a live event), both accept optional state threaded from the
+previous call, and both use that state the same way: prefer continuity
+over reacting to a single noisy instant.
+
+- **Detection hysteresis.** Once fired, `fired` is held `True` for at
+  least `HYSTERESIS_MIN_FIRED_DAYS` consecutive evaluations even if that
+  day's raw relative/absolute check alone says no — an ordinary wobble in
+  which reports fall inside a rolling 72h window should not flip
+  detection off and back on inside one ongoing event. It releases early
+  regardless of the minimum if the window's qualifying count drops to
+  `HYSTERESIS_RELEASE_THRESHOLD` or below: a drop that low means the event
+  is genuinely over. State is `HysteresisState`, threaded explicitly
+  (never global); a call with no state behaves exactly as if hysteresis
+  did not exist.
+
+- **Disclosure scope stability.** Once a scope has been disclosed, passing
+  its id as `prior_disclosed_scope_id` makes `evaluate` prefer to keep
+  disclosing that scope, or a coarser ancestor of it if the exact scope
+  stops qualifying, over hopping to a different scope. It only switches
+  away from that lineage when some other scope's qualifying count exceeds
+  it by more than `SIBLING_SWITCH_MARGIN`. Each disclosure still passes
+  both gates on its own; the point is that the SEQUENCE of disclosures
+  leaks more than any one of them does — an observer who watches it
+  wander learns about every group it ever names, not just one. A call
+  with no prior id is unaffected.
+
+Both constants live in `microcluster/config.py` next to every other
+threshold, for the same reason: named, configurable, and not a proven
+law. `simulation/pipeline.py` is the reference caller — it threads both
+kinds of state day to day and records, in `DailyRecord`, the running
+`first_fired_day` and `first_disclosed_day`. The gap between them is the
+measurable cost of the privacy policy: how long the system knew something
+before it was permitted to say where.
+
+---
+
 ## Test scenarios (`tests/`)
 
 - **Localized cluster** — relative detector fires, absolute does not; a
@@ -319,6 +359,13 @@ into the disclosure path.
 - **Privacy evaluation runs after detection, before presentation.** The
   animation and the delay curve render engine output; they do not
   recompute gates.
+- **Every emitted report is at the same `ScopeLevel` — `SUITE`.**
+  `detection.evaluate` raises `ValueError` on mixed-level input (its
+  peer-population math only holds for sibling locations). Each simulated
+  agent belongs to one suite; a report's `location_id` is always that
+  suite. The coarser scopes (`FLOOR`, `BUILDING`, `CAMPUS`) exist only in
+  the `ScopeRegistry` as the suite's ancestors, and are reached through
+  the registry, never by emitting a report against them.
 
 ### Simulation parameters are chosen, not measured
 

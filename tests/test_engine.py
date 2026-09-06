@@ -19,12 +19,13 @@ from tests.fixtures import (
 class LocalizedClusterEndToEndTest(unittest.TestCase):
     def setUp(self) -> None:
         reg = standard_registry()
+        # Uniform suite level (see detection.evaluate's mixed-level rule).
         data = (
             reports("S1", 9, category=Category.RESPIRATORY)
-            + reports("B2", 2, category=Category.GENERAL)
-            + reports("B3", 1, category=Category.GASTROINTESTINAL)
-            + reports("B4", 1, category=Category.OTHER)
-            + reports("B5", 1, category=Category.GENERAL)
+            + reports("S2", 2, category=Category.GENERAL)
+            + reports("S3", 1, category=Category.GASTROINTESTINAL)
+            + reports("S4", 1, category=Category.OTHER)
+            + reports("S5", 1, category=Category.GENERAL)
         )
         self.result = analyze(data, reg, now=NOW)
 
@@ -59,14 +60,11 @@ class ScatteredNoiseEndToEndTest(unittest.TestCase):
     def test_detects_nothing_and_discloses_nothing(self) -> None:
         reg = standard_registry()
         data = (
-            reports("B1", 2, category=Category.GENERAL)
-            + reports("B2", 2, category=Category.RESPIRATORY)
-            + reports("B3", 2, category=Category.GASTROINTESTINAL)
-            + reports("B4", 2, category=Category.OTHER)
-            + reports("B5", 1, category=Category.GENERAL)
-            + reports("F2", 2, category=Category.RESPIRATORY)
-            + reports("F3", 2, category=Category.GENERAL)
-            + reports("S2", 2, category=Category.OTHER)
+            reports("B1", 3, category=Category.GENERAL)
+            + reports("B2", 3, category=Category.RESPIRATORY)
+            + reports("B3", 3, category=Category.GASTROINTESTINAL)
+            + reports("B4", 3, category=Category.OTHER)
+            + reports("B5", 3, category=Category.GENERAL)
         )
         result = analyze(data, reg, now=NOW)
 

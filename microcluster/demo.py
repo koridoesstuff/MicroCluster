@@ -92,12 +92,13 @@ def main() -> None:
     reg = standard_registry()
 
     # 1. Localized cluster -- relative fires, absolute does not.
+    #    All reports at suite level (detection requires one scope level).
     localized = (
         reports("S1", 9, category=Category.RESPIRATORY)
-        + reports("B2", 2, category=Category.GENERAL)
-        + reports("B3", 1, category=Category.GASTROINTESTINAL)
-        + reports("B4", 1, category=Category.OTHER)
-        + reports("B5", 1, category=Category.GENERAL)
+        + reports("S2", 2, category=Category.GENERAL)
+        + reports("S3", 1, category=Category.GASTROINTESTINAL)
+        + reports("S4", 1, category=Category.OTHER)
+        + reports("S5", 1, category=Category.GENERAL)
         + reports("S3", 4, category=Category.RESPIRATORY, hours_ago=400)  # outside window
     )
     _scenario("SCENARIO 1  Localized cluster (relative fires, absolute does not)",
@@ -110,16 +111,13 @@ def main() -> None:
     _scenario("SCENARIO 2  Campus-wide rise (absolute fires, relative does not)",
               analyze(campus_wide, reg, now=NOW))
 
-    # 3. Scattered noise -- neither fires.
+    # 3. Scattered noise -- neither fires. Uniform building level.
     scattered = (
-        reports("B1", 2, category=Category.GENERAL)
-        + reports("B2", 2, category=Category.RESPIRATORY)
-        + reports("B3", 2, category=Category.GASTROINTESTINAL)
-        + reports("B4", 2, category=Category.OTHER)
-        + reports("B5", 1, category=Category.GENERAL)
-        + reports("F2", 2, category=Category.RESPIRATORY)
-        + reports("F3", 2, category=Category.GENERAL)
-        + reports("S2", 2, category=Category.OTHER)
+        reports("B1", 3, category=Category.GENERAL)
+        + reports("B2", 3, category=Category.RESPIRATORY)
+        + reports("B3", 3, category=Category.GASTROINTESTINAL)
+        + reports("B4", 3, category=Category.OTHER)
+        + reports("B5", 3, category=Category.GENERAL)
     )
     _scenario("SCENARIO 3  Scattered noise (neither detector fires)",
               analyze(scattered, reg, now=NOW))

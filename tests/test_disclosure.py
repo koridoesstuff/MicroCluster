@@ -239,5 +239,84 @@ class ConfigurableThresholdsTest(unittest.TestCase):
         self.assertEqual(result.disclosed_scope_id, "C")
 
 
+class ScopeStabilityTest(unittest.TestCase):
+    """config.SIBLING_SWITCH_MARGIN: once a scope has been disclosed,
+    evaluate() prefers to keep disclosing it (or a coarser ancestor of it)
+    across a SEQUENCE of calls, threaded via ``prior_disclosed_scope_id``.
+    A single call with no prior id is unaffected (all other disclosure
+    tests exercise exactly that default path).
+    """
+
+    def setUp(self) -> None:
+        self.reg = standard_registry()  # S1, S2 are sibling suites under F1
+
+    def test_stays_at_the_prior_scope_when_a_sibling_is_within_the_margin(self) -> None:
+        # S2's count (11) exceeds S1's (6) by only 5 -- not MORE than the
+        # margin (5) -- so disclosure must stay at S1.
+        counts = {"S1": 6, "S2": 11, "F1": 6, "B1": 6, "C": 6}
+        result = disclosure.evaluate(self.reg, counts, prior_disclosed_scope_id="S1")
+
+        self.assertEqual(result.disclosed_scope_id, "S1")
+        s1 = next(e for e in result.evaluations if e.scope_id == "S1")
+        self.assertIn("kept disclosing the same scope", s1.disclosure_reason)
+
+    def test_switches_only_once_a_sibling_clears_the_margin(self) -> None:
+        # S2's count (12) exceeds S1's (6) by 6 -- MORE than the margin
+        # (5) -- so disclosure is allowed to move.
+        counts = {"S1": 6, "S2": 12, "F1": 6, "B1": 6, "C": 6}
+        result = disclosure.evaluate(self.reg, counts, prior_disclosed_scope_id="S1")
+
+        self.assertEqual(result.disclosed_scope_id, "S2")
+        s2 = next(e for e in result.evaluations if e.scope_id == "S2")
+        self.assertIn("exceeded the previously disclosed scope", s2.disclosure_reason)
+        self.assertIn("switch margin", s2.disclosure_reason)
+
+    def test_never_silently_hops_between_siblings_across_a_sequence(self) -> None:
+        # Simulate three consecutive days. Day 1 names S1. Day 2, S2 briefly
+        # edges ahead but not past the margin -- must NOT switch. Day 3, S2
+        # pulls decisively ahead -- switching is now allowed.
+        day1 = disclosure.evaluate(
+            self.reg, {"S1": 6, "F1": 6, "B1": 6, "C": 6}, prior_disclosed_scope_id=None
+        )
+        self.assertEqual(day1.disclosed_scope_id, "S1")
+
+        day2 = disclosure.evaluate(
+            self.reg,
+            {"S1": 6, "S2": 10, "F1": 6, "B1": 6, "C": 6},
+            prior_disclosed_scope_id=day1.disclosed_scope_id,
+        )
+        self.assertEqual(day2.disclosed_scope_id, "S1")
+
+        day3 = disclosure.evaluate(
+            self.reg,
+            {"S1": 6, "S2": 12, "F1": 6, "B1": 6, "C": 6},
+            prior_disclosed_scope_id=day2.disclosed_scope_id,
+        )
+        self.assertEqual(day3.disclosed_scope_id, "S2")
+
+    def test_falls_back_to_a_coarser_ancestor_when_the_prior_scope_drops_out(self) -> None:
+        # S1 no longer clears its own statistical gate; its ancestor F1
+        # does. A different, unrelated suite (S2) is ALSO eligible with a
+        # smaller count than F1 -- disclosure must still prefer F1 (S1's
+        # own ancestor) over hopping to the unrelated sibling S2.
+        counts = {"S1": 3, "S2": 8, "F1": 15, "B1": 15, "C": 15}
+        result = disclosure.evaluate(self.reg, counts, prior_disclosed_scope_id="S1")
+
+        self.assertEqual(result.disclosed_scope_id, "F1")
+        f1 = next(e for e in result.evaluations if e.scope_id == "F1")
+        self.assertIn("no longer qualifies", f1.disclosure_reason)
+        self.assertIn("coarser ancestor", f1.disclosure_reason)
+
+    def test_no_prior_scope_ignores_stability_entirely(self) -> None:
+        # Same counts as the "switches" test, but with no prior id: plain
+        # finest-eligible selection (rule 9) -- S1 and S2 are both SUITE
+        # level with the same declared population, so the qualifying count
+        # is irrelevant to the tie-break; S1 wins on scope id alone,
+        # exactly as every other disclosure test in this module exercises.
+        counts = {"S1": 6, "S2": 12, "F1": 6, "B1": 6, "C": 6}
+        result = disclosure.evaluate(self.reg, counts)
+        self.assertEqual(result.disclosed_scope_id, "S1")
+
+
 if __name__ == "__main__":
     unittest.main()
