@@ -10,3 +10,10 @@ pytest>=8.3
 # and is also used directly for the feature matrices.
 numpy>=2.1
 scikit-learn>=1.5
+
+# The interface layer (api/ + web/): a FastAPI service that runs the
+# simulation and the engines server-side and serves the plain-JS floor-plan
+# animation in web/. No frontend build step.
+fastapi>=0.115
+uvicorn>=0.30
+httpx>=0.27   # FastAPI's TestClient (tests/test_api.py) needs it

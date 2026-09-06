@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MicroCluster simulator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>MicroCluster &mdash; outbreak animation</h1>
+  <p id="disclaimer" class="disclaimer">
+    Illustrative simulation. Every parameter here is a chosen figure, not measured
+    from real data, and this model does not predict real disease transmission.
+  </p>
+</header>
+
+<section class="controls" aria-label="run and playback controls">
+  <div class="control-group">
+    <label for="seed">Seed</label>
+    <input type="number" id="seed" value="4" min="0" step="1">
+    <label for="days">Days</label>
+    <input type="number" id="days" value="30" min="1" max="120" step="1">
+    <button type="button" id="run">Run</button>
+  </div>
+
+  <div class="control-group">
+    <button type="button" id="play" disabled>Play</button>
+    <button type="button" id="pause" disabled>Pause</button>
+    <button type="button" id="step" disabled>Step</button>
+    <button type="button" id="reset" disabled>Reset</button>
+    <label for="speed">Speed</label>
+    <select id="speed">
+      <option value="1000">0.5x</option>
+      <option value="500" selected>1x</option>
+      <option value="250">2x</option>
+      <option value="120">4x</option>
+    </select>
+  </div>
+
+  <div class="control-group daycount">
+    <span>Day <output id="day-label">&ndash;</output> / <output id="day-max">&ndash;</output></span>
+    <input type="range" id="scrub" min="0" max="0" value="0" disabled>
+  </div>
+</section>
+
+<p id="status" class="status" role="status">System says: &mdash;</p>
+
+<section class="legend" aria-label="colour key">
+  <span class="key"><span class="dot s-susceptible"></span>susceptible</span>
+  <span class="key"><span class="dot s-incubating"></span>incubating</span>
+  <span class="key"><span class="dot s-symptomatic"></span>symptomatic</span>
+  <span class="key"><span class="dot s-recovered"></span>recovered</span>
+  <span class="key counts" id="counts"></span>
+</section>
+
+<main id="plan" class="plan" aria-label="floor plan">
+  <p class="empty-note" id="empty-note">Set a seed and press Run to start an outbreak.</p>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
