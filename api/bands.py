@@ -45,6 +45,17 @@ def band(count: int) -> str:
     return f"1-{edges[0] - 1}"
 
 
+def band_interval(label: str) -> tuple[int, int | None]:
+    """Inverse of :func:`band`: the inclusive ``[lo, hi]`` a label stands
+    for. ``hi`` is ``None`` for the open-topped ``"<n>+"`` band."""
+    if label == "0":
+        return (0, 0)
+    if label.endswith("+"):
+        return (int(label[:-1]), None)
+    lo, hi = label.split("-")
+    return (int(lo), int(hi))
+
+
 _QUALIFYING_PAREN = re.compile(r"\((\d+) qualifying reports")
 _QUALIFYING_COUNT = re.compile(r"qualifying count \((\d+)\)")
 _SCOPES_COUNT = re.compile(r"scope's \((\d+)\)")

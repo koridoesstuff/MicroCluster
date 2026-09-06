@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import unittest
 
-from api.bands import BAND_LOWER_BOUNDS, band, sanitize_reason
+from api.bands import BAND_LOWER_BOUNDS, band, band_interval, sanitize_reason
 
 
 class BandTest(unittest.TestCase):
@@ -36,6 +36,17 @@ class BandTest(unittest.TestCase):
 
     def test_negative_is_zero(self) -> None:
         self.assertEqual(band(-3), "0")
+
+    def test_band_interval_inverts_band(self) -> None:
+        self.assertEqual(band_interval("0"), (0, 0))
+        self.assertEqual(band_interval("1-4"), (1, 4))
+        self.assertEqual(band_interval("10-19"), (10, 19))
+        top = BAND_LOWER_BOUNDS[-1]
+        self.assertEqual(band_interval(f"{top}+"), (top, None))
+        for c in (1, 4, 5, 12, 40, 99):
+            lo, hi = band_interval(band(c))
+            self.assertLessEqual(lo, c)
+            self.assertGreaterEqual(hi, c)
 
 
 class SanitizeReasonTest(unittest.TestCase):

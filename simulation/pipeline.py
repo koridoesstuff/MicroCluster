@@ -144,6 +144,7 @@ def analyze_report_stream(
     *,
     detection_config: DetectionConfig = DEFAULT_DETECTION_CONFIG,
     disclosure_config: DisclosureConfig = DEFAULT_DISCLOSURE_CONFIG,
+    thread_scope_stability: bool = True,
 ) -> list[DailyRecord]:
     """Replay ``microcluster.engine.analyze`` day by day over an
     already-simulated report stream, feeding the ACCUMULATED reports so
@@ -154,6 +155,10 @@ def analyze_report_stream(
     Pure with respect to ``simulated`` -- safe to call repeatedly with
     different ``detection_config`` / ``disclosure_config`` on the same
     ``SimulatedReports``.
+
+    ``thread_scope_stability=False`` stops threading
+    ``prior_disclosed_scope_id``, so each day's disclosure is the plain
+    finest-eligible pick with no continuity preference.
     """
     sim = simulated.simulation
     config = simulated.config
@@ -175,7 +180,9 @@ def analyze_report_stream(
             detection_config=detection_config,
             disclosure_config=disclosure_config,
             hysteresis_state=hysteresis_state,
-            prior_disclosed_scope_id=prior_disclosed_scope_id,
+            prior_disclosed_scope_id=(
+                prior_disclosed_scope_id if thread_scope_stability else None
+            ),
         )
         hysteresis_state = analysis.detection.hysteresis_state
         # The stability "anchor" only moves when a scope is actually named
