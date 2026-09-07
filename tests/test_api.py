@@ -200,6 +200,33 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIn("outbreak", res.text.lower())
 
+    def test_static_pages_are_served(self) -> None:
+        for page, needle in (("terms.html", "terms of service"), ("privacy.html", "privacy")):
+            res = self.client.get(f"/{page}")
+            self.assertEqual(res.status_code, 200, page)
+            self.assertIn(needle, res.text.lower())
+
+    def test_precomputed_results_are_served_and_shaped(self) -> None:
+        sweep = self.client.get("/api/results/disclosure_sweep")
+        self.assertEqual(sweep.status_code, 200)
+        sweep = sweep.json()
+        self.assertIn(sweep["primary_sweep"], sweep["sweeps"])
+        self.assertTrue(sweep["sweeps"][sweep["primary_sweep"]]["rows"])
+
+        bench = self.client.get("/api/results/benchmark").json()
+        self.assertEqual(len(bench["settings"]), 3)
+        for setting in bench["settings"]:
+            for who in ("rules", "model"):
+                self.assertLessEqual(setting[who]["precision"], 1.0)
+                self.assertLessEqual(setting[who]["recall"], 1.0)
+
+        adv = self.client.get("/api/results/adversarial").json()
+        self.assertGreater(adv["exact_one_person_pins"], adv["band_one_person_pins"])
+        self.assertEqual(adv["band_one_person_pins"], 0)
+
+    def test_unknown_results_file_is_404(self) -> None:
+        self.assertEqual(self.client.get("/api/results/secrets").status_code, 404)
+
 
 if __name__ == "__main__":
     unittest.main()

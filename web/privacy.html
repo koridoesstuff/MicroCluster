@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MicroCluster &mdash; Privacy policy</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<article class="static-page">
+  <p class="back"><a href="index.html">&larr; Back to the simulator</a></p>
+  <h1>Privacy policy</h1>
+  <p class="updated">This describes the mechanism as built. It is not legal boilerplate.</p>
+
+  <p>
+    MicroCluster is a privacy-preserving health-signal system for small shared
+    communities. It looks for statistically unusual symptom activity and discloses
+    it only at a scope that is both statistically supported and privacy-safe. The
+    running page on this site is an illustrative simulation of that system: the
+    people, the outbreak, and every parameter are synthetic.
+  </p>
+
+  <h2>What a real deployment collects</h2>
+  <p>Each report is a single submission from a fixed checklist:</p>
+  <ul>
+    <li>one of four <strong>symptom categories</strong> (respiratory, gastrointestinal, general, other);</li>
+    <li>a specific symptom from that category, recorded for the reporter's own clarity and <strong>never used for matching</strong>;</li>
+    <li>a <strong>coarse onset bucket</strong>: today, 1&ndash;2 days, 3&ndash;7 days, 1+ week;</li>
+    <li>one <strong>location group</strong> from the community's scope hierarchy, at the finest level the reporter belongs to.</li>
+  </ul>
+
+  <h2>What it never collects</h2>
+  <ul>
+    <li>No name, account, login, device identifier, or contact information.</li>
+    <li>No free text. Every field is a choice from a closed vocabulary, so there is nothing to interpret and nothing to leak in prose.</li>
+    <li>No precise timestamp. Onset is a bucket; submission time is only used to decide whether a report falls inside the current detection window.</li>
+    <li>No precise location. The finest location is a declared group, not a coordinate or a room.</li>
+    <li>No medical concept finer than a category. The system has no code path that reasons about a specific diagnosis.</li>
+  </ul>
+  <p>
+    The privacy strategy is <strong>data minimisation, not encryption</strong>. The system
+    never holds identity, free text, precise time, or precise location, so there is very
+    little to encrypt. You cannot leak what you did not collect.
+  </p>
+
+  <h2>How the gates work</h2>
+  <p>
+    Detection and disclosure are separate. Detection decides whether something unusual is
+    happening. Disclosure decides what, if anything, may be said, and at what scope. A
+    scope is disclosed only if it passes <strong>both</strong> of two gates, which are
+    evaluated independently and never combined into one number:
+  </p>
+  <ul>
+    <li>
+      <strong>Statistical gate.</strong> The number of qualifying reports must be at
+      least <code>max(5, ceil(sqrt(n)))</code> for a declared population <code>n</code>.
+      This scales up with <code>n</code>: a claim about a larger group needs more evidence.
+    </li>
+    <li>
+      <strong>Privacy gate.</strong> The declared population must be at least 20, and the
+      qualifying reports must be at most half of it. This scales down with <code>n</code>:
+      small groups are the identifying ones, and naming a group when a large share of it
+      has reported is effectively publishing a roster.
+    </li>
+  </ul>
+  <p>
+    The two gates pull in opposite directions by design. The system discloses the finest
+    scope that clears both; if none does, it discloses nothing. Every candidate scope,
+    including the rejected ones, gets a full evaluation record with the reason for its
+    outcome. The disclosure engine is only ever handed aggregate per-scope counts and
+    declared populations, never individual reports.
+  </p>
+
+  <h2>What the bands are for</h2>
+  <p>
+    The interface shows qualifying report counts as ranges (&ldquo;5&ndash;9&rdquo;,
+    &ldquo;10&ndash;19&rdquo;), never exact integers. This is a defence against a
+    differencing attack: if the exact count for a named group were visible on two
+    consecutive days, an observer could subtract them and learn that exactly one
+    identifiable person changed state overnight. The exact count stays on the server;
+    only the band is sent to the page. This reduces that leak; it does not eliminate
+    every inference. A named group with sustained activity in a known band still tells an
+    observer something, and the system's own adversarial self-test reports exactly what.
+  </p>
+
+  <h2>Abuse</h2>
+  <p>
+    Because reports are anonymous, someone can submit reports to manufacture a signal. The
+    system accepts this as the cost of anonymity. The only mitigations are per-session and
+    per-day submission caps. No identity-based control is used, because identity is the
+    thing the system exists to protect.
+  </p>
+
+  <p class="back"><a href="index.html">&larr; Back to the simulator</a></p>
+</article>
+</body>
+</html>

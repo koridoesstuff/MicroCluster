@@ -91,6 +91,60 @@
   </table>
 </section>
 
+<section class="results" id="result-cost" aria-label="the cost of the privacy policy">
+  <h2>The cost of the privacy policy</h2>
+  <p class="results-note">
+    Each point is one setting of the statistical gate, over 500 simulated outbreaks
+    with detection held fixed. Tightening the gate moves first disclosure later and
+    lets more people be infected before anything is said. Infections are the unbiased
+    figure: outbreaks that were never disclosed count their full day-30 total.
+  </p>
+  <div id="cost-chart" class="chart"></div>
+</section>
+
+<section class="results" id="result-benchmark" aria-label="rules versus learned model">
+  <h2>Rules vs learned model</h2>
+  <p class="results-note">
+    A logistic-regression detector trained on the three findings, scored against the
+    authored threshold rules on held-out runs, in and out of the training
+    transmission regime.
+  </p>
+  <table id="benchmark-table">
+    <thead>
+      <tr>
+        <th>Setting</th><th>Detector</th><th>Precision</th><th>Recall</th><th>Mean delay (days)</th>
+      </tr>
+    </thead>
+    <tbody id="benchmark-body">
+      <tr><td colspan="5" class="muted">Loading…</td></tr>
+    </tbody>
+  </table>
+  <p id="benchmark-conclusion" class="results-conclusion"></p>
+</section>
+
+<section class="results" id="result-adversarial" aria-label="attacking our own system">
+  <h2>Attacking our own system</h2>
+  <p class="results-note">
+    An observer who sees only what this page shows &mdash; the disclosed scope and its
+    report-count band, day after day &mdash; runs the differencing attack: subtract
+    consecutive disclosures of the same scope to infer how many people changed state
+    overnight.
+  </p>
+  <div class="bignums">
+    <div class="bignum"><span class="bignum-value" id="adv-exact">&ndash;</span>
+      <span class="bignum-label">days an exact one-person change is pinned, against exact counts</span></div>
+    <div class="bignum"><span class="bignum-value" id="adv-band">&ndash;</span>
+      <span class="bignum-label">against the bands this page ships</span></div>
+  </div>
+  <p id="adv-residual" class="results-conclusion"></p>
+</section>
+
+<footer class="site-footer">
+  <a href="terms.html">Terms of Service</a>
+  <span aria-hidden="true">&middot;</span>
+  <a href="privacy.html">Privacy policy</a>
+</footer>
+
 <script src="app.js"></script>
 </body>
 </html>

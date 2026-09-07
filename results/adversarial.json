@@ -1,0 +1,15 @@
+{
+  "seeds": 200,
+  "days": 30,
+  "same_scope_pairs": 1171,
+  "exact_one_person_pins": 358,
+  "band_one_person_pins": 0,
+  "exact_direction_known": 924,
+  "band_direction_known": 204,
+  "band_median_possible_deltas": 19,
+  "wandering_on_mean": 1.6,
+  "wandering_off_mean": 3.12,
+  "wandering_on_max": 5,
+  "wandering_off_max": 8,
+  "residual": "the named group is still named; its count stays bracketed to a band; the overnight change stays a wide interval"
+}

@@ -268,9 +268,12 @@ function gateCell(pass, sub) {
   const verdict = document.createElement("span");
   verdict.className = pass ? "pass" : "fail";
   verdict.textContent = pass ? "PASS" : "FAIL";
-  const note = document.createElement("small");
-  note.textContent = sub;
-  el.append(verdict, note);
+  el.appendChild(verdict);
+  if (sub) {
+    const note = document.createElement("small");
+    note.textContent = sub;
+    el.appendChild(note);
+  }
   return el;
 }
 
@@ -300,10 +303,7 @@ function renderGateTable(frame) {
     tr.appendChild(td(String(e.population)));
     tr.appendChild(td(e.qualifying_band));
     tr.appendChild(gateCell(e.statistical_pass, `need ≥ ${e.statistical_threshold}`));
-    const privSub = e.privacy_pass
-      ? "within minimum size and share"
-      : (!e.min_population_pass ? "population below minimum" : "share of group too large");
-    tr.appendChild(gateCell(e.privacy_pass, privSub));
+    tr.appendChild(gateCell(e.privacy_pass, ""));
     tr.appendChild(td(e.reason));
     body.appendChild(tr);
   }
@@ -409,6 +409,150 @@ els.scrub.addEventListener("input", () => { stopTimer(); paintDay(Number(els.scr
 els.speed.addEventListener("change", () => {
   if (state.timer !== null) { stopTimer(); play(); }
 });
+
+// ---- precomputed results panel ---------------------------------------
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+function svg(name, attrs, text) {
+  const el = document.createElementNS(SVG_NS, name);
+  for (const [k, v] of Object.entries(attrs || {})) el.setAttribute(k, String(v));
+  if (text != null) el.textContent = text;
+  return el;
+}
+
+function renderCostChart(data) {
+  const host = document.getElementById("cost-chart");
+  host.innerHTML = "";
+  const rows = (data.sweeps[data.primary_sweep].rows || []).filter(
+    (r) => !r.degenerate && r.disc_delay != null && r.inf_before_disclosure_unbiased != null
+  );
+  if (rows.length < 2) {
+    host.textContent = "not enough sweep points to plot.";
+    return;
+  }
+  rows.sort((a, b) => a.disc_delay - b.disc_delay);
+
+  const W = 760, H = 430, L = 66, Rm = 46, T = 22, Bm = 52;
+  const xs = rows.map((r) => r.disc_delay);
+  const ys = rows.map((r) => r.inf_before_disclosure_unbiased);
+  const xMin = Math.floor(Math.min(...xs)) - 0.5;
+  const xMax = Math.ceil(Math.max(...xs)) + 0.5;
+  const yMax = Math.max(15, Math.ceil(Math.max(...ys) / 15) * 15);
+  const px = (x) => L + ((x - xMin) / (xMax - xMin)) * (W - L - Rm);
+  const py = (y) => H - Bm - (y / yMax) * (H - T - Bm);
+
+  const root = svg("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H,
+    role: "img", "aria-label": "cost of the privacy policy" });
+
+  root.appendChild(svg("line", { class: "axis", x1: L, y1: H - Bm, x2: W - Rm, y2: H - Bm }));
+  root.appendChild(svg("line", { class: "axis", x1: L, y1: T, x2: L, y2: H - Bm }));
+
+  for (let x = Math.ceil(xMin); x <= Math.floor(xMax); x += 2) {
+    root.appendChild(svg("line", { class: "axis", x1: px(x), y1: H - Bm, x2: px(x), y2: H - Bm + 5 }));
+    root.appendChild(svg("text", { class: "tick", x: px(x), y: H - Bm + 18, "text-anchor": "middle" }, String(x)));
+  }
+  for (let i = 0; i <= 3; i++) {
+    const y = (yMax / 3) * i;
+    root.appendChild(svg("line", { class: "axis", x1: L - 5, y1: py(y), x2: L, y2: py(y) }));
+    root.appendChild(svg("text", { class: "tick", x: L - 9, y: py(y) + 4, "text-anchor": "end" }, String(Math.round(y))));
+  }
+
+  const d = rows.map((r, i) => `${i ? "L" : "M"}${px(r.disc_delay).toFixed(1)},${py(r.inf_before_disclosure_unbiased).toFixed(1)}`).join(" ");
+  root.appendChild(svg("path", { class: "series", d }));
+
+  rows.forEach((r, i) => {
+    const cx = px(r.disc_delay), cy = py(r.inf_before_disclosure_unbiased);
+    root.appendChild(svg("circle", { class: "point", cx, cy, r: 4 }));
+    const first = i === 0;
+    root.appendChild(svg("text", {
+      class: "point-label",
+      x: cx + (first ? 8 : -8),
+      y: cy - 8,
+      "text-anchor": first ? "start" : "end",
+    }, String(r.value)));
+  });
+
+  root.appendChild(svg("text", { x: (L + W - Rm) / 2, y: H - 10, "text-anchor": "middle" },
+    "mean days to first disclosure"));
+  root.appendChild(svg("text", {
+    x: 16, y: (T + H - Bm) / 2, "text-anchor": "middle",
+    transform: `rotate(-90 16 ${(T + H - Bm) / 2})`,
+  }, "mean infections before disclosure"));
+
+  host.appendChild(root);
+  const caption = document.createElement("p");
+  caption.className = "results-note";
+  caption.textContent = `point labels are the ${data.primary_sweep} value; the shipped default is 5.`;
+  host.appendChild(caption);
+}
+
+function _cell(text, cls) {
+  const td = document.createElement("td");
+  td.textContent = text;
+  if (cls) td.className = cls;
+  return td;
+}
+
+function _fmtScore(v) {
+  return v == null ? "n/a" : v.toFixed(2);
+}
+
+function renderBenchmark(data) {
+  const body = document.getElementById("benchmark-body");
+  body.innerHTML = "";
+  for (const setting of data.settings) {
+    const rulesRow = document.createElement("tr");
+    const label = document.createElement("td");
+    label.textContent = setting.label;
+    label.rowSpan = 2;
+    rulesRow.append(
+      label, _cell("authored rules"),
+      _cell(_fmtScore(setting.rules.precision)),
+      _cell(_fmtScore(setting.rules.recall)),
+      _cell(_fmtScore(setting.rules.delay))
+    );
+    const modelRow = document.createElement("tr");
+    modelRow.className = "model";
+    modelRow.append(
+      _cell("learned model"),
+      _cell(_fmtScore(setting.model.precision)),
+      _cell(_fmtScore(setting.model.recall)),
+      _cell(_fmtScore(setting.model.delay))
+    );
+    body.append(rulesRow, modelRow);
+  }
+  document.getElementById("benchmark-conclusion").textContent = data.conclusion;
+}
+
+function renderAdversarial(data) {
+  document.getElementById("adv-exact").textContent = String(data.exact_one_person_pins);
+  document.getElementById("adv-band").textContent = String(data.band_one_person_pins);
+  document.getElementById("adv-residual").textContent =
+    `Bands remove the one-person pin, not every inference. What the observer still gets: ` +
+    `${data.residual}. The direction of the overnight change is still forced on ` +
+    `${data.band_direction_known} of ${data.same_scope_pairs} day-pairs, and with scope ` +
+    `stability off a run names about ${data.wandering_off_mean} distinct groups instead of ` +
+    `${data.wandering_on_mean}.`;
+}
+
+async function loadResults() {
+  try {
+    const [sweep, bench, adv] = await Promise.all([
+      fetch("/api/results/disclosure_sweep").then((r) => r.json()),
+      fetch("/api/results/benchmark").then((r) => r.json()),
+      fetch("/api/results/adversarial").then((r) => r.json()),
+    ]);
+    renderCostChart(sweep);
+    renderBenchmark(bench);
+    renderAdversarial(adv);
+  } catch (err) {
+    document.getElementById("cost-chart").textContent =
+      "precomputed results unavailable: run python -m scripts.precompute_results";
+  }
+}
+
+loadResults();
 
 // Optional: ?auto runs a seed on load (used for smoke screenshots).
 // ?auto=day30 also jumps to the final day. Harmless otherwise.

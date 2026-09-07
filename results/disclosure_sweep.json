@@ -1,0 +1,178 @@
+{
+  "seeds": 500,
+  "days": 30,
+  "fizzle_rate": 0.31000000000000005,
+  "false_alarm_rate": 0.6,
+  "control_fire_delay": 8.18313953488372,
+  "primary_sweep": "STATISTICAL_GATE_FLOOR",
+  "sweeps": {
+    "MIN_SCOPE_POPULATION": {
+      "rows": [
+        {
+          "value": 20,
+          "degenerate": false,
+          "degenerate_reason": "",
+          "n_disclosed": 322,
+          "n_established": 345,
+          "disc_delay": 14.062111801242237,
+          "fire_delay": 8.055900621118013,
+          "gap": 6.0062111801242235,
+          "inf_before_disclosure_unbiased": 35.18550724637681,
+          "inf_at_disclosure_conditional": 36.01863354037267,
+          "finest_level": "SUITE"
+        },
+        {
+          "value": 50,
+          "degenerate": false,
+          "degenerate_reason": "",
+          "n_disclosed": 321,
+          "n_established": 345,
+          "disc_delay": 14.878504672897197,
+          "fire_delay": 8.052959501557632,
+          "gap": 6.825545171339564,
+          "inf_before_disclosure_unbiased": 38.93623188405797,
+          "inf_at_disclosure_conditional": 40.06853582554517,
+          "finest_level": "FLOOR"
+        },
+        {
+          "value": 100,
+          "degenerate": false,
+          "degenerate_reason": "",
+          "n_disclosed": 317,
+          "n_established": 345,
+          "disc_delay": 15.466876971608833,
+          "fire_delay": 8.02839116719243,
+          "gap": 7.438485804416404,
+          "inf_before_disclosure_unbiased": 42.38840579710145,
+          "inf_at_disclosure_conditional": 43.54574132492114,
+          "finest_level": "BUILDING"
+        },
+        {
+          "value": 200,
+          "degenerate": true,
+          "degenerate_reason": "min_scope_population=200 exceeds every declared scope population (largest is 150); the privacy gate can never pass",
+          "n_disclosed": 0,
+          "n_established": 345,
+          "disc_delay": null,
+          "fire_delay": null,
+          "gap": null,
+          "inf_before_disclosure_unbiased": 98.28985507246377,
+          "inf_at_disclosure_conditional": null,
+          "finest_level": null
+        }
+      ]
+    },
+    "STATISTICAL_GATE_FLOOR": {
+      "rows": [
+        {
+          "value": 5,
+          "degenerate": false,
+          "degenerate_reason": "",
+          "n_disclosed": 322,
+          "n_established": 345,
+          "disc_delay": 14.062111801242237,
+          "fire_delay": 8.055900621118013,
+          "gap": 6.0062111801242235,
+          "inf_before_disclosure_unbiased": 35.18550724637681,
+          "inf_at_disclosure_conditional": 36.01863354037267,
+          "finest_level": "SUITE"
+        },
+        {
+          "value": 8,
+          "degenerate": false,
+          "degenerate_reason": "",
+          "n_disclosed": 321,
+          "n_established": 345,
+          "disc_delay": 14.878504672897197,
+          "fire_delay": 8.052959501557632,
+          "gap": 6.825545171339564,
+          "inf_before_disclosure_unbiased": 38.93623188405797,
+          "inf_at_disclosure_conditional": 40.06853582554517,
+          "finest_level": "SUITE"
+        },
+        {
+          "value": 12,
+          "degenerate": false,
+          "degenerate_reason": "",
+          "n_disclosed": 317,
+          "n_established": 345,
+          "disc_delay": 15.46056782334385,
+          "fire_delay": 8.02839116719243,
+          "gap": 7.4321766561514195,
+          "inf_before_disclosure_unbiased": 42.35072463768116,
+          "inf_at_disclosure_conditional": 43.504731861198735,
+          "finest_level": "FLOOR"
+        },
+        {
+          "value": 16,
+          "degenerate": false,
+          "degenerate_reason": "",
+          "n_disclosed": 304,
+          "n_established": 345,
+          "disc_delay": 16.960526315789473,
+          "fire_delay": 7.947368421052632,
+          "gap": 9.013157894736842,
+          "inf_before_disclosure_unbiased": 53.01449275362319,
+          "inf_at_disclosure_conditional": 54.36184210526316,
+          "finest_level": "FLOOR"
+        },
+        {
+          "value": 25,
+          "degenerate": false,
+          "degenerate_reason": "",
+          "n_disclosed": 159,
+          "n_established": 345,
+          "disc_delay": 18.61006289308176,
+          "fire_delay": 7.515723270440252,
+          "gap": 11.09433962264151,
+          "inf_before_disclosure_unbiased": 82.16521739130435,
+          "inf_at_disclosure_conditional": 77.81761006289308,
+          "finest_level": "FLOOR"
+        }
+      ]
+    },
+    "MAX_REPORT_FRACTION": {
+      "rows": [
+        {
+          "value": 0.08,
+          "degenerate": true,
+          "degenerate_reason": "no scope population in [25, 75, 150] admits a qualifying count that clears the statistical gate while staying under max_report_fraction=0.08",
+          "n_disclosed": 0,
+          "n_established": 345,
+          "disc_delay": null,
+          "fire_delay": null,
+          "gap": null,
+          "inf_before_disclosure_unbiased": 98.28985507246377,
+          "inf_at_disclosure_conditional": null,
+          "finest_level": null
+        },
+        {
+          "value": 0.15,
+          "degenerate": false,
+          "degenerate_reason": "",
+          "n_disclosed": 321,
+          "n_established": 345,
+          "disc_delay": 14.881619937694705,
+          "fire_delay": 8.052959501557632,
+          "gap": 6.8286604361370715,
+          "inf_before_disclosure_unbiased": 38.95072463768116,
+          "inf_at_disclosure_conditional": 40.08411214953271,
+          "finest_level": "FLOOR"
+        },
+        {
+          "value": 0.25,
+          "degenerate": false,
+          "degenerate_reason": "",
+          "n_disclosed": 322,
+          "n_established": 345,
+          "disc_delay": 14.065217391304348,
+          "fire_delay": 8.055900621118013,
+          "gap": 6.009316770186335,
+          "inf_before_disclosure_unbiased": 35.20289855072464,
+          "inf_at_disclosure_conditional": 36.037267080745345,
+          "finest_level": "SUITE"
+        }
+      ]
+    }
+  }
+}

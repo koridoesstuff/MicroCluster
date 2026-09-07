@@ -25,6 +25,7 @@ and the engine verdicts, and stops there.
 
 from __future__ import annotations
 
+import json
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
@@ -50,6 +51,8 @@ from simulation.pipeline import (
 )
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
+RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
+RESULT_FILES = ("disclosure_sweep", "benchmark", "adversarial")
 
 MAX_DAYS = 120
 MAX_RUNS_KEPT = 64  # in-memory only; oldest evicted past this
@@ -302,6 +305,19 @@ def get_day(run_id: str, n: int) -> dict:
         "first_disclosed_day": record.first_disclosed_day,
         "disclaimer": DISCLAIMER,
     }
+
+
+@app.get("/api/results/{name}")
+def get_results(name: str) -> dict:
+    if name not in RESULT_FILES:
+        raise HTTPException(status_code=404, detail=f"unknown results file: {name!r}")
+    path = RESULTS_DIR / f"{name}.json"
+    if not path.is_file():
+        raise HTTPException(
+            status_code=503,
+            detail="results not precomputed; run python -m scripts.precompute_results",
+        )
+    return json.loads(path.read_text())
 
 
 @app.get("/api/health")
