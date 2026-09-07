@@ -44,11 +44,34 @@ class ApiTest(unittest.TestCase):
         data = self._run()
         self.assertIn("run_id", data)
         self.assertEqual(data["disclaimer"], DISCLAIMER)
-        self.assertIn("does not predict real disease transmission", data["disclaimer"])
+        self.assertIn("predicts nothing about any real building", data["disclaimer"])
+        self.assertIn("no one is diagnosed or treated", data["disclaimer"])
         floors = data["layout"]["floors"]
         self.assertEqual(len(floors), 2)
         self.assertEqual(sum(len(f["suites"]) for f in floors), 6)
         self.assertTrue(all(s["size"] == 25 for f in floors for s in f["suites"]))
+
+    def test_population_and_detection_window_controls_take_effect(self) -> None:
+        data = self._run(population=30, detection_window_hours=48, days=10)
+        self.assertEqual(data["params"]["population_per_suite"], 30)
+        self.assertEqual(data["params"]["total_population"], 180)
+        self.assertEqual(data["params"]["detection_window_hours"], 48)
+        day = self.client.get(f"/api/run/{data['run_id']}/day/5").json()
+        self.assertEqual(len(day["agents"]), 180)
+
+    def test_out_of_range_controls_are_422_not_500(self) -> None:
+        self.assertEqual(self.client.post("/api/run", json={"seed": 1, "population": 15}).status_code, 422)
+        self.assertEqual(
+            self.client.post("/api/run", json={"seed": 1, "detection_window_hours": 6}).status_code,
+            422,
+        )
+
+    def test_assets_are_served_no_cache(self) -> None:
+        res = self.client.get("/style.css")
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("no-cache", res.headers.get("cache-control", ""))
+        api_res = self.client.get("/api/health")
+        self.assertNotIn("no-cache", api_res.headers.get("cache-control", ""))
 
     def test_day_zero_and_last_day_are_in_range_and_beyond_is_404(self) -> None:
         data = self._run(days=10)
@@ -214,11 +237,14 @@ class ApiTest(unittest.TestCase):
         self.assertTrue(sweep["sweeps"][sweep["primary_sweep"]]["rows"])
 
         bench = self.client.get("/api/results/benchmark").json()
-        self.assertEqual(len(bench["settings"]), 3)
-        for setting in bench["settings"]:
+        self.assertEqual(set(bench["in_distribution"]), {"rules", "model"})
+        self.assertEqual(len(bench["cross_regime"]), 2)
+        self.assertIn("cross_regime_conclusion", bench)
+        blocks = [bench["in_distribution"]] + bench["cross_regime"]
+        for block in blocks:
             for who in ("rules", "model"):
-                self.assertLessEqual(setting[who]["precision"], 1.0)
-                self.assertLessEqual(setting[who]["recall"], 1.0)
+                self.assertLessEqual(block[who]["precision"], 1.0)
+                self.assertLessEqual(block[who]["recall"], 1.0)
 
         adv = self.client.get("/api/results/adversarial").json()
         self.assertGreater(adv["exact_one_person_pins"], adv["band_one_person_pins"])

@@ -7,6 +7,29 @@ the ``simulation`` package hard-codes a tunable number.
 None of these figures is clinical or epidemiological. They are chosen to
 produce a legible demonstration outbreak on a small population, not
 measured from real data. Tune them before drawing any real conclusion.
+
+PROVENANCE OF THESE NUMBERS
+--------------------------------------------------------------------------
+There is no real dataset behind this simulator, so there are no citations
+to give for the specific values. Every transmission probability, reporting
+rate, contact rate and state duration below was PICKED FOR DEMONSTRATION:
+set by hand, checked by running the model, and kept at the figure that
+produced a believable outbreak on a 150-person building inside a 30-day
+window (see the joint-tuning note at ``SUITE_TRANSMISSION_PROBABILITY``).
+
+Where the SHAPE of a modelling choice follows standard practice, that is
+noted, and only the shape -- not any number -- is borrowed:
+
+* compartmental progression susceptible -> incubating -> symptomatic ->
+  recovered is the classic SIR / SEIR structure (Kermack & McKendrick,
+  1927; and every agent-based descendant since).
+* tiered per-contact transmission by shared space (suite / floor /
+  building) is the ordinary agent-based-model treatment of contact
+  structure.
+
+The specific numbers are ours and illustrative only. Anything user-facing
+says so in the same words (see ``api.app.DISCLAIMER`` and the on-page
+limitations banner).
 """
 
 from __future__ import annotations
@@ -90,7 +113,9 @@ BUILDING_TRANSMISSION_PROBABILITY: float = 0.001
 
 # Each agent is assigned, once at population creation, a personal
 # probability of filing a symptom report while SYMPTOMATIC. Not everyone
-# reports. Drawn uniformly per agent from this inclusive range.
+# reports. Drawn uniformly per agent from this inclusive range. No real
+# source: a spread picked for demo so the detector has a partial, noisy
+# signal to work with rather than a full census of the sick.
 REPORTING_PROBABILITY_MIN: float = 0.30
 REPORTING_PROBABILITY_MAX: float = 0.70
 

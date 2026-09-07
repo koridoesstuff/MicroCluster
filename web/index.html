@@ -4,15 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MicroCluster simulator</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
+<p id="disclaimer" class="limitations" role="note">
+  Illustrative simulation. Transmission, reporting, contact and incubation values are
+  chosen for demonstration, not measured from any real population. This predicts nothing
+  about any real building, and no one is diagnosed or treated by this tool.
+</p>
+
 <header>
-  <h1>MicroCluster &mdash; outbreak animation</h1>
-  <p id="disclaimer" class="disclaimer">
-    Illustrative simulation. Every parameter here is a chosen figure, not measured
-    from real data, and this model does not predict real disease transmission.
-  </p>
+  <h1>MicroCluster outbreak animation</h1>
 </header>
 
 <section class="controls" aria-label="run and playback controls">
@@ -22,6 +24,7 @@
     <label for="days">Days</label>
     <input type="number" id="days" value="30" min="1" max="120" step="1">
     <button type="button" id="run">Run</button>
+    <span id="params-dirty" hidden>parameters changed; press Run to apply</span>
   </div>
 
   <div class="control-group">
@@ -39,12 +42,32 @@
   </div>
 
   <div class="control-group daycount">
-    <span>Day <output id="day-label">&ndash;</output> / <output id="day-max">&ndash;</output></span>
+    <span>Day <output id="day-label">0</output> / <output id="day-max">0</output></span>
     <input type="range" id="scrub" min="0" max="0" value="0" disabled>
   </div>
 </section>
 
-<p id="status" class="status" role="status">System says: &mdash;</p>
+<fieldset class="params" aria-label="model parameters">
+  <legend>Model parameters (applied on Run)</legend>
+  <label class="param">Suite size
+    <input type="number" id="p-population" value="25" min="21" max="40" step="1">
+    <span class="hint" id="p-population-hint">6 suites, 150 people</span>
+  </label>
+  <label class="param">Transmission (per contact / day)
+    <input type="range" id="p-transmission" min="0.001" max="0.04" step="0.001" value="0.008">
+    <span class="hint" id="p-transmission-hint">0.008</span>
+  </label>
+  <label class="param">Reporting rate (while symptomatic)
+    <input type="range" id="p-reporting" min="0.1" max="1" step="0.05" value="0.5">
+    <span class="hint" id="p-reporting-hint">0.50</span>
+  </label>
+  <label class="param">Detection window (hours)
+    <input type="number" id="p-window" value="72" min="24" max="168" step="12">
+    <span class="hint">rolling window for &ldquo;current&rdquo; reports</span>
+  </label>
+</fieldset>
+
+<p id="status" class="status" role="status">System says: no run yet</p>
 
 <section class="resolution" aria-label="privacy / resolution control">
   <div class="res-row">
@@ -69,7 +92,7 @@
 </main>
 
 <section class="gates" aria-label="gate table for the current day">
-  <h2>Gate table &mdash; day <output id="gate-day">&ndash;</output></h2>
+  <h2>Gate table, day <output id="gate-day">0</output></h2>
   <p class="gates-note">
     Every candidate scope the engine evaluated, refused ones included.
     Report counts are shown as bands, never exact numbers.
@@ -105,35 +128,56 @@
 <section class="results" id="result-benchmark" aria-label="rules versus learned model">
   <h2>Rules vs learned model</h2>
   <p class="results-note">
-    A logistic-regression detector trained on the three findings, scored against the
-    authored threshold rules on held-out runs, in and out of the training
-    transmission regime.
+    A logistic-regression detector trained on the three detection findings, scored
+    against the authored threshold rules on held-out simulation runs. Both are kept in
+    the product; the model never replaces the rules.
   </p>
   <table id="benchmark-table">
     <thead>
       <tr>
-        <th>Setting</th><th>Detector</th><th>Precision</th><th>Recall</th><th>Mean delay (days)</th>
+        <th>Detector</th><th>Precision</th><th>Recall</th><th>Mean detection delay (days)</th>
       </tr>
     </thead>
     <tbody id="benchmark-body">
-      <tr><td colspan="5" class="muted">Loading…</td></tr>
+      <tr><td colspan="4" class="muted">Loading</td></tr>
     </tbody>
   </table>
   <p id="benchmark-conclusion" class="results-conclusion"></p>
 </section>
 
+<section class="results" id="result-robustness" aria-label="cross-parameter robustness">
+  <h2>Cross-parameter robustness check</h2>
+  <p class="results-note">
+    The circularity risk: a classifier trained on this simulator learns this simulator.
+    Here the model is trained at one transmission probability and scored on runs
+    generated at a different one. If its advantage only holds in-distribution, that is
+    reported.
+  </p>
+  <table id="robustness-table">
+    <thead>
+      <tr>
+        <th>Test regime</th><th>Detector</th><th>Precision</th><th>Recall</th><th>Mean delay (days)</th>
+      </tr>
+    </thead>
+    <tbody id="robustness-body">
+      <tr><td colspan="5" class="muted">Loading</td></tr>
+    </tbody>
+  </table>
+  <p id="robustness-conclusion" class="results-conclusion"></p>
+</section>
+
 <section class="results" id="result-adversarial" aria-label="attacking our own system">
   <h2>Attacking our own system</h2>
   <p class="results-note">
-    An observer who sees only what this page shows &mdash; the disclosed scope and its
-    report-count band, day after day &mdash; runs the differencing attack: subtract
+    An observer who sees only what this page shows (the disclosed scope and its
+    report-count band, day after day) runs the differencing attack: subtract
     consecutive disclosures of the same scope to infer how many people changed state
     overnight.
   </p>
   <div class="bignums">
-    <div class="bignum"><span class="bignum-value" id="adv-exact">&ndash;</span>
+    <div class="bignum"><span class="bignum-value" id="adv-exact">0</span>
       <span class="bignum-label">days an exact one-person change is pinned, against exact counts</span></div>
-    <div class="bignum"><span class="bignum-value" id="adv-band">&ndash;</span>
+    <div class="bignum"><span class="bignum-value" id="adv-band">0</span>
       <span class="bignum-label">against the bands this page ships</span></div>
   </div>
   <p id="adv-residual" class="results-conclusion"></p>
@@ -145,6 +189,6 @@
   <a href="privacy.html">Privacy policy</a>
 </footer>
 
-<script src="app.js"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>

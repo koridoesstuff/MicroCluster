@@ -1,24 +1,22 @@
 {
   "seeds": 300,
   "days": 30,
-  "settings": [
-    {
-      "key": "in_distribution",
-      "label": "In distribution",
-      "rules": {
-        "precision": 0.954,
-        "recall": 0.784,
-        "delay": 3.71
-      },
-      "model": {
-        "precision": 0.925,
-        "recall": 0.821,
-        "delay": 2.84
-      }
+  "in_distribution": {
+    "rules": {
+      "precision": 0.954,
+      "recall": 0.784,
+      "delay": 3.71
     },
+    "model": {
+      "precision": 0.925,
+      "recall": 0.821,
+      "delay": 2.84
+    }
+  },
+  "conclusion": "In distribution the learned model is marginally faster and catches a few more real outbreak-days, at a cost of about three points of precision on a detector that already over-alarms. The authored threshold rules ship; the model is kept only as this benchmark.",
+  "cross_regime": [
     {
-      "key": "cross_p0.005",
-      "label": "Cross regime, suite p=0.005",
+      "label": "suite p=0.005",
       "rules": {
         "precision": 0.906,
         "recall": 0.636,
@@ -31,8 +29,7 @@
       }
     },
     {
-      "key": "cross_p0.012",
-      "label": "Cross regime, suite p=0.012",
+      "label": "suite p=0.012",
       "rules": {
         "precision": 0.966,
         "recall": 0.817,
@@ -45,5 +42,5 @@
       }
     }
   ],
-  "conclusion": "The learned model is marginally faster but buys that speed with false positives, on a detector that already over-alarms, so the authored threshold rules ship and the model is kept only as this benchmark."
+  "cross_regime_conclusion": "The model's small recall and latency edge survives the shift in transmission probability: it is not purely memorised. The edge is still small and still bought with lower precision, and it is still a model of this simulator."
 }

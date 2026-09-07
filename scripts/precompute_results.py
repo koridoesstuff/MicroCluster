@@ -99,33 +99,49 @@ def build_benchmark() -> dict:
     test_ids = sorted({r.seed for r in test_seeds})
     cross = benchmark_cross_regime(train_ids, test_ids)
 
-    settings = [
-        {
-            "key": "in_distribution",
-            "label": "In distribution",
-            "rules": _score_dict(in_dist.scores[0]),
-            "model": _score_dict(in_dist.scores[1]),
-        }
-    ]
+    cross_regime = []
+    model_still_wins = True
     for res, tp in zip(cross, BENCHMARK_TEST_SUITE_TRANSMISSIONS):
-        settings.append(
+        rules, model = res.scores[0], res.scores[1]
+        cross_regime.append(
             {
-                "key": f"cross_p{tp:g}",
-                "label": f"Cross regime, suite p={tp:g}",
-                "rules": _score_dict(res.scores[0]),
-                "model": _score_dict(res.scores[1]),
+                "label": f"suite p={tp:g}",
+                "rules": _score_dict(rules),
+                "model": _score_dict(model),
             }
+        )
+        if not (model.recall > rules.recall + 0.02):
+            model_still_wins = False
+
+    if model_still_wins:
+        cross_conclusion = (
+            "The model's small recall and latency edge survives the shift in "
+            "transmission probability: it is not purely memorised. The edge is still "
+            "small and still bought with lower precision, and it is still a model of "
+            "this simulator."
+        )
+    else:
+        cross_conclusion = (
+            "The model's advantage does not hold once the transmission probability "
+            "differs from training. Reported as a negative result: the classifier "
+            "mostly learned this simulator."
         )
 
     return {
         "seeds": BENCHMARK_DEFAULT_SEEDS,
         "days": DEFAULT_RUN_DAYS,
-        "settings": settings,
+        "in_distribution": {
+            "rules": _score_dict(in_dist.scores[0]),
+            "model": _score_dict(in_dist.scores[1]),
+        },
         "conclusion": (
-            "The learned model is marginally faster but buys that speed with false "
-            "positives, on a detector that already over-alarms, so the authored "
-            "threshold rules ship and the model is kept only as this benchmark."
+            "In distribution the learned model is marginally faster and catches a few "
+            "more real outbreak-days, at a cost of about three points of precision on a "
+            "detector that already over-alarms. The authored threshold rules ship; the "
+            "model is kept only as this benchmark."
         ),
+        "cross_regime": cross_regime,
+        "cross_regime_conclusion": cross_conclusion,
     }
 
 

@@ -41,6 +41,8 @@ from simulation.config import (
     SimulationConfig,
 )
 
+from microcluster.config import DEFAULT_DETECTION_CONFIG, DetectionConfig
+
 from .bands import band, sanitize_reason
 from simulation.contact import suite_ancestor_ids
 from simulation.pipeline import (
@@ -49,6 +51,7 @@ from simulation.pipeline import (
     analyze_report_stream,
     simulate_and_report,
 )
+from simulation.population import StructureSpec
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
@@ -57,10 +60,15 @@ RESULT_FILES = ("disclosure_sweep", "benchmark", "adversarial")
 MAX_DAYS = 120
 MAX_RUNS_KEPT = 64  # in-memory only; oldest evicted past this
 
+MIN_SUITE_SIZE = 21   # StructureSpec rejects agents_per_suite <= MIN_SCOPE_POPULATION (20)
+MAX_SUITE_SIZE = 40
+MIN_WINDOW_HOURS = 24
+MAX_WINDOW_HOURS = 168
+
 DISCLAIMER = (
-    "Illustrative simulation. Every parameter here is a chosen figure, not "
-    "measured from real data, and this model does not predict real disease "
-    "transmission."
+    "Illustrative simulation. Transmission, reporting, contact and incubation values "
+    "are chosen for demonstration, not measured from any real population. This predicts "
+    "nothing about any real building, and no one is diagnosed or treated by this tool."
 )
 
 
@@ -112,6 +120,11 @@ class RunRequest(BaseModel):
     days: int = Field(default=DEFAULT_RUN_DAYS, ge=1, le=MAX_DAYS)
     seed_infections: int = Field(default=1, ge=0)
 
+    population: int | None = Field(default=None, ge=MIN_SUITE_SIZE, le=MAX_SUITE_SIZE)
+    detection_window_hours: int | None = Field(
+        default=None, ge=MIN_WINDOW_HOURS, le=MAX_WINDOW_HOURS
+    )
+
     suite_transmission_probability: float | None = Field(default=None, ge=0.0, le=1.0)
     floor_transmission_probability: float | None = Field(default=None, ge=0.0, le=1.0)
     building_transmission_probability: float | None = Field(default=None, ge=0.0, le=1.0)
@@ -132,6 +145,16 @@ class RunRequest(BaseModel):
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
+    def to_spec(self) -> StructureSpec | None:
+        if self.population is None:
+            return None
+        return StructureSpec(agents_per_suite=self.population)
+
+    def to_detection_config(self) -> DetectionConfig:
+        if self.detection_window_hours is None:
+            return DEFAULT_DETECTION_CONFIG
+        return DetectionConfig(detection_window_hours=self.detection_window_hours)
+
 
 # ---------------------------------------------------------------------------
 # App
@@ -144,6 +167,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def _no_stale_assets(request, call_next):
+    # single-process demo, no CDN: make the browser revalidate every asset
+    # so an edited web/ file is never served from a stale cache
+    response = await call_next(request)
+    if not request.url.path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-cache, must-revalidate"
+    return response
 
 
 def _build_layout_and_slots(
@@ -191,14 +224,20 @@ def _build_layout_and_slots(
 @app.post("/api/run")
 def start_run(req: RunRequest) -> dict:
     config = req.to_config()
+    detection_config = req.to_detection_config()
     try:
-        simulated = simulate_and_report(seed=req.seed, days=req.days, config=config)
+        simulated = simulate_and_report(
+            seed=req.seed, days=req.days, spec=req.to_spec(), config=config
+        )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    daily_records = analyze_report_stream(simulated)
+    daily_records = analyze_report_stream(simulated, detection_config=detection_config)
 
     layout, agent_slot = _build_layout_and_slots(simulated)
     params = {
+        "population_per_suite": simulated.simulation.spec.agents_per_suite,
+        "total_population": len(simulated.simulation.agents),
+        "detection_window_hours": detection_config.detection_window_hours,
         "suite_transmission_probability": config.suite_transmission_probability,
         "floor_transmission_probability": config.floor_transmission_probability,
         "building_transmission_probability": config.building_transmission_probability,

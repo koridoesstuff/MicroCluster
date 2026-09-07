@@ -25,6 +25,14 @@ const els = {
   resReadout: document.getElementById("res-readout"),
   gateDay: document.getElementById("gate-day"),
   gateBody: document.getElementById("gate-body"),
+  pPopulation: document.getElementById("p-population"),
+  pTransmission: document.getElementById("p-transmission"),
+  pReporting: document.getElementById("p-reporting"),
+  pWindow: document.getElementById("p-window"),
+  pPopulationHint: document.getElementById("p-population-hint"),
+  pTransmissionHint: document.getElementById("p-transmission-hint"),
+  pReportingHint: document.getElementById("p-reporting-hint"),
+  paramsDirty: document.getElementById("params-dirty"),
 };
 
 const state = {
@@ -197,7 +205,7 @@ function renderResolution(frame) {
     els.resReadout.className = "res-readout";
     els.resReadout.textContent = frame.detection.fired
       ? "Detection fired but no scope had a qualifying report this day."
-      : "No candidate scopes — detection has not fired on this day.";
+      : "No candidate scopes. Detection has not fired on this day.";
     return;
   }
 
@@ -224,13 +232,13 @@ function renderResReadout() {
       `Resolution stops at ${e.level} ${e.label}. ${e.reason}`;
   } else if (e.selected) {
     els.resReadout.textContent =
-      `Resolution: ${e.level} ${e.label} — the scope the system disclosed.`;
+      `Resolution: ${e.level} ${e.label}. The scope the system disclosed.`;
   } else if (e.eligible) {
     els.resReadout.textContent =
-      `Resolution: ${e.level} ${e.label} — passes both gates; a finer scope was disclosed.`;
+      `Resolution: ${e.level} ${e.label}. Passes both gates; a finer scope was disclosed.`;
   } else {
     els.resReadout.textContent =
-      `Resolution: ${e.level} ${e.label} — passes the privacy gate. ${e.reason}`;
+      `Resolution: ${e.level} ${e.label}. Passes the privacy gate. ${e.reason}`;
   }
 }
 
@@ -317,30 +325,41 @@ async function startRun() {
   els.run.disabled = true;
   els.emptyNote && (els.emptyNote.style.display = "none");
   renderSkeleton();
-  els.status.textContent = "System says: —";
+  els.status.textContent = "System says: loading";
   els.status.classList.remove("flagged");
   els.resSlider.disabled = true;
   els.resReadout.className = "res-readout";
-  els.resReadout.textContent = "Loading…";
+  els.resReadout.textContent = "Loading";
   els.gateBody.innerHTML = "";
-  els.gateDay.textContent = "–";
+  els.gateDay.textContent = "0";
 
+  const reporting = Number(els.pReporting.value);
   const body = {
     seed: Number(els.seed.value) || 0,
     days: Math.max(1, Math.min(120, Number(els.days.value) || 30)),
+    population: Number(els.pPopulation.value) || 25,
+    suite_transmission_probability: Number(els.pTransmission.value),
+    reporting_probability_min: reporting,
+    reporting_probability_max: reporting,
+    detection_window_hours: Number(els.pWindow.value) || 72,
   };
-  // Optional illustrative overrides via URL, e.g.
-  // ?suite_transmission_probability=0.03&reporting_probability_min=0.85
   const qs = new URLSearchParams(location.search);
   for (const key of [
     "suite_transmission_probability", "floor_transmission_probability",
     "building_transmission_probability", "reporting_probability_min",
     "reporting_probability_max", "background_noise_daily_rate", "seed_infections",
+    "population", "detection_window_hours",
   ]) {
     if (qs.has(key)) body[key] = Number(qs.get(key));
   }
   if (qs.has("seed")) { body.seed = Number(qs.get("seed")); els.seed.value = body.seed; }
   if (qs.has("days")) { body.days = Number(qs.get("days")); els.days.value = body.days; }
+  if (qs.has("population")) els.pPopulation.value = body.population;
+  if (qs.has("suite_transmission_probability")) els.pTransmission.value = body.suite_transmission_probability;
+  if (qs.has("reporting_probability_min")) els.pReporting.value = body.reporting_probability_min;
+  if (qs.has("detection_window_hours")) els.pWindow.value = body.detection_window_hours;
+  refreshParamHints();
+  els.paramsDirty.hidden = true;
 
   let meta;
   try {
@@ -362,7 +381,7 @@ async function startRun() {
   state.runId = meta.run_id;
   state.totalDays = meta.days;
   state.frames = new Array(meta.days + 1).fill(null);
-  els.disclaimer.textContent = meta.disclaimer;
+  if (meta.disclaimer) els.disclaimer.textContent = meta.disclaimer;
   els.dayMax.textContent = String(meta.days);
   els.scrub.max = String(meta.days);
 
@@ -409,6 +428,25 @@ els.scrub.addEventListener("input", () => { stopTimer(); paintDay(Number(els.scr
 els.speed.addEventListener("change", () => {
   if (state.timer !== null) { stopTimer(); play(); }
 });
+
+// ---- model parameter controls ---------------------------------------
+
+function refreshParamHints() {
+  const perSuite = Number(els.pPopulation.value) || 25;
+  els.pPopulationHint.textContent = `6 suites, ${perSuite * 6} people`;
+  els.pTransmissionHint.textContent = Number(els.pTransmission.value).toFixed(3);
+  els.pReportingHint.textContent = Number(els.pReporting.value).toFixed(2);
+}
+
+for (const el of [
+  els.pPopulation, els.pTransmission, els.pReporting, els.pWindow, els.seed, els.days,
+]) {
+  el.addEventListener("input", () => {
+    refreshParamHints();
+    if (state.runId) els.paramsDirty.hidden = false;
+  });
+}
+refreshParamHints();
 
 // ---- precomputed results panel ---------------------------------------
 
@@ -498,31 +536,45 @@ function _fmtScore(v) {
   return v == null ? "n/a" : v.toFixed(2);
 }
 
+function _detectorRows(scores, cols) {
+  // scores: {rules, model}; cols: extra leading cell text per row or null
+  const rules = document.createElement("tr");
+  const model = document.createElement("tr");
+  model.className = "model";
+  if (cols) {
+    const lead = _cell(cols);
+    lead.rowSpan = 2;
+    rules.appendChild(lead);
+  }
+  rules.append(
+    _cell("authored rules"),
+    _cell(_fmtScore(scores.rules.precision)),
+    _cell(_fmtScore(scores.rules.recall)),
+    _cell(_fmtScore(scores.rules.delay))
+  );
+  model.append(
+    _cell("learned model"),
+    _cell(_fmtScore(scores.model.precision)),
+    _cell(_fmtScore(scores.model.recall)),
+    _cell(_fmtScore(scores.model.delay))
+  );
+  return [rules, model];
+}
+
 function renderBenchmark(data) {
   const body = document.getElementById("benchmark-body");
   body.innerHTML = "";
-  for (const setting of data.settings) {
-    const rulesRow = document.createElement("tr");
-    const label = document.createElement("td");
-    label.textContent = setting.label;
-    label.rowSpan = 2;
-    rulesRow.append(
-      label, _cell("authored rules"),
-      _cell(_fmtScore(setting.rules.precision)),
-      _cell(_fmtScore(setting.rules.recall)),
-      _cell(_fmtScore(setting.rules.delay))
-    );
-    const modelRow = document.createElement("tr");
-    modelRow.className = "model";
-    modelRow.append(
-      _cell("learned model"),
-      _cell(_fmtScore(setting.model.precision)),
-      _cell(_fmtScore(setting.model.recall)),
-      _cell(_fmtScore(setting.model.delay))
-    );
-    body.append(rulesRow, modelRow);
-  }
+  body.append(..._detectorRows(data.in_distribution, null));
   document.getElementById("benchmark-conclusion").textContent = data.conclusion;
+}
+
+function renderRobustness(data) {
+  const body = document.getElementById("robustness-body");
+  body.innerHTML = "";
+  for (const regime of data.cross_regime) {
+    body.append(..._detectorRows(regime, regime.label));
+  }
+  document.getElementById("robustness-conclusion").textContent = data.cross_regime_conclusion;
 }
 
 function renderAdversarial(data) {
@@ -545,6 +597,7 @@ async function loadResults() {
     ]);
     renderCostChart(sweep);
     renderBenchmark(bench);
+    renderRobustness(bench);
     renderAdversarial(adv);
   } catch (err) {
     document.getElementById("cost-chart").textContent =
