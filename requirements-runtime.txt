@@ -1,0 +1,11 @@
+# Runtime-only dependencies for a deployed server.
+#
+# api.app imports NOTHING heavy -- no numpy, scipy, scikit-learn (verified).
+# The precomputed results/*.json are committed, so the host never runs
+# scripts/precompute_results. Use this file for hosting; use the full
+# requirements.txt for development, tests and regenerating results.
+#
+# >= constraints only (see requirements.txt for why).
+
+fastapi>=0.115
+uvicorn>=0.30

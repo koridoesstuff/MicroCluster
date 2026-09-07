@@ -1,0 +1,20 @@
+# Render.com Blueprint. Deploys the FastAPI app + static web/ as one free
+# web service. No database, no build step for the frontend, no secrets.
+#
+# The precomputed results/*.json are committed, so nothing heavy runs on
+# the host -- the runtime install is just FastAPI + Uvicorn.
+#
+# Free tier note: the instance sleeps after ~15 min idle; the next request
+# cold-starts in ~50s. Hit the URL once a minute before demoing.
+
+services:
+  - type: web
+    name: microcluster
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-runtime.txt
+    startCommand: uvicorn api.app:app --host 0.0.0.0 --port $PORT
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"

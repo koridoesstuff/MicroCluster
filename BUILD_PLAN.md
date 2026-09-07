@@ -1,4 +1,5 @@
-# BUILD PLAN — Outbreak Sandbox
+# BUILD PLAN — MicroCluster
+### (working title during planning: "Outbreak Sandbox")
 ### Agent-based transmission simulator with privacy-preserving detection and a learned-vs-authored benchmark
 
 **Locked:** September 2, 2026. No concept evaluation before October 6.

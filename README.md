@@ -22,18 +22,30 @@ and no one is diagnosed or treated by it.
 | `adversarial/` | a self-test: an observer who sees only what the UI shows runs the differencing attack against exact counts and against bands. |
 | `api/` + `web/` | a FastAPI service and a plain-JS floor-plan animation with a live gate table, a resolution slider, and the precomputed results panels. |
 | `scripts/` | `precompute_results.py` (caches the three analyses to `results/*.json`), `verify_epidemic_curves.py` (Week-1 curve sanity check). |
+| `docs/` | demo video script, one-page submission doc, deployment notes. |
 
 ## Run it
 
+Python 3.10 or newer (developed on 3.14; every module uses
+`from __future__ import annotations`, so nothing needs a specific point
+release).
+
 ```
 pip install -r requirements.txt
-python -m pytest                         # full test suite
-python -m scripts.precompute_results     # regenerate results/*.json
+python -m pytest                         # full suite: 209 passing
+python -m unittest discover -s tests     # same tests, stdlib runner
+python -m scripts.precompute_results     # regenerate results/*.json (~30s)
 uvicorn api.app:app                      # then open http://127.0.0.1:8000/
 ```
 
-`python -m microcluster.demo` prints the six reference disclosure
-scenarios; `python -m adversarial` prints the differencing-attack numbers.
+`python -m microcluster.demo` prints the seven reference disclosure
+scenarios; `python -m adversarial` prints the differencing-attack numbers;
+`python -m scripts.verify_epidemic_curves` prints the epidemic-curve
+plausibility check.
+
+To deploy the web app to a free host, see [`docs/deployment.md`](docs/deployment.md)
+(`render.yaml` is ready; only account creation and connecting the repo are
+manual).
 
 ## Prior art
 
