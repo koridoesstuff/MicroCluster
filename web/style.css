@@ -1,9 +1,10 @@
 /* Flat, high-contrast, documentary/clinical. Off-white ground, no
-   gradients, no shadows, no rounded corners, system UI / IBM Plex only. */
+   gradients, no shadows, no transitions. Square panels; the only circles
+   are agent / legend data marks. System UI / IBM Plex stack. */
 
 :root {
   --ground: #f4f3ef;
-  --field: #faf9f6;            /* off-white, for form controls -- never pure #fff */
+  --field: #faf9f6;            /* off-white ground for form controls, never pure white */
   --ink: #1a1a1a;
   --line: #1a1a1a;
   --line-soft: #9a978f;
@@ -120,7 +121,7 @@ button {
   font: inherit;
   padding: 5px 14px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--field);
   color: var(--ink);
   border-radius: 0;
   cursor: pointer;
@@ -142,7 +143,7 @@ input[type="range"] {
   padding: 8px 10px;
   max-width: 900px;
 }
-.status.flagged { border-color: var(--flag); color: var(--flag); }
+.status.flagged { border-color: var(--flag); }
 
 .resolution {
   padding-top: 6px;
@@ -152,6 +153,7 @@ input[type="range"] {
 }
 .res-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
 }
@@ -167,7 +169,6 @@ input[type="range"] {
 }
 .res-readout.wall {
   border-color: var(--flag);
-  color: var(--flag);
 }
 
 .legend {
@@ -232,7 +233,6 @@ input[type="range"] {
   margin-bottom: 6px;
   font-variant-numeric: tabular-nums;
 }
-.suite.disclosed .suite-label { color: var(--flag); }
 .agents {
   display: grid;
   grid-template-columns: repeat(5, 14px);
@@ -279,9 +279,8 @@ input[type="range"] {
 }
 #gate-table td.muted { color: var(--line-soft); }
 #gate-table tr.selected td { border-color: var(--flag); }
-.pass { color: #1a1a1a; font-weight: 600; }
-.fail { color: var(--flag); font-weight: 600; }
-.gate-cell small { display: block; color: var(--line-soft); font-weight: 400; }
+.fail { color: var(--flag); }
+.gate-cell small { display: block; color: var(--line-soft); }
 
 .results {
   padding-left: 20px;
@@ -313,7 +312,9 @@ input[type="range"] {
 }
 
 .chart { overflow-x: auto; }
-.chart svg { display: block; }
+.chart svg { display: block; width: 100%; min-width: 460px; max-width: 760px; height: auto; }
+
+.table-scroll { overflow-x: auto; }
 .chart .axis { stroke: var(--ink); stroke-width: 1; }
 .chart .series { fill: none; stroke: var(--ink); stroke-width: 1.5; }
 .chart .point { fill: var(--ink); }
@@ -389,11 +390,17 @@ input[type="range"] {
 .static-page .back { font-size: 13px; }
 .static-page .updated { color: var(--line-soft); font-size: 12px; margin-top: 0; }
 
-/* skeleton loader for the async run -- flat gray placeholder, no motion */
-.plan.loading .floor,
-.skeleton {
-  border-color: var(--line-soft);
+@media (max-width: 560px) {
+  .limitations { font-size: 12px; padding: 6px 14px; }
+  header, .controls, .legend, .status, main, .resolution, .gates, .results {
+    padding-left: 14px; padding-right: 14px;
+  }
+  .param input[type="range"] { width: 130px; }
+  .bignum-value { font-size: 38px; }
 }
+
+/* skeleton loader for the async run -- flat gray placeholder, no motion */
+.plan.loading .floor { border-color: var(--line-soft); }
 .skeleton-suite {
   min-width: 120px;
   height: 96px;

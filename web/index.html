@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MicroCluster simulator</title>
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <p id="disclaimer" class="limitations" role="note">
@@ -97,6 +97,7 @@
     Every candidate scope the engine evaluated, refused ones included.
     Report counts are shown as bands, never exact numbers.
   </p>
+  <div class="table-scroll">
   <table id="gate-table">
     <thead>
       <tr>
@@ -112,6 +113,7 @@
       <tr><td colspan="6" class="muted">No run yet.</td></tr>
     </tbody>
   </table>
+  </div>
 </section>
 
 <section class="results" id="result-cost" aria-label="the cost of the privacy policy">
@@ -132,6 +134,7 @@
     against the authored threshold rules on held-out simulation runs. Both are kept in
     the product; the model never replaces the rules.
   </p>
+  <div class="table-scroll">
   <table id="benchmark-table">
     <thead>
       <tr>
@@ -142,6 +145,7 @@
       <tr><td colspan="4" class="muted">Loading</td></tr>
     </tbody>
   </table>
+  </div>
   <p id="benchmark-conclusion" class="results-conclusion"></p>
 </section>
 
@@ -153,6 +157,7 @@
     generated at a different one. If its advantage only holds in-distribution, that is
     reported.
   </p>
+  <div class="table-scroll">
   <table id="robustness-table">
     <thead>
       <tr>
@@ -163,6 +168,7 @@
       <tr><td colspan="5" class="muted">Loading</td></tr>
     </tbody>
   </table>
+  </div>
   <p id="robustness-conclusion" class="results-conclusion"></p>
 </section>
 
@@ -189,6 +195,6 @@
   <a href="privacy.html">Privacy policy</a>
 </footer>
 
-<script src="app.js?v=4"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>

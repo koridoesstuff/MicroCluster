@@ -480,7 +480,7 @@ function renderCostChart(data) {
   const px = (x) => L + ((x - xMin) / (xMax - xMin)) * (W - L - Rm);
   const py = (y) => H - Bm - (y / yMax) * (H - T - Bm);
 
-  const root = svg("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H,
+  const root = svg("svg", { viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: "xMidYMid meet",
     role: "img", "aria-label": "cost of the privacy policy" });
 
   root.appendChild(svg("line", { class: "axis", x1: L, y1: H - Bm, x2: W - Rm, y2: H - Bm }));
