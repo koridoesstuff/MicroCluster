@@ -60,7 +60,7 @@ real weakness, stated in the UI.)
 | authored threshold rules | 0.95 | 0.78 | 3.7 days |
 | logistic-regression model | 0.93 | 0.82 | 2.8 days |
 
-The model is ~1 day faster for ~2 points of precision; the small edge
+The model is ~1 day faster for ~3 points of precision; the small edge
 survives a change in transmission probability. **The rules ship; the model
 is kept only as this benchmark.**
 
@@ -85,5 +85,5 @@ only. Plain HTML/CSS/vanilla JS with a hand-drawn SVG chart — no
 framework, no build step, no CDN. scikit-learn is used only for the
 offline benchmark. 209 tests, all green.
 
-**Links.** Repository `<GITHUB URL>` · Live demo `<DEPLOYED URL>` · Video
-`<VIDEO URL>`
+**Links.** Repository <https://github.com/koridoesstuff/MicroCluster> ·
+Live demo <https://microcluster.onrender.com> · Video `<VIDEO URL>`
