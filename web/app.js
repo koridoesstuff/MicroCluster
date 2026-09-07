@@ -4,6 +4,24 @@
 // Detection and disclosure happen server-side; this file only draws what
 // /api/run and /api/run/{id}/day/{n} return.
 
+// render free tier edge returns intermittent 404/502 (x-render-routing:
+// no-server) before the request reaches the app. retry those a few times
+async function apiFetch(url, opts, tries = 4) {
+  let lastErr;
+  for (let attempt = 0; attempt < tries; attempt++) {
+    if (attempt > 0) await new Promise((r) => setTimeout(r, 300 * 2 ** (attempt - 1)));
+    try {
+      const res = await fetch(url, opts);
+      if (res.ok) return res;
+      if (![404, 502, 503, 504].includes(res.status) || attempt === tries - 1) return res;
+      lastErr = new Error(res.status + " " + (await res.clone().text()).slice(0, 120));
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  throw lastErr;
+}
+
 const els = {
   seed: document.getElementById("seed"),
   days: document.getElementById("days"),
@@ -363,7 +381,7 @@ async function startRun() {
 
   let meta;
   try {
-    const res = await fetch("/api/run", {
+    const res = await apiFetch("/api/run", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -389,7 +407,14 @@ async function startRun() {
 
   // Prefetch every day up front so playback is smooth.
   for (let n = 0; n <= meta.days; n++) {
-    const res = await fetch(`/api/run/${state.runId}/day/${n}`);
+    let res;
+    try {
+      res = await apiFetch(`/api/run/${state.runId}/day/${n}`);
+    } catch (err) {
+      els.status.textContent = "Error loading day " + n + ": " + err.message;
+      els.run.disabled = false;
+      return;
+    }
     if (!res.ok) {
       els.status.textContent = "Error loading day " + n + ": " + res.status;
       els.run.disabled = false;
@@ -591,9 +616,9 @@ function renderAdversarial(data) {
 async function loadResults() {
   try {
     const [sweep, bench, adv] = await Promise.all([
-      fetch("/api/results/disclosure_sweep").then((r) => r.json()),
-      fetch("/api/results/benchmark").then((r) => r.json()),
-      fetch("/api/results/adversarial").then((r) => r.json()),
+      apiFetch("/api/results/disclosure_sweep").then((r) => r.json()),
+      apiFetch("/api/results/benchmark").then((r) => r.json()),
+      apiFetch("/api/results/adversarial").then((r) => r.json()),
     ]);
     renderCostChart(sweep);
     renderBenchmark(bench);

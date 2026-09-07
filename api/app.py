@@ -25,8 +25,8 @@ and the engine verdicts, and stops there.
 
 from __future__ import annotations
 
+import base64
 import json
-import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -94,10 +94,41 @@ _RUN_ORDER: list[str] = []
 
 
 def _remember(run_id: str, run: StoredRun) -> None:
+    if run_id in RUNS:
+        RUNS[run_id] = run
+        return
     RUNS[run_id] = run
     _RUN_ORDER.append(run_id)
     while len(_RUN_ORDER) > MAX_RUNS_KEPT:
         RUNS.pop(_RUN_ORDER.pop(0), None)
+
+
+# run id carries its own params so any process can rebuild the run
+# deterministically after a restart or free-tier spin-down. RUNS stays a
+# pure cache
+def _encode_run_id(payload: dict) -> str:
+    raw = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode()
+    return base64.urlsafe_b64encode(raw).decode().rstrip("=")
+
+
+def _decode_run_id(run_id: str) -> "dict | None":
+    try:
+        pad = "=" * (-len(run_id) % 4)
+        data = json.loads(base64.urlsafe_b64decode(run_id + pad))
+    except Exception:
+        return None
+    return data if isinstance(data, dict) else None
+
+
+# results json read once at import, not per request
+_RESULTS_CACHE: "dict[str, dict]" = {}
+for _name in RESULT_FILES:
+    _p = RESULTS_DIR / f"{_name}.json"
+    if _p.is_file():
+        try:
+            _RESULTS_CACHE[_name] = json.loads(_p.read_text())
+        except Exception:
+            pass
 
 
 # ---------------------------------------------------------------------------
@@ -221,8 +252,7 @@ def _build_layout_and_slots(
     return layout, agent_slot
 
 
-@app.post("/api/run")
-def start_run(req: RunRequest) -> dict:
+def _materialize(req: RunRequest) -> StoredRun:
     config = req.to_config()
     detection_config = req.to_detection_config()
     try:
@@ -246,27 +276,29 @@ def start_run(req: RunRequest) -> dict:
         "background_noise_daily_rate": config.background_noise_daily_rate,
         "seed_infections": config.seed_infections,
     }
-
-    run_id = uuid.uuid4().hex[:12]
-    _remember(
-        run_id,
-        StoredRun(
-            seed=req.seed,
-            days=req.days,
-            params=params,
-            simulated=simulated,
-            daily_records=daily_records,
-            agent_slot=agent_slot,
-            layout=layout,
-        ),
+    return StoredRun(
+        seed=req.seed,
+        days=req.days,
+        params=params,
+        simulated=simulated,
+        daily_records=daily_records,
+        agent_slot=agent_slot,
+        layout=layout,
     )
+
+
+@app.post("/api/run")
+def start_run(req: RunRequest) -> dict:
+    run_id = _encode_run_id(req.model_dump(exclude_none=True))
+    run = RUNS.get(run_id) or _materialize(req)
+    _remember(run_id, run)
     return {
         "run_id": run_id,
         "seed": req.seed,
         "days": req.days,
         "disclaimer": DISCLAIMER,
-        "params": params,
-        "layout": layout,
+        "params": run.params,
+        "layout": run.layout,
     }
 
 
@@ -274,7 +306,17 @@ def start_run(req: RunRequest) -> dict:
 def get_day(run_id: str, n: int) -> dict:
     run = RUNS.get(run_id)
     if run is None:
-        raise HTTPException(status_code=404, detail="unknown run id (it may have been evicted; start a new run)")
+        # cache miss: rebuild from the params baked into the id
+        payload = _decode_run_id(run_id)
+        if payload is None:
+            raise HTTPException(status_code=404, detail="unknown run id (start a new run)")
+        try:
+            run = _materialize(RunRequest(**payload))
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(status_code=404, detail="unknown run id (start a new run)")
+        _remember(run_id, run)
     if n < 0 or n > run.days:
         raise HTTPException(status_code=404, detail=f"day {n} out of range 0..{run.days}")
 
@@ -350,13 +392,16 @@ def get_day(run_id: str, n: int) -> dict:
 def get_results(name: str) -> dict:
     if name not in RESULT_FILES:
         raise HTTPException(status_code=404, detail=f"unknown results file: {name!r}")
+    if name in _RESULTS_CACHE:
+        return _RESULTS_CACHE[name]
     path = RESULTS_DIR / f"{name}.json"
     if not path.is_file():
         raise HTTPException(
             status_code=503,
             detail="results not precomputed; run python -m scripts.precompute_results",
         )
-    return json.loads(path.read_text())
+    _RESULTS_CACHE[name] = json.loads(path.read_text())
+    return _RESULTS_CACHE[name]
 
 
 @app.get("/api/health")

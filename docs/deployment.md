@@ -1,10 +1,16 @@
 # Deployment
 
 The app is a single FastAPI process serving `web/` as static files and a
-small JSON API. It keeps run state **in memory**, so it needs one
-long-running server — it will **not** work on request-scoped serverless
-(Vercel / Netlify functions): `POST /api/run` and the follow-up
-`GET /api/run/{id}/day/{n}` must hit the same process.
+small JSON API. Run state is cached **in memory**, but the `run_id`
+returned by `POST /api/run` encodes every parameter of the run, so
+`GET /api/run/{id}/day/{n}` rebuilds the run deterministically on a cache
+miss (after a restart or a free-tier spin-down). No shared store is
+needed. Still not request-scoped serverless (each cold invocation would
+re-simulate), but a restart mid-session no longer breaks a run.
+
+The frontend also retries `x-render-routing: no-server` edge 404/502s a
+few times with backoff — Render's free edge drops a minority of requests
+before they reach the app.
 
 No database. No secrets. No frontend build. `results/*.json` are committed,
 so the host never runs `scripts/precompute_results`.
