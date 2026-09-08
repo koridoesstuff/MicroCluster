@@ -93,6 +93,7 @@ function stopTimer() {
 function renderSkeleton() {
   els.plan.classList.add("loading");
   els.plan.innerHTML = "";
+  els.plan.setAttribute("aria-label", "Loading the floor plan.");
   for (let f = 0; f < 2; f++) {
     const floor = document.createElement("div");
     floor.className = "floor";
@@ -114,6 +115,7 @@ function renderSkeleton() {
 function buildPlan(layout) {
   els.plan.classList.remove("loading");
   els.plan.innerHTML = "";
+  els.plan.setAttribute("aria-label", "Floor plan. Everyone susceptible; the simulation has not run yet.");
   state.agentCells.clear();
   state.suiteEls.clear();
 
@@ -187,6 +189,13 @@ function paintDay(n) {
   els.counts.textContent =
     `susceptible ${c.susceptible} · incubating ${c.incubating} · ` +
     `symptomatic ${c.symptomatic} · recovered ${c.recovered}`;
+  // text alternative for the role=img plan -- the numbers, not the pixels
+  els.plan.setAttribute(
+    "aria-label",
+    `Floor plan, day ${n}. ${c.susceptible} susceptible, ${c.incubating} incubating, ` +
+    `${c.symptomatic} symptomatic, ${c.recovered} recovered` +
+    (d ? `. Disclosed scope: ${d.level} ${d.label}.` : ".")
+  );
 
   els.dayLabel.textContent = String(n);
   els.scrub.value = String(n);
@@ -215,37 +224,37 @@ function renderRefusal(frame) {
   const refused = evals.find((e) => e.statistical_pass && !e.privacy_pass);
   const d = frame.disclosure;
 
+  // :empty hides the box; writing into it is the change role=status announces
+  function show(title, text) {
+    const head = document.createElement("strong");
+    head.textContent = title;
+    const body = document.createElement("span");
+    body.textContent = text;
+    els.refusal.replaceChildren(head, body);
+  }
+
   if (refused) {
     const named = d ? `${d.level} ${d.label}` : "no scope at all";
-    els.refusal.innerHTML = "";
-    const head = document.createElement("strong");
-    head.textContent = "Privacy refusal";
-    const body = document.createElement("span");
     // strip the engine's "Rejected: " prefix n trailing punctuation, frame it here
     const reason = refused.reason.replace(/^Rejected:\s*/, "").replace(/[.\s]+$/, "");
-    body.textContent =
+    show(
+      "Privacy refusal",
       `The system has enough evidence to name ${refused.level} ${refused.label}, ` +
-      `but will not: ${reason}. It disclosed ${named} instead.`;
-    els.refusal.append(head, body);
-    els.refusal.hidden = false;
+      `but will not: ${reason}. It disclosed ${named} instead.`
+    );
     return;
   }
 
   if (frame.detection.fired && !d) {
-    els.refusal.innerHTML = "";
-    const head = document.createElement("strong");
-    head.textContent = "Nothing disclosed";
-    const body = document.createElement("span");
-    body.textContent =
+    show(
+      "Nothing disclosed",
       "Activity was detected, but no scope has both enough evidence and a safe " +
-      "population to name, so the system says nothing.";
-    els.refusal.append(head, body);
-    els.refusal.hidden = false;
+      "population to name, so the system says nothing."
+    );
     return;
   }
 
-  els.refusal.hidden = true;
-  els.refusal.textContent = "";
+  els.refusal.replaceChildren();
 }
 
 // ---- resolution slider -------------------------------------------------
@@ -391,8 +400,7 @@ async function startRun() {
   renderSkeleton();
   els.status.textContent = "System says: loading";
   els.status.classList.remove("flagged");
-  els.refusal.hidden = true;
-  els.refusal.textContent = "";
+  els.refusal.replaceChildren();
   els.resSlider.disabled = true;
   els.resReadout.className = "res-readout";
   els.resReadout.textContent = "Loading";

@@ -34,8 +34,9 @@ The system discloses the **finest scope that clears both**; if none does,
 it says nothing. Accounts or precise location would make clusters easier
 to pin down and rebuild exactly the dataset the system exists to avoid, so
 it chooses data minimisation over control. Report counts render as bands
-("5–9", "10–19"), never exact integers, which closes a day-to-day
-differencing attack.
+("5–9", "10–19"), never exact integers, which defeats the one-person
+version of a day-to-day differencing attack (the residual is measured
+below, not waved away).
 
 ---
 
@@ -83,7 +84,8 @@ policy onto a live detector and measuring the trade-off.
 **Tech.** Python, FastAPI + Uvicorn; engines and simulator run server-side
 only. Plain HTML/CSS/vanilla JS with a hand-drawn SVG chart — no
 framework, no build step, no CDN. scikit-learn is used only for the
-offline benchmark. 209 tests, all green.
+offline benchmark. Contrast-checked, keyboard-navigable, colour is never
+the only channel. 211 tests, all green.
 
 **Links.** Repository <https://github.com/koridoesstuff/MicroCluster> ·
 Live demo <https://microcluster.onrender.com> · Video `<VIDEO URL>`

@@ -4,9 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MicroCluster simulator</title>
-<link rel="stylesheet" href="style.css?v=8">
+<link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to main content</a>
 <p id="disclaimer" class="limitations" role="note">
   Illustrative simulation. Transmission, reporting, contact and incubation values are
   chosen for demonstration, not measured from any real population. This predicts nothing
@@ -40,6 +41,7 @@
   </details>
 </header>
 
+<main id="main">
 <div class="workbench">
   <div class="col-controls">
 
@@ -85,27 +87,32 @@
       </div>
       <div class="daycount">
         <span>Day <output id="day-label">0</output> / <output id="day-max">0</output></span>
-        <input type="range" id="scrub" min="0" max="0" value="0" disabled>
+        <input type="range" id="scrub" min="0" max="0" value="0" disabled
+          aria-label="Playback day">
       </div>
     </fieldset>
 
     <fieldset class="panel params">
       <legend>Model parameters (applied on Run)</legend>
       <label class="param">Suite size
-        <input type="number" id="p-population" value="25" min="21" max="40" step="1">
+        <input type="number" id="p-population" value="25" min="21" max="40" step="1"
+          aria-describedby="p-population-hint">
         <span class="hint" id="p-population-hint">6 suites, 150 people</span>
       </label>
       <label class="param">Transmission (per contact / day)
-        <input type="range" id="p-transmission" min="0.001" max="0.04" step="0.001" value="0.008">
+        <input type="range" id="p-transmission" min="0.001" max="0.04" step="0.001" value="0.008"
+          aria-describedby="p-transmission-hint">
         <span class="hint" id="p-transmission-hint">0.008</span>
       </label>
       <label class="param">Reporting rate (while symptomatic)
-        <input type="range" id="p-reporting" min="0.1" max="1" step="0.05" value="0.5">
+        <input type="range" id="p-reporting" min="0.1" max="1" step="0.05" value="0.5"
+          aria-describedby="p-reporting-hint">
         <span class="hint" id="p-reporting-hint">0.50</span>
       </label>
       <label class="param">Detection window (hours)
-        <input type="number" id="p-window" value="72" min="24" max="168" step="12">
-        <span class="hint">rolling window for &ldquo;current&rdquo; reports</span>
+        <input type="number" id="p-window" value="72" min="24" max="168" step="12"
+          aria-describedby="p-window-hint">
+        <span class="hint" id="p-window-hint">rolling window for &ldquo;current&rdquo; reports</span>
       </label>
     </fieldset>
 
@@ -113,16 +120,18 @@
       <h2>Resolution</h2>
       <p class="panel-caption">Drag toward finer detail. It stops at the point where naming the group would expose its members.</p>
       <div class="res-row">
-        <span class="res-end">coarsest</span>
-        <input type="range" id="res-slider" min="0" max="0" value="0" step="1" disabled>
-        <span class="res-end">finest</span>
+        <span class="res-end" aria-hidden="true">coarsest</span>
+        <input type="range" id="res-slider" min="0" max="0" value="0" step="1" disabled
+          aria-label="Disclosure resolution, coarsest to finest">
+        <span class="res-end" aria-hidden="true">finest</span>
       </div>
-      <p id="res-readout" class="res-readout">Run a simulation to explore the candidate scopes.</p>
+      <p id="res-readout" class="res-readout" role="status">Run a simulation to explore the candidate scopes.</p>
     </section>
 
   </div>
 
   <div class="col-stage">
+    <h2 class="visually-hidden">Floor plan and detector output</h2>
 
     <section class="legend" aria-label="colour key">
       <span class="key"><span class="dot s-susceptible"></span>susceptible</span>
@@ -134,18 +143,20 @@
 
     <p id="status" class="status" role="status">System says: no run yet</p>
 
-    <div id="refusal" class="refusal" role="status" hidden></div>
+    <div id="refusal" class="refusal" role="status" aria-live="polite"></div>
 
-    <p class="plan-caption">
+    <p class="plan-caption" id="plan-caption">
       Each circle is one person; colour is that person's state on the shown day.
-      Circles are grouped into suites, suites into floors. The building holds
-      <output id="plan-pop">150</output> people. The detector never sees this picture,
-      only the anonymous reports it produces.
+      Symptomatic circles carry a heavy ring and recovered circles a centre dot, so
+      the four states read without colour. Circles are grouped into suites, suites into
+      floors. The building holds <output id="plan-pop">150</output> people. The detector
+      never sees this picture, only the anonymous reports it produces.
     </p>
 
-    <main id="plan" class="plan" aria-label="floor plan">
+    <div id="plan" class="plan" role="img"
+      aria-label="Floor plan. Run a simulation to populate it." aria-describedby="plan-caption">
       <p class="empty-note" id="empty-note">Loading the building layout.</p>
-    </main>
+    </div>
 
     <section class="gates" aria-label="gate table for the current day">
       <h2>Gate table, day <output id="gate-day">0</output></h2>
@@ -271,12 +282,14 @@
   <p id="adv-residual" class="results-conclusion"></p>
 </section>
 
+</main>
+
 <footer class="site-footer">
   <a href="terms.html">Terms of Service</a>
   <span aria-hidden="true">&middot;</span>
   <a href="privacy.html">Privacy policy</a>
 </footer>
 
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>
