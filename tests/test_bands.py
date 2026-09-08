@@ -63,8 +63,9 @@ class SanitizeReasonTest(unittest.TestCase):
         out = sanitize_reason(
             "Rejected: report fraction 0.60 exceeds maximum 0.50 (roster)"
         )
-        self.assertNotIn("0.60", out)
-        self.assertIn("maximum 0.50", out)
+        self.assertNotIn("0.60", out)          # the exact fraction is gone
+        self.assertIn("over the limit of 0.50", out)  # the policy max stays
+        self.assertNotIn("exceeds maximum", out)      # no redundant phrasing
 
     def test_stability_note_counts_become_bands(self) -> None:
         out = sanitize_reason(

@@ -221,10 +221,11 @@ function renderRefusal(frame) {
     const head = document.createElement("strong");
     head.textContent = "Privacy refusal";
     const body = document.createElement("span");
-    const reason = refused.reason.replace(/[.\s]+$/, "");
+    // strip the engine's "Rejected: " prefix n trailing punctuation, frame it here
+    const reason = refused.reason.replace(/^Rejected:\s*/, "").replace(/[.\s]+$/, "");
     body.textContent =
       `The system has enough evidence to name ${refused.level} ${refused.label}, ` +
-      `but will not. ${reason}. It disclosed ${named} instead.`;
+      `but will not: ${reason}. It disclosed ${named} instead.`;
     els.refusal.append(head, body);
     els.refusal.hidden = false;
     return;
@@ -640,7 +641,8 @@ function renderCostChart(data) {
   host.appendChild(root);
   const caption = document.createElement("p");
   caption.className = "results-note";
-  caption.textContent = `point labels are the ${data.primary_sweep} value; the shipped default is 5.`;
+  caption.textContent =
+    `point labels are the ${data.primary_sweep} value; the shipped default is ${rows[0].value}.`;
   host.appendChild(caption);
 }
 
@@ -702,9 +704,9 @@ function renderAdversarial(data) {
   document.getElementById("adv-residual").textContent =
     `Bands remove the one-person pin, not every inference. What the observer still gets: ` +
     `${data.residual}. The direction of the overnight change is still forced on ` +
-    `${data.band_direction_known} of ${data.same_scope_pairs} day-pairs, and with scope ` +
-    `stability off a run names about ${data.wandering_off_mean} distinct groups instead of ` +
-    `${data.wandering_on_mean}.`;
+    `${data.band_direction_known} of ${data.same_scope_pairs.toLocaleString()} day-pairs, ` +
+    `and with scope stability off a run names about ${data.wandering_off_mean} distinct ` +
+    `groups instead of ${data.wandering_on_mean}.`;
 }
 
 // headline numbers, straight from results/*.json, nothing hardcoded
@@ -718,7 +720,8 @@ function renderSummary(sweep, bench, adv) {
   if (shipped) {
     const gap = shipped.disc_delay - shipped.fire_delay;
     items.push(
-      `The detector fires about day ${shipped.fire_delay.toFixed(0)} of an outbreak, ` +
+      `Averaged over ${sweep.seeds.toLocaleString()} simulated outbreaks at the default ` +
+      `transmission rate, the detector fires around day ${shipped.fire_delay.toFixed(0)} ` +
       `but the privacy rules hold disclosure until about day ${shipped.disc_delay.toFixed(0)}. ` +
       `That gap of roughly ${gap.toFixed(0)} days, during which about ` +
       `${Math.round(shipped.inf_before_disclosure_unbiased)} people are infected, ` +
@@ -728,15 +731,18 @@ function renderSummary(sweep, bench, adv) {
 
   const r = bench.in_distribution.rules, m = bench.in_distribution.model;
   items.push(
-    `Authored rules score precision ${r.precision.toFixed(2)}, recall ${r.recall.toFixed(2)}. ` +
-    `A learned model is about ${(r.delay - m.delay).toFixed(1)} day faster but less precise ` +
-    `(${m.precision.toFixed(2)}), so the rules ship and the model stays a benchmark.`
+    `On held-out runs in the training regime, the authored rules score precision ` +
+    `${r.precision.toFixed(2)}, recall ${r.recall.toFixed(2)}. A learned model is about ` +
+    `${(r.delay - m.delay).toFixed(1)} day faster but less precise (${m.precision.toFixed(2)}), ` +
+    `so the rules ship and the model stays a benchmark.`
   );
 
   items.push(
-    `An observer differencing exact report counts pins an exact one-person overnight ` +
-    `change on ${adv.exact_one_person_pins} days. Against the report bands this page ` +
-    `actually shows: ${adv.band_one_person_pins}.`
+    `Banding the report counts stops an observer pinning an exact one-person overnight ` +
+    `change: ${adv.exact_one_person_pins} days against exact counts, ` +
+    `${adv.band_one_person_pins} against the bands. On about ` +
+    `${adv.band_direction_known} of ${adv.same_scope_pairs.toLocaleString()} same-scope ` +
+    `day-pairs the bands still reveal which way the count moved, though not by how much.`
   );
 
   els.summaryList.innerHTML = "";

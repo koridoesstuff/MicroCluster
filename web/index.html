@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MicroCluster simulator</title>
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 <p id="disclaimer" class="limitations" role="note">
@@ -50,9 +50,11 @@
         <button type="button" id="run">Run</button>
       </div>
       <p class="run-hint" id="guided-hint">
-        The guided example is the scenario to watch: the detector fires on day 3, one
-        suite is named on day 4, then by day 8 the privacy gate forces the disclosure
-        back up to the whole floor.
+        The guided example is the scenario to watch. In this single run, at these exact
+        settings (seed 4, transmission 0.025, reporting 0.80), the detector fires on
+        day 3, one suite is named on day 4, then by day 8 the privacy gate forces the
+        disclosure back up to the whole floor. The headline numbers below are averages
+        over many runs and will not match this one.
       </p>
       <div class="field-row">
         <label for="seed">Seed
@@ -275,6 +277,6 @@
   <a href="privacy.html">Privacy policy</a>
 </footer>
 
-<script src="app.js?v=7"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>

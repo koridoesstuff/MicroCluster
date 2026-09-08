@@ -79,6 +79,6 @@ def sanitize_reason(reason: str) -> str:
     )
     out = _SCOPES_COUNT.sub(lambda m: f"scope's ({band(int(m.group(1)))})", out)
     out = _FRACTION.sub(
-        r"report fraction (over the limit) exceeds maximum \1", out
+        r"report fraction over the limit of \1", out
     )
     return out
