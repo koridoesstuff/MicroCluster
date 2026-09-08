@@ -10,6 +10,7 @@ from simulation.config import DEFAULT_RUN_DAYS
 from simulation.pipeline import analyze_report_stream, simulate_and_report
 
 from .differencing import attack
+from .injection import format_result, measure_injection
 from .observer import observe
 from .wandering import measure_wandering
 
@@ -127,6 +128,8 @@ def _fmt(value: float) -> str:
 
 def main() -> None:
     print(format_summary(run_self_test()))
+    print()
+    print(format_result(measure_injection()))
 
 
 if __name__ == "__main__":

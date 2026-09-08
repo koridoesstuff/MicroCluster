@@ -3,7 +3,8 @@
 **A privacy-preserving community health-signal system, with a simulator
 that measures what the privacy costs.**
 
-> It detects the signal without exposing the person who created it.
+> It detects the signal without identifying the reporter, and won't name a
+> group too small or too covered to name safely.
 
 *(This file and `one_pager.html` carry the same prose; the HTML is the
 print source for `one_pager.pdf`. Keep them in sync.)*
@@ -73,9 +74,10 @@ real dataset, and the system is validated only at one population size
 (150). The detector is exercised only against a clean, memoryless
 reporting model, and fires on roughly 60% of outbreaks that never
 establish. It predicts nothing about a real building and treats no one;
-the claim is understanding, not intervention. Abuse mitigation (rate caps)
-is designed but not implemented; anonymity is chosen over abuse-resistance
-by design.
+the claim is understanding, not intervention. It rate-limits submissions
+per session but does not authenticate reporters, so a determined attacker
+using multiple sessions can still inject signal; anonymity is chosen over
+abuse-resistance by design.
 
 Agent-based epidemic modelling and small-cell suppression are both mature
 prior art. The contribution is wiring the suppression policy directly onto
@@ -88,7 +90,7 @@ answers, are in [`anticipated_questions.md`](anticipated_questions.md).
 **Tech.** Python, FastAPI + Uvicorn; detection and disclosure run
 server-side only. Plain HTML/CSS/vanilla JS with a hand-drawn SVG chart,
 no framework, no build step. scikit-learn is used only for the offline
-benchmark. 211 tests, all green; contrast-checked, keyboard-navigable.
+benchmark. 223 tests, all green; contrast-checked, keyboard-navigable.
 
 **Links.** Repository <https://github.com/koridoesstuff/MicroCluster> ·
 Live demo <https://microcluster.onrender.com> · Video `<VIDEO URL>`

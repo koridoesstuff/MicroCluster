@@ -163,10 +163,16 @@ SIBLING_SWITCH_MARGIN: int = 5
 # apply only light, anonymous mitigation -- never identity-based controls,
 # because identity is exactly what the system exists to protect.
 #
-# These caps are enforced at INTAKE, which is not part of this repository
-# yet. They are named here so the policy lives in one place.
-SESSION_SUBMISSION_CAP: int = 3
-DAILY_SUBMISSION_CAP: int = 10
+# These caps are enforced at INTAKE by ``microcluster.intake`` (wired into
+# ``engine.analyze`` as its first step). A report carries an opaque,
+# ephemeral ``session_id``; that is the ONLY thing the cap keys on. It is
+# rate limiting, not authentication: a report with no session_id is not
+# rate limited (there is nothing to key on), and an attacker who spreads
+# their reports across many sessions defeats a per-session cap outright.
+# ``adversarial.injection`` measures exactly what the cap does and does
+# not buy.
+SESSION_SUBMISSION_CAP: int = 3     # max accepted reports per session_id (its lifetime)
+DAILY_SUBMISSION_CAP: int = 10      # max accepted reports per session_id per calendar day
 
 
 # ---------------------------------------------------------------------------
@@ -200,5 +206,16 @@ class DisclosureConfig:
     sibling_switch_margin: int = SIBLING_SWITCH_MARGIN
 
 
+@dataclass(frozen=True)
+class IntakeConfig:
+    """Tunable inputs to the intake submission caps (rule 11). Defaults
+    come from the module-level policy constants above. Anonymous rate
+    limiting only -- see the SESSION_SUBMISSION_CAP comment."""
+
+    session_submission_cap: int = SESSION_SUBMISSION_CAP
+    daily_submission_cap: int = DAILY_SUBMISSION_CAP
+
+
 DEFAULT_DETECTION_CONFIG = DetectionConfig()
 DEFAULT_DISCLOSURE_CONFIG = DisclosureConfig()
+DEFAULT_INTAKE_CONFIG = IntakeConfig()

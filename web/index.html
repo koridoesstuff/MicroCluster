@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MicroCluster simulator</title>
-<link rel="stylesheet" href="style.css?v=9">
+<link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -16,12 +16,13 @@
 
 <header class="intro">
   <h1>MicroCluster</h1>
-  <p class="tagline">It detects a health signal in a small community without exposing the person who created it.</p>
+  <p class="tagline">It detects the signal without identifying the reporter, and won't name a group too small or too covered to name safely.</p>
   <p class="explainer">
     An illness spreads through a simulated dorm floor. A detector that sees only
     anonymous symptom reports, never a name or a room, tries to find the outbreak it
-    was never told about. When it finds one, it reports where the cluster is without
-    identifying the people who reported it. Everything on this page is simulated.
+    was never told about. When it finds one, it names the finest scope that is still
+    safe to name, never one small enough to identify a reporter. Everything on this
+    page is simulated.
   </p>
   <details class="how">
     <summary>How it works</summary>
@@ -290,6 +291,6 @@
   <a href="privacy.html">Privacy policy</a>
 </footer>
 
-<script src="app.js?v=9"></script>
+<script src="app.js?v=10"></script>
 </body>
 </html>

@@ -249,37 +249,59 @@ tool with no users would have to explain why nobody uses it; a simulator
 does not), and the impact claim is "understanding, not intervention" —
 nobody is diagnosed, treated or protected, and the docs say so.
 
-**Verdict: mostly honest.** The thesis sentence is true for the individual
-and the privacy gate genuinely bounds the group case, but "without
-exposing" slightly overstates what happens to a small named group.
-"Without exposing the individual, and bounding the group" would be the
-fully precise claim.
+**Verdict: mostly honest, and the phrasing is now fixed.** The old
+tagline ("without exposing the person who created it") slightly overstated
+what happens to a small named group. It now reads: "it detects the signal
+without identifying the reporter, and won't name a group too small or too
+covered to name safely" — the affirmative claim about the individual, and
+the explicit bound on the group, in one line.
 
 ---
 
 ## 10. Reports are anonymous with no identity check. What stops someone injecting a fake cluster — or manufacturing a disclosure about a group they want stigmatised?
 
-Nothing, today. This is the deliberate and accepted cost of anonymity, and
-it is currently **unmitigated in code**. The design rejects identity-based
-controls (accounts, device binding, verification) on principle, because
-identity is the thing the system exists to protect. The only mitigations
-named — `SESSION_SUBMISSION_CAP` and `DAILY_SUBMISSION_CAP` — are weak
-(rate limits an attacker spreads across sessions or days), and they are
-enforced at intake, which is not built in this repo.
+The per-session submission cap is now enforced — `microcluster.intake`,
+wired into `engine.analyze` as its first step, server side, so it holds
+regardless of client. A report carries an opaque, ephemeral `session_id`;
+that is the only thing the cap keys on. `adversarial.injection` measures
+exactly what it buys, and the answer is: **it raises the attacker's
+session count, and nothing else.**
 
-So a determined actor can submit a dozen "gastrointestinal" reports tagged
-to a rival's suite and, if the counts clear the statistical gate, the
-system announces a GI cluster at that scope. The privacy gate's roster
-refusal partly limits this — it pushes a suite-level false claim up to the
-floor — but a floor-level false disclosure is still harmful, and the
-attacker controls the category label. There is no anomaly-of-anomalies
-check, no cross-referencing against independent signals, nothing.
+Concretely, against the representative target — a floor, declared
+population 75:
 
-**Verdict: real limitation, and the sharpest one.** Manufactured-signal
-and manufactured-disclosure attacks are possible now, the mitigations are
-both weak and unimplemented, and the trade-off (abuse-resistance
-sacrificed for anonymity) is a design choice a judge may simply disagree
-with. The limitations statement now names this explicitly.
+- To manufacture a floor-level false disclosure an attacker needs **9**
+  fabricated reports. That number is set by the statistical gate
+  (`ceil(sqrt(75)) = 9`); the cap does not change it.
+- **Without the cap**, or with unlimited sessions: 9 reports from **1
+  source**, and the floor is falsely disclosed.
+- **With the cap, attacker limited to one session:** 6 of the 9 are
+  rejected, 3 get through, the statistical gate is not cleared, and
+  **nothing is disclosed**. A naive single-session flood is stopped.
+- **With the cap, attacker rotates sessions:** `ceil(9 / 3) = 3`
+  session_ids, 3 reports each, 0 rejected, floor falsely disclosed. The
+  attack succeeds again.
+
+A `session_id` is a client-chosen, unauthenticated string. Generating
+three of them (or three hundred) costs the attacker essentially nothing,
+so the cap converts "9 reports from one source" into "9 reports across
+three sources" and stops there. The attacker still controls the category
+label, and the privacy gate's roster refusal only pushes a suite-level
+false claim up to the floor — a floor-level false disclosure is still
+harmful. There is still no anomaly-of-anomalies check and no
+cross-referencing against independent signals.
+
+What would actually close this is identity or session binding (a
+verified account, a device attestation, a server-issued session an
+attacker cannot mint at will) — exactly the class of control the system
+refuses on principle, because identity is the thing it exists to protect.
+
+**Verdict: partially mitigated, still open — not solid.** The cap is real
+now and it does stop a lazy single-session attacker, which is worth
+having. It does not prevent report injection by anyone willing to rotate
+sessions, and it cannot without adding identity. The privacy policy and
+the one-pager both now say the system rate-limits but does not
+authenticate reporters.
 
 ---
 
@@ -287,9 +309,11 @@ with. The limitations statement now names this explicitly.
 
 In rough order of how much they would hurt:
 
-1. **Abuse (Q10).** A false cluster or a targeted false disclosure can be
-   injected right now; the mitigation is weak in design and absent in
-   code.
+1. **Abuse (Q10).** The per-session cap is now enforced and stops a
+   single-session flood, but an attacker who rotates unauthenticated
+   session_ids still injects a false cluster or targeted false disclosure
+   at the same report cost. Closing it needs identity binding, which the
+   design refuses.
 2. **No realistic reporting model (Q6).** Every performance number
    assumes a clean, memoryless reporting process the detector has never
    been tested without.
@@ -300,8 +324,9 @@ In rough order of how much they would hurt:
    principle, still a bad number.
 5. **No formal privacy guarantee (Q3).** The gates are a suppression
    policy with a measured cost curve, not a mechanism with a proof.
-6. **Thesis phrasing (Q9).** "Without exposing" is precise for the
-   individual and slightly loose for a small named group.
+
+Q9's loose thesis phrasing has been fixed (the tagline now states the
+individual claim and the group bound separately).
 
 The stronger ground: the ML benchmark's circularity is handled honestly
 and the model never ships (Q1); the prior art is credited rather than

@@ -120,5 +120,29 @@ class SelfTestIntegrationTest(unittest.TestCase):
         self.assertGreaterEqual(s.wandering_off_mean, s.wandering_on_mean)
 
 
+class InjectionAttackTest(unittest.TestCase):
+    """The intake cap must raise the attacker's session count without
+    claiming to close the hole -- exactly what the docs say it does."""
+
+    def test_cap_blocks_one_session_but_not_a_session_rotating_attacker(self) -> None:
+        from adversarial.injection import measure_injection
+
+        r = measure_injection()  # target FLOOR C-B1-F2, declared population 75
+        self.assertEqual(r.target_level, "FLOOR")
+
+        # the report count is set by the statistical gate, not the cap
+        self.assertEqual(r.reports_to_disclose, 9)  # ceil(sqrt(75)) = 9
+        self.assertEqual(r.sessions_without_cap, 1)
+        self.assertEqual(
+            r.sessions_with_cap,
+            -(-r.reports_to_disclose // r.session_cap),  # ceil(9 / 3) = 3
+        )
+
+        # the cap stops a single-session flood ...
+        self.assertFalse(r.single_session_attack_succeeds)
+        # ... and does nothing against an attacker who rotates sessions
+        self.assertTrue(r.multi_session_attack_succeeds)
+
+
 if __name__ == "__main__":
     unittest.main()

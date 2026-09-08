@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MicroCluster Privacy policy</title>
-<link rel="stylesheet" href="style.css?v=9">
+<link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
 <p class="limitations" role="note">
@@ -91,9 +91,11 @@
   <h2>Abuse</h2>
   <p>
     Because reports are anonymous, someone can submit reports to manufacture a signal. The
-    system accepts this as the cost of anonymity. The only mitigations are per-session and
-    per-day submission caps. No identity-based control is used, because identity is the
-    thing the system exists to protect.
+    system accepts this as the cost of anonymity. It rate-limits submissions per session
+    (a per-session and a per-session-per-day cap, enforced server side), but it does not
+    authenticate reporters, so a determined attacker using multiple sessions can still
+    inject reports. No identity-based control is used, because identity is the thing the
+    system exists to protect.
   </p>
 
   <p class="back"><a href="index.html">Back to the simulator</a></p>

@@ -110,7 +110,7 @@
 
   <h1>MicroCluster</h1>
   <p class="tagline">A privacy-preserving community health-signal system, with a simulator that measures what the privacy costs.</p>
-  <p class="thesis">It detects the signal without exposing the person who created it.</p>
+  <p class="thesis">It detects the signal without identifying the reporter, and won't name a group too small or too covered to name safely.</p>
 
   <h2>The problem</h2>
   <p>A cluster of the same illness on a dorm or office floor is worth catching
@@ -180,9 +180,9 @@
     validated only at one population size (150). The detector is exercised only
     against a clean, memoryless reporting model, and fires on roughly 60% of
     outbreaks that never establish. It predicts nothing about a real building
-    and treats no one; the claim is understanding, not intervention. Abuse
-    mitigation (rate caps) is designed but not implemented; anonymity is chosen
-    over abuse-resistance by design.</p>
+    and treats no one; the claim is understanding, not intervention. It
+    rate-limits submissions per session but does not authenticate reporters, so
+    a determined attacker using multiple sessions can still inject signal.</p>
     <p>Agent-based epidemic modelling and small-cell suppression are both mature
     prior art. The contribution is wiring the suppression policy directly onto a
     live anomaly detector as one server-side pipeline, and measuring the
@@ -192,7 +192,7 @@
   <div class="meta">
     <p><span class="lead">Tech.</span> Python, FastAPI + Uvicorn; detection and
     disclosure run server-side only. Plain HTML/CSS/JS, hand-drawn SVG chart, no
-    framework or build step. scikit-learn for the offline benchmark only. 211
+    framework or build step. scikit-learn for the offline benchmark only. 223
     tests green; contrast-checked, keyboard-navigable.</p>
     <p><span class="lead">Links.</span> Repository
     github.com/koridoesstuff/MicroCluster &nbsp;&middot;&nbsp; Live demo

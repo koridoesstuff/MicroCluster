@@ -5,7 +5,8 @@ dorm floor, an office floor, a co-op), with a headless agent-based
 outbreak simulator wrapped around it so the detection and disclosure
 engines can be exercised end to end.
 
-**Thesis: it detects the signal without exposing the person who created it.**
+**Thesis: it detects the signal without identifying the reporter, and
+won't name a group too small or too covered to name safely.**
 
 This is an illustrative simulation. Every parameter is chosen for
 demonstration, not measured; it predicts nothing about any real building,
@@ -32,7 +33,7 @@ release).
 
 ```
 pip install -r requirements.txt
-python -m pytest                         # full suite: 211 passing
+python -m pytest                         # full suite: 223 passing
 python -m unittest discover -s tests     # same tests, stdlib runner
 python -m scripts.precompute_results     # regenerate results/*.json (~30s)
 uvicorn api.app:app                      # then open http://127.0.0.1:8000/

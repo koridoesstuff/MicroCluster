@@ -10,12 +10,16 @@ attacks against that stream:
     contrast is the result.
   * SCOPE WANDERING (adversarial.wandering): how many distinct groups get
     named across a run, scope stability on versus off.
+  * REPORT INJECTION (adversarial.injection): how many fabricated reports,
+    and how many sessions, it takes to manufacture a false disclosure --
+    with and without the intake submission cap.
 
 The point is to make the privacy claim demonstrable. Where a defence only
 reduces leakage rather than removing it, that is reported as such.
 """
 
 from .differencing import DifferencingOutcome, attack
+from .injection import InjectionResult, measure_injection
 from .observer import DayView, observe
 from .wandering import WanderingOutcome, measure_wandering
 
@@ -26,4 +30,6 @@ __all__ = [
     "attack",
     "WanderingOutcome",
     "measure_wandering",
+    "InjectionResult",
+    "measure_injection",
 ]
