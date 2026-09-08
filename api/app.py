@@ -302,6 +302,21 @@ def start_run(req: RunRequest) -> dict:
     }
 
 
+@app.get("/api/layout")
+def get_layout(population: int | None = None) -> dict:
+    # pre-run empty state: the building structure before anything happens.
+    # 1-day sim just to build the population n registry, no run stored
+    fields: dict = {"days": 1}
+    if population is not None:
+        fields["population"] = population
+    try:
+        req = RunRequest(**fields)
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    run = _materialize(req)
+    return {"layout": run.layout, "params": run.params, "disclaimer": DISCLAIMER}
+
+
 @app.get("/api/run/{run_id}/day/{n}")
 def get_day(run_id: str, n: int) -> dict:
     run = RUNS.get(run_id)

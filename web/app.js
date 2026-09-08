@@ -26,6 +26,10 @@ const els = {
   seed: document.getElementById("seed"),
   days: document.getElementById("days"),
   run: document.getElementById("run"),
+  runGuided: document.getElementById("run-guided"),
+  refusal: document.getElementById("refusal"),
+  planPop: document.getElementById("plan-pop"),
+  summaryList: document.getElementById("summary-list"),
   play: document.getElementById("play"),
   pause: document.getElementById("pause"),
   step: document.getElementById("step"),
@@ -200,6 +204,47 @@ function paintDay(n) {
     els.status.textContent = "System says: nothing";
     els.status.classList.remove("flagged");
   }
+
+  renderRefusal(frame);
+}
+
+// the money moment: a scope with enough evidence that the privacy gate
+// refuses. wording comes from the engine's own reason text, not invented here
+function renderRefusal(frame) {
+  const evals = frame.evaluations || [];
+  const refused = evals.find((e) => e.statistical_pass && !e.privacy_pass);
+  const d = frame.disclosure;
+
+  if (refused) {
+    const named = d ? `${d.level} ${d.label}` : "no scope at all";
+    els.refusal.innerHTML = "";
+    const head = document.createElement("strong");
+    head.textContent = "Privacy refusal";
+    const body = document.createElement("span");
+    const reason = refused.reason.replace(/[.\s]+$/, "");
+    body.textContent =
+      `The system has enough evidence to name ${refused.level} ${refused.label}, ` +
+      `but will not. ${reason}. It disclosed ${named} instead.`;
+    els.refusal.append(head, body);
+    els.refusal.hidden = false;
+    return;
+  }
+
+  if (frame.detection.fired && !d) {
+    els.refusal.innerHTML = "";
+    const head = document.createElement("strong");
+    head.textContent = "Nothing disclosed";
+    const body = document.createElement("span");
+    body.textContent =
+      "Activity was detected, but no scope has both enough evidence and a safe " +
+      "population to name, so the system says nothing.";
+    els.refusal.append(head, body);
+    els.refusal.hidden = false;
+    return;
+  }
+
+  els.refusal.hidden = true;
+  els.refusal.textContent = "";
 }
 
 // ---- resolution slider -------------------------------------------------
@@ -345,6 +390,8 @@ async function startRun() {
   renderSkeleton();
   els.status.textContent = "System says: loading";
   els.status.classList.remove("flagged");
+  els.refusal.hidden = true;
+  els.refusal.textContent = "";
   els.resSlider.disabled = true;
   els.resReadout.className = "res-readout";
   els.resReadout.textContent = "Loading";
@@ -445,6 +492,19 @@ function play() {
 }
 
 els.run.addEventListener("click", startRun);
+
+// guided example: the exact scenario from docs/demo_video_script.md
+els.runGuided.addEventListener("click", () => {
+  els.seed.value = "4";
+  els.days.value = "30";
+  els.pPopulation.value = "25";
+  els.pTransmission.value = "0.025";
+  els.pReporting.value = "0.8";
+  els.pWindow.value = "72";
+  refreshParamHints();
+  startRun().then(() => { if (state.runId) play(); });
+});
+
 els.play.addEventListener("click", play);
 els.pause.addEventListener("click", stopTimer);
 els.step.addEventListener("click", () => { stopTimer(); advance(); });
@@ -472,6 +532,40 @@ for (const el of [
   });
 }
 refreshParamHints();
+
+// ts keeps the pre-run building drawing in sync w suite size
+let preloadTimer = null;
+els.pPopulation.addEventListener("input", () => {
+  if (state.runId) return;
+  clearTimeout(preloadTimer);
+  preloadTimer = setTimeout(preloadLayout, 250);
+});
+
+// ---- pre-run empty state: draw the building before anything happens ----
+
+function layoutQuery() {
+  const qs = new URLSearchParams(location.search);
+  const pop = qs.get("population") || els.pPopulation.value;
+  return pop ? `?population=${encodeURIComponent(pop)}` : "";
+}
+
+async function preloadLayout() {
+  if (state.runId) return;
+  try {
+    const res = await apiFetch("/api/layout" + layoutQuery());
+    if (!res.ok) return;
+    const data = await res.json();
+    if (state.runId) return;                 // a real run started meanwhile
+    buildPlan(data.layout);
+    if (data.params && data.params.total_population) {
+      els.planPop.textContent = String(data.params.total_population);
+    }
+    if (data.disclaimer) els.disclaimer.textContent = data.disclaimer;
+  } catch (_) {
+    const note = document.getElementById("empty-note");
+    if (note) note.textContent = "Press Run to draw the building and start an outbreak.";
+  }
+}
 
 // ---- precomputed results panel ---------------------------------------
 
@@ -613,6 +707,46 @@ function renderAdversarial(data) {
     `${data.wandering_on_mean}.`;
 }
 
+// headline numbers, straight from results/*.json, nothing hardcoded
+function renderSummary(sweep, bench, adv) {
+  const rows = (sweep.sweeps[sweep.primary_sweep].rows || []).filter(
+    (r) => !r.degenerate && r.disc_delay != null && r.fire_delay != null
+  );
+  const shipped = rows[0];
+  const items = [];
+
+  if (shipped) {
+    const gap = shipped.disc_delay - shipped.fire_delay;
+    items.push(
+      `The detector fires about day ${shipped.fire_delay.toFixed(0)} of an outbreak, ` +
+      `but the privacy rules hold disclosure until about day ${shipped.disc_delay.toFixed(0)}. ` +
+      `That gap of roughly ${gap.toFixed(0)} days, during which about ` +
+      `${Math.round(shipped.inf_before_disclosure_unbiased)} people are infected, ` +
+      `is the measurable cost of the policy.`
+    );
+  }
+
+  const r = bench.in_distribution.rules, m = bench.in_distribution.model;
+  items.push(
+    `Authored rules score precision ${r.precision.toFixed(2)}, recall ${r.recall.toFixed(2)}. ` +
+    `A learned model is about ${(r.delay - m.delay).toFixed(1)} day faster but less precise ` +
+    `(${m.precision.toFixed(2)}), so the rules ship and the model stays a benchmark.`
+  );
+
+  items.push(
+    `An observer differencing exact report counts pins an exact one-person overnight ` +
+    `change on ${adv.exact_one_person_pins} days. Against the report bands this page ` +
+    `actually shows: ${adv.band_one_person_pins}.`
+  );
+
+  els.summaryList.innerHTML = "";
+  for (const text of items) {
+    const li = document.createElement("li");
+    li.textContent = text;
+    els.summaryList.appendChild(li);
+  }
+}
+
 async function loadResults() {
   try {
     const [sweep, bench, adv] = await Promise.all([
@@ -620,6 +754,7 @@ async function loadResults() {
       apiFetch("/api/results/benchmark").then((r) => r.json()),
       apiFetch("/api/results/adversarial").then((r) => r.json()),
     ]);
+    renderSummary(sweep, bench, adv);
     renderCostChart(sweep);
     renderBenchmark(bench);
     renderRobustness(bench);
@@ -627,9 +762,11 @@ async function loadResults() {
   } catch (err) {
     document.getElementById("cost-chart").textContent =
       "precomputed results unavailable: run python -m scripts.precompute_results";
+    els.summaryList.innerHTML = "<li class=\"muted\">Findings unavailable.</li>";
   }
 }
 
+preloadLayout();
 loadResults();
 
 // Optional: ?auto runs a seed on load (used for smoke screenshots).

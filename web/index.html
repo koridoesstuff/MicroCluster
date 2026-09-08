@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MicroCluster simulator</title>
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 <p id="disclaimer" class="limitations" role="note">
@@ -13,126 +13,200 @@
   about any real building, and no one is diagnosed or treated by this tool.
 </p>
 
-<header>
-  <h1>MicroCluster outbreak animation</h1>
+<header class="intro">
+  <h1>MicroCluster</h1>
+  <p class="tagline">It detects a health signal in a small community without exposing the person who created it.</p>
+  <p class="explainer">
+    An illness spreads through a simulated dorm floor. A detector that sees only
+    anonymous symptom reports, never a name or a room, tries to find the outbreak it
+    was never told about. When it finds one, it reports where the cluster is without
+    identifying the people who reported it. Everything on this page is simulated.
+  </p>
+  <details class="how">
+    <summary>How it works</summary>
+    <ol>
+      <li>Anonymous reports flow in: one symptom category from a fixed checklist, a
+        rough onset, and which group the reporter is in. No name, no free text, no
+        room number.</li>
+      <li>The detector flags a statistical excess of reports inside a rolling time
+        window, either against a location's neighbours or against a background rate.</li>
+      <li>Two independent gates then decide whether anything may be said. The
+        statistical gate needs more reports before it will name a larger population;
+        the privacy gate refuses to name a population that is small or almost fully
+        covered by reports. Both gates must pass.</li>
+      <li>The system names the finest scope that clears both gates. If no scope
+        clears them, it discloses nothing.</li>
+    </ol>
+  </details>
 </header>
 
-<section class="controls" aria-label="run and playback controls">
-  <div class="control-group">
-    <label for="seed">Seed</label>
-    <input type="number" id="seed" value="4" min="0" step="1">
-    <label for="days">Days</label>
-    <input type="number" id="days" value="30" min="1" max="120" step="1">
-    <button type="button" id="run">Run</button>
-    <span id="params-dirty" hidden>parameters changed; press Run to apply</span>
+<div class="workbench">
+  <div class="col-controls">
+
+    <fieldset class="panel">
+      <legend>Run</legend>
+      <div class="btn-row">
+        <button type="button" id="run-guided" class="primary">Run the guided example</button>
+        <button type="button" id="run">Run</button>
+      </div>
+      <p class="run-hint" id="guided-hint">
+        The guided example is the scenario to watch: the detector fires on day 3, one
+        suite is named on day 4, then by day 8 the privacy gate forces the disclosure
+        back up to the whole floor.
+      </p>
+      <div class="field-row">
+        <label for="seed">Seed
+          <input type="number" id="seed" value="4" min="0" step="1"></label>
+        <label for="days">Days
+          <input type="number" id="days" value="30" min="1" max="120" step="1"></label>
+      </div>
+      <p id="params-dirty" class="dirty" hidden>Parameters changed. Press Run to apply.</p>
+    </fieldset>
+
+    <fieldset class="panel">
+      <legend>Playback</legend>
+      <div class="btn-row">
+        <button type="button" id="play" disabled>Play</button>
+        <button type="button" id="pause" disabled>Pause</button>
+        <button type="button" id="step" disabled>Step</button>
+        <button type="button" id="reset" disabled>Reset</button>
+      </div>
+      <div class="field-row">
+        <label for="speed">Speed
+          <select id="speed">
+            <option value="1000">0.5x</option>
+            <option value="500" selected>1x</option>
+            <option value="250">2x</option>
+            <option value="120">4x</option>
+          </select>
+        </label>
+      </div>
+      <div class="daycount">
+        <span>Day <output id="day-label">0</output> / <output id="day-max">0</output></span>
+        <input type="range" id="scrub" min="0" max="0" value="0" disabled>
+      </div>
+    </fieldset>
+
+    <fieldset class="panel params">
+      <legend>Model parameters (applied on Run)</legend>
+      <label class="param">Suite size
+        <input type="number" id="p-population" value="25" min="21" max="40" step="1">
+        <span class="hint" id="p-population-hint">6 suites, 150 people</span>
+      </label>
+      <label class="param">Transmission (per contact / day)
+        <input type="range" id="p-transmission" min="0.001" max="0.04" step="0.001" value="0.008">
+        <span class="hint" id="p-transmission-hint">0.008</span>
+      </label>
+      <label class="param">Reporting rate (while symptomatic)
+        <input type="range" id="p-reporting" min="0.1" max="1" step="0.05" value="0.5">
+        <span class="hint" id="p-reporting-hint">0.50</span>
+      </label>
+      <label class="param">Detection window (hours)
+        <input type="number" id="p-window" value="72" min="24" max="168" step="12">
+        <span class="hint">rolling window for &ldquo;current&rdquo; reports</span>
+      </label>
+    </fieldset>
+
+    <section class="panel resolution" aria-label="privacy / resolution control">
+      <h2>Resolution</h2>
+      <p class="panel-caption">Drag toward finer detail. It stops at the point where naming the group would expose its members.</p>
+      <div class="res-row">
+        <span class="res-end">coarsest</span>
+        <input type="range" id="res-slider" min="0" max="0" value="0" step="1" disabled>
+        <span class="res-end">finest</span>
+      </div>
+      <p id="res-readout" class="res-readout">Run a simulation to explore the candidate scopes.</p>
+    </section>
+
   </div>
 
-  <div class="control-group">
-    <button type="button" id="play" disabled>Play</button>
-    <button type="button" id="pause" disabled>Pause</button>
-    <button type="button" id="step" disabled>Step</button>
-    <button type="button" id="reset" disabled>Reset</button>
-    <label for="speed">Speed</label>
-    <select id="speed">
-      <option value="1000">0.5x</option>
-      <option value="500" selected>1x</option>
-      <option value="250">2x</option>
-      <option value="120">4x</option>
-    </select>
+  <div class="col-stage">
+
+    <section class="legend" aria-label="colour key">
+      <span class="key"><span class="dot s-susceptible"></span>susceptible</span>
+      <span class="key"><span class="dot s-incubating"></span>incubating</span>
+      <span class="key"><span class="dot s-symptomatic"></span>symptomatic</span>
+      <span class="key"><span class="dot s-recovered"></span>recovered</span>
+      <span class="key counts" id="counts"></span>
+    </section>
+
+    <p id="status" class="status" role="status">System says: no run yet</p>
+
+    <div id="refusal" class="refusal" role="status" hidden></div>
+
+    <p class="plan-caption">
+      Each circle is one person; colour is that person's state on the shown day.
+      Circles are grouped into suites, suites into floors. The building holds
+      <output id="plan-pop">150</output> people. The detector never sees this picture,
+      only the anonymous reports it produces.
+    </p>
+
+    <main id="plan" class="plan" aria-label="floor plan">
+      <p class="empty-note" id="empty-note">Loading the building layout.</p>
+    </main>
+
+    <section class="gates" aria-label="gate table for the current day">
+      <h2>Gate table, day <output id="gate-day">0</output></h2>
+      <p class="panel-caption">
+        One row per group the engine considered, refused ones included. A group is
+        named only when both gates read PASS. Report counts show as bands, never exact
+        numbers.
+      </p>
+      <div class="table-scroll">
+      <table id="gate-table">
+        <thead>
+          <tr>
+            <th>Scope</th>
+            <th>Population</th>
+            <th>Qualifying</th>
+            <th>Statistical gate</th>
+            <th>Privacy gate</th>
+            <th>Reason</th>
+          </tr>
+        </thead>
+        <tbody id="gate-body">
+          <tr><td colspan="6" class="muted">Run a simulation. Each row will be one group the engine checked.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
   </div>
+</div>
 
-  <div class="control-group daycount">
-    <span>Day <output id="day-label">0</output> / <output id="day-max">0</output></span>
-    <input type="range" id="scrub" min="0" max="0" value="0" disabled>
-  </div>
-</section>
-
-<fieldset class="params" aria-label="model parameters">
-  <legend>Model parameters (applied on Run)</legend>
-  <label class="param">Suite size
-    <input type="number" id="p-population" value="25" min="21" max="40" step="1">
-    <span class="hint" id="p-population-hint">6 suites, 150 people</span>
-  </label>
-  <label class="param">Transmission (per contact / day)
-    <input type="range" id="p-transmission" min="0.001" max="0.04" step="0.001" value="0.008">
-    <span class="hint" id="p-transmission-hint">0.008</span>
-  </label>
-  <label class="param">Reporting rate (while symptomatic)
-    <input type="range" id="p-reporting" min="0.1" max="1" step="0.05" value="0.5">
-    <span class="hint" id="p-reporting-hint">0.50</span>
-  </label>
-  <label class="param">Detection window (hours)
-    <input type="number" id="p-window" value="72" min="24" max="168" step="12">
-    <span class="hint">rolling window for &ldquo;current&rdquo; reports</span>
-  </label>
-</fieldset>
-
-<p id="status" class="status" role="status">System says: no run yet</p>
-
-<section class="resolution" aria-label="privacy / resolution control">
-  <div class="res-row">
-    <label for="res-slider">Resolution</label>
-    <span class="res-end">coarsest</span>
-    <input type="range" id="res-slider" min="0" max="0" value="0" step="1" disabled>
-    <span class="res-end">finest</span>
-  </div>
-  <p id="res-readout" class="res-readout">Run a simulation to explore the candidate scopes.</p>
-</section>
-
-<section class="legend" aria-label="colour key">
-  <span class="key"><span class="dot s-susceptible"></span>susceptible</span>
-  <span class="key"><span class="dot s-incubating"></span>incubating</span>
-  <span class="key"><span class="dot s-symptomatic"></span>symptomatic</span>
-  <span class="key"><span class="dot s-recovered"></span>recovered</span>
-  <span class="key counts" id="counts"></span>
-</section>
-
-<main id="plan" class="plan" aria-label="floor plan">
-  <p class="empty-note" id="empty-note">Set a seed and press Run to start an outbreak.</p>
-</main>
-
-<section class="gates" aria-label="gate table for the current day">
-  <h2>Gate table, day <output id="gate-day">0</output></h2>
-  <p class="gates-note">
-    Every candidate scope the engine evaluated, refused ones included.
-    Report counts are shown as bands, never exact numbers.
-  </p>
-  <div class="table-scroll">
-  <table id="gate-table">
-    <thead>
-      <tr>
-        <th>Scope</th>
-        <th>Population</th>
-        <th>Qualifying</th>
-        <th>Statistical gate</th>
-        <th>Privacy gate</th>
-        <th>Reason</th>
-      </tr>
-    </thead>
-    <tbody id="gate-body">
-      <tr><td colspan="6" class="muted">No run yet.</td></tr>
-    </tbody>
-  </table>
-  </div>
+<section class="results-summary" aria-label="headline findings">
+  <h2>What the experiments found</h2>
+  <p class="panel-caption">Three numbers from the precomputed runs. Read these alone and you have the point of the project.</p>
+  <ul id="summary-list">
+    <li class="muted">Loading findings.</li>
+  </ul>
 </section>
 
 <section class="results" id="result-cost" aria-label="the cost of the privacy policy">
   <h2>The cost of the privacy policy</h2>
+  <p class="panel-caption">
+    How many more people are infected for each extra day the privacy rules delay
+    disclosure. A flatter line means restraint is cheap; a steep one means it is
+    expensive.
+  </p>
   <p class="results-note">
     Each point is one setting of the statistical gate, over 500 simulated outbreaks
-    with detection held fixed. Tightening the gate moves first disclosure later and
-    lets more people be infected before anything is said. Infections are the unbiased
-    figure: outbreaks that were never disclosed count their full day-30 total.
+    with detection held fixed. Non-disclosing outbreaks count their full day-30 total.
   </p>
   <div id="cost-chart" class="chart"></div>
 </section>
 
 <section class="results" id="result-benchmark" aria-label="rules versus learned model">
   <h2>Rules vs learned model</h2>
+  <p class="panel-caption">
+    Whether a model fitted to the data beats the hand-written rules. A good result for
+    the rules is comparable precision and recall without the model's extra false
+    alarms.
+  </p>
   <p class="results-note">
     A logistic-regression detector trained on the three detection findings, scored
-    against the authored threshold rules on held-out simulation runs. Both are kept in
-    the product; the model never replaces the rules.
+    against the authored threshold rules on held-out simulation runs. Both stay in the
+    product; the model never replaces the rules.
   </p>
   <div class="table-scroll">
   <table id="benchmark-table">
@@ -151,11 +225,14 @@
 
 <section class="results" id="result-robustness" aria-label="cross-parameter robustness">
   <h2>Cross-parameter robustness check</h2>
+  <p class="panel-caption">
+    Whether the model's small edge is real or just memorised: it is trained at one
+    transmission probability and tested at another. If the edge disappears here, it was
+    overfitting.
+  </p>
   <p class="results-note">
-    The circularity risk: a classifier trained on this simulator learns this simulator.
-    Here the model is trained at one transmission probability and scored on runs
-    generated at a different one. If its advantage only holds in-distribution, that is
-    reported.
+    The circularity risk stated plainly: a classifier trained on this simulator learns
+    this simulator. This panel reports what happens when the regime shifts.
   </p>
   <div class="table-scroll">
   <table id="robustness-table">
@@ -174,11 +251,14 @@
 
 <section class="results" id="result-adversarial" aria-label="attacking our own system">
   <h2>Attacking our own system</h2>
+  <p class="panel-caption">
+    What someone watching only this page can still work out about individuals. A good
+    result is that the banded output leaves them almost nothing.
+  </p>
   <p class="results-note">
-    An observer who sees only what this page shows (the disclosed scope and its
-    report-count band, day after day) runs the differencing attack: subtract
-    consecutive disclosures of the same scope to infer how many people changed state
-    overnight.
+    An observer who sees only the disclosed scope and its report-count band, day after
+    day, runs the differencing attack: subtract consecutive disclosures of the same
+    scope to infer how many people changed state overnight.
   </p>
   <div class="bignums">
     <div class="bignum"><span class="bignum-value" id="adv-exact">0</span>
@@ -195,6 +275,6 @@
   <a href="privacy.html">Privacy policy</a>
 </footer>
 
-<script src="app.js?v=6"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>

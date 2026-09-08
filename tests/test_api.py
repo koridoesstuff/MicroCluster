@@ -218,6 +218,21 @@ class ApiTest(unittest.TestCase):
                 break
         self.assertTrue(found_wall, "expected a day with a coarser pass then a suite privacy fail")
 
+    def test_layout_endpoint_serves_prerun_structure(self) -> None:
+        res = self.client.get("/api/layout")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        floors = data["layout"]["floors"]
+        self.assertEqual(len(floors), 2)
+        self.assertEqual(sum(len(f["suites"]) for f in floors), 6)
+        self.assertEqual(data["params"]["total_population"], 150)
+        self.assertIn("predicts nothing about any real building", data["disclaimer"])
+
+    def test_layout_endpoint_honours_population_and_rejects_bad_values(self) -> None:
+        data = self.client.get("/api/layout?population=30").json()
+        self.assertEqual(data["params"]["total_population"], 180)
+        self.assertEqual(self.client.get("/api/layout?population=5").status_code, 422)
+
     def test_web_index_is_served(self) -> None:
         res = self.client.get("/")
         self.assertEqual(res.status_code, 200)
