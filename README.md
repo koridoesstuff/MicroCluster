@@ -22,7 +22,7 @@ and no one is diagnosed or treated by it.
 | `adversarial/` | a self-test: an observer who sees only what the UI shows runs the differencing attack against exact counts and against bands. |
 | `api/` + `web/` | a FastAPI service and a plain-JS floor-plan animation with a live gate table, a resolution slider, and the precomputed results panels. |
 | `scripts/` | `precompute_results.py` (caches the three analyses to `results/*.json`), `verify_epidemic_curves.py` (Week-1 curve sanity check). |
-| `docs/` | demo video script, one-page submission doc, deployment notes. |
+| `docs/` | demo video script, one-page submission doc (`.md` source, `.html` print source, generated `.pdf`), a red-team `anticipated_questions.md`, deployment notes. |
 
 ## Run it
 
@@ -32,11 +32,21 @@ release).
 
 ```
 pip install -r requirements.txt
-python -m pytest                         # full suite: 209 passing
+python -m pytest                         # full suite: 211 passing
 python -m unittest discover -s tests     # same tests, stdlib runner
 python -m scripts.precompute_results     # regenerate results/*.json (~30s)
 uvicorn api.app:app                      # then open http://127.0.0.1:8000/
 ```
+
+**Regenerate the submission PDF.** `docs/one_pager.html` is the print
+source for `docs/one_pager.pdf`. With any Chromium on PATH:
+
+```
+chrome --headless --disable-gpu --no-pdf-header-footer \
+  --print-to-pdf=docs/one_pager.pdf docs/one_pager.html
+```
+
+Keep the prose in `docs/one_pager.html` and `docs/one_pager.md` in sync.
 
 `python -m microcluster.demo` prints the seven reference disclosure
 scenarios; `python -m adversarial` prints the differencing-attack numbers;
