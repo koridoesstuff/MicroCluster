@@ -573,3 +573,39 @@ input[type="range"] { accent-color: var(--ink); }
   border: 1px solid var(--line-soft);
   background: var(--panel-head);
 }
+
+
+/* ---- gate explanations: plain rule first, typeset formula second ---- */
+
+math {
+  font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", math, serif;
+  font-size: 1.15em;
+  math-style: compact;   /* keep an inline fraction from ballooning the line */
+}
+.gate-rule {
+  border: 1px solid var(--line-soft);
+  padding: var(--sp-1) var(--sp-2);
+  margin: var(--sp-2) 0;
+}
+.gate-rule p { margin: 0 0 var(--sp-1); }
+.gate-formula { overflow-x: auto; max-width: 100%; line-height: 1.9; }
+.gate-examples { margin: var(--sp-1) 0; font-size: 13px; color: var(--muted); }
+.gate-example {
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.gate-example caption {
+  text-align: left;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--muted);
+  padding-bottom: 4px;
+}
+.gate-example th, .gate-example td {
+  border: 1px solid var(--line-soft);
+  padding: 4px 10px;
+  text-align: left;
+}
+.gate-example th { background: var(--panel-head); border-color: var(--line); font-weight: 600; }

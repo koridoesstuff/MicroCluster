@@ -4,14 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MicroCluster simulator</title>
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
 <p id="disclaimer" class="limitations" role="note">
   Illustrative simulation. Transmission, reporting, contact and incubation values are
-  chosen for demonstration, not measured from any real population. This predicts nothing
-  about any real building, and no one is diagnosed or treated by this tool.
+  chosen for demonstration, not measured from any real population. Tested at 150 to 2,000
+  simulated people and against a harsher simulated reporting model, never against real
+  reports. This predicts nothing about any real building, and no one is diagnosed or
+  treated by this tool.
 </p>
 
 <header class="intro">
@@ -32,10 +34,29 @@
         room number.</li>
       <li>The detector flags a statistical excess of reports inside a rolling time
         window, either against a location's neighbours or against a background rate.</li>
-      <li>Two independent gates then decide whether anything may be said. The
-        statistical gate needs more reports before it will name a larger population;
-        the privacy gate refuses to name a population that is small or almost fully
-        covered by reports. Both gates must pass.</li>
+      <li>Two independent gates then decide whether anything may be said. Both must pass.
+        <div class="gate-rule">
+          <p><strong>Evidence gate.</strong> The bigger the group you want to name, the more
+          reports you need before the system will name it, and never fewer than
+          <span data-gate-const="statistical.floor">5</span>.</p>
+          <p class="gate-formula">In symbols:
+          <math aria-label="at least five, or the square root of the population rounded up, whichever is larger"><mrow><mi>needed</mi><mo>=</mo><mi>max</mi><mo>(</mo><mn data-gate-const="statistical.floor">5</mn><mo>,</mo><mo>&lceil;</mo><msqrt><mi>n</mi></msqrt><mo>&rceil;</mo><mo>)</mo></mrow></math>,
+          where <math aria-label="n"><mi>n</mi></math> is how many people are in the group.</p>
+          <div class="gate-examples" data-gate-examples="statistical">Worked numbers load from the running server.</div>
+        </div>
+        <div class="gate-rule">
+          <p><strong>Privacy gate.</strong> The system never names a group with fewer than
+          <span data-gate-const="privacy.min_population">20</span> people, and never names a group where
+          more than <span data-gate-const="privacy.max_fraction_words">half</span> of the members have
+          reported, because that announcement would be close to a list of who is ill.</p>
+          <p class="gate-formula">In symbols, with <math aria-label="q"><mi>q</mi></math> reports from a group of
+          <math aria-label="n"><mi>n</mi></math> people:
+          <math aria-label="the group has at least twenty people"><mrow><mi>n</mi><mo>&ge;</mo><mn data-gate-const="privacy.min_population">20</mn></mrow></math>
+          and
+          <math aria-label="the reports divided by the group size is at most one half"><mrow><mfrac><mi>q</mi><mi>n</mi></mfrac><mo>&le;</mo><mn data-gate-const="privacy.max_fraction">0.5</mn></mrow></math>.</p>
+          <div class="gate-examples" data-gate-examples="privacy">Worked numbers load from the running server.</div>
+        </div>
+      </li>
       <li>The system names the finest scope that clears both gates. If no scope
         clears them, it discloses nothing.</li>
     </ol>
@@ -162,9 +183,10 @@
     <section class="gates" aria-label="gate table for the current day">
       <h2>Gate table, day <output id="gate-day">0</output></h2>
       <p class="panel-caption">
-        One row per group the engine considered, refused ones included. A group is
-        named only when both gates read PASS. Report counts show as bands, never exact
-        numbers.
+        One row per group the engine considered, refused ones included. The first gate
+        passes when the group has enough reports for its size; the second passes when
+        the group is big enough to name and not mostly reporters. A group is named only
+        when both read PASS. Report counts show as bands, never exact numbers.
       </p>
       <div class="table-scroll">
       <table id="gate-table">
@@ -291,6 +313,7 @@
   <a href="privacy.html">Privacy policy</a>
 </footer>
 
-<script src="app.js?v=10"></script>
+<script src="app.js?v=11"></script>
+<script src="gates.js?v=11"></script>
 </body>
 </html>

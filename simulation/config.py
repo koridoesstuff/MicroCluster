@@ -285,6 +285,18 @@ CAMPUS_SCOPE_ID: str = "C"
 CAMPUS_LABEL: str = "Campus"
 
 
+# Which reporting process generates the reports. "clean" is the shipped
+# default and the one every committed result was produced with: a fixed
+# per-agent probability, independent and memoryless. "realistic" is the
+# stress-test alternative in ``simulation.realism`` (heterogeneous baselines,
+# correlated reporting, stigma suppression after a group is named). It exists
+# to test how much the detector leans on the clean assumption; it is not a
+# claim about real people either -- its parameters are chosen, not measured.
+REPORTING_MODEL_CLEAN = "clean"
+REPORTING_MODEL_REALISTIC = "realistic"
+REPORTING_MODELS = (REPORTING_MODEL_CLEAN, REPORTING_MODEL_REALISTIC)
+
+
 @dataclass(frozen=True)
 class SimulationConfig:
     """Tunable inputs to one simulation run. Defaults come from the module
@@ -305,6 +317,7 @@ class SimulationConfig:
     seed_infections: int = DEFAULT_SEED_INFECTIONS
     campus_scope_id: str = CAMPUS_SCOPE_ID
     campus_label: str = CAMPUS_LABEL
+    reporting_model: str = REPORTING_MODEL_CLEAN
 
     def __post_init__(self) -> None:
         for lo, hi, name in (
@@ -334,6 +347,10 @@ class SimulationConfig:
             raise ValueError(f"outbreak_category must be a Category, got {self.outbreak_category!r}")
         if self.seed_infections < 0:
             raise ValueError("seed_infections must be >= 0")
+        if self.reporting_model not in REPORTING_MODELS:
+            raise ValueError(
+                f"reporting_model must be one of {REPORTING_MODELS}, got {self.reporting_model!r}"
+            )
 
 
 DEFAULT_SIMULATION_CONFIG = SimulationConfig()

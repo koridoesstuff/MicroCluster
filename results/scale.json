@@ -1,0 +1,184 @@
+{
+  "seeds": 500,
+  "days": 30,
+  "sizes": [
+    {
+      "n_agents": 150,
+      "n_suites": 6,
+      "n_distinct_populations": 3,
+      "n_runs": 500,
+      "seconds_per_run": 0.009521680800004106,
+      "established_fraction": 0.69,
+      "median_attack_rate": 0.7,
+      "median_attack_rate_in_touched": 0.7,
+      "median_buildings_touched": 1,
+      "peaks_and_declines_fraction": 0.9391304347826087,
+      "scope_evaluations_checked": 63703,
+      "threshold_formula_violations": 0,
+      "pass_flag_violations": 0,
+      "selected_without_both_gates": 0,
+      "thresholds_by_level": {
+        "SUITE": 5,
+        "FLOOR": 9,
+        "BUILDING": 13,
+        "CAMPUS": 13
+      },
+      "roster_refusals": 2,
+      "roster_refusal_levels": {
+        "SUITE": 2
+      },
+      "runs_with_a_roster_refusal": 2,
+      "n_established": 345,
+      "n_disclosed": 322,
+      "mean_fire_delay": 8.055900621118013,
+      "mean_disclosure_delay": 14.062111801242237,
+      "mean_gap": 6.0062111801242235,
+      "infections_before_disclosure": 35.18550724637681,
+      "infections_before_disclosure_pct": 23.45700483091787,
+      "finest_level_histogram": {
+        "SUITE": 231,
+        "FLOOR": 58,
+        "BUILDING": 33
+      },
+      "false_alarm_rate": 0.6,
+      "fizzle_rate": 0.31000000000000005,
+      "relative_fired_days": 4072,
+      "absolute_fired_days": 6807,
+      "errors": 0
+    },
+    {
+      "n_agents": 500,
+      "n_suites": 20,
+      "n_distinct_populations": 4,
+      "n_runs": 500,
+      "seconds_per_run": 0.027959125200002745,
+      "established_fraction": 0.876,
+      "median_attack_rate": 0.462,
+      "median_attack_rate_in_touched": 0.924,
+      "median_buildings_touched": 1.0,
+      "peaks_and_declines_fraction": 1.0,
+      "scope_evaluations_checked": 102155,
+      "threshold_formula_violations": 0,
+      "pass_flag_violations": 0,
+      "selected_without_both_gates": 0,
+      "thresholds_by_level": {
+        "SUITE": 5,
+        "FLOOR": 12,
+        "BUILDING": 16,
+        "CAMPUS": 23
+      },
+      "roster_refusals": 282,
+      "roster_refusal_levels": {
+        "SUITE": 282
+      },
+      "runs_with_a_roster_refusal": 161,
+      "n_established": 438,
+      "n_disclosed": 435,
+      "mean_fire_delay": 8.039080459770116,
+      "mean_disclosure_delay": 10.193103448275862,
+      "mean_gap": 2.154022988505747,
+      "infections_before_disclosure": 52.84474885844749,
+      "infections_before_disclosure_pct": 10.568949771689498,
+      "finest_level_histogram": {
+        "BUILDING": 97,
+        "SUITE": 254,
+        "FLOOR": 84
+      },
+      "false_alarm_rate": 0.6612903225806451,
+      "fizzle_rate": 0.124,
+      "relative_fired_days": 7421,
+      "absolute_fired_days": 6344,
+      "errors": 0
+    },
+    {
+      "n_agents": 1000,
+      "n_suites": 40,
+      "n_distinct_populations": 4,
+      "n_runs": 500,
+      "seconds_per_run": 0.05557471760000044,
+      "established_fraction": 0.956,
+      "median_attack_rate": 0.489,
+      "median_attack_rate_in_touched": 0.978,
+      "median_buildings_touched": 1.0,
+      "peaks_and_declines_fraction": 1.0,
+      "scope_evaluations_checked": 179535,
+      "threshold_formula_violations": 0,
+      "pass_flag_violations": 0,
+      "selected_without_both_gates": 0,
+      "thresholds_by_level": {
+        "SUITE": 5,
+        "FLOOR": 12,
+        "BUILDING": 23,
+        "CAMPUS": 32
+      },
+      "roster_refusals": 5244,
+      "roster_refusal_levels": {
+        "SUITE": 5149,
+        "FLOOR": 95
+      },
+      "runs_with_a_roster_refusal": 478,
+      "n_established": 478,
+      "n_disclosed": 478,
+      "mean_fire_delay": 7.202928870292887,
+      "mean_disclosure_delay": 8.648535564853557,
+      "mean_gap": 1.4456066945606694,
+      "infections_before_disclosure": 106.96861924686192,
+      "infections_before_disclosure_pct": 10.696861924686193,
+      "finest_level_histogram": {
+        "SUITE": 279,
+        "BUILDING": 115,
+        "FLOOR": 84
+      },
+      "false_alarm_rate": 0.8636363636363636,
+      "fizzle_rate": 0.04400000000000004,
+      "relative_fired_days": 7061,
+      "absolute_fired_days": 5791,
+      "errors": 0
+    },
+    {
+      "n_agents": 2000,
+      "n_suites": 80,
+      "n_distinct_populations": 4,
+      "n_runs": 500,
+      "seconds_per_run": 0.10254487920000246,
+      "established_fraction": 0.95,
+      "median_attack_rate": 0.2445,
+      "median_attack_rate_in_touched": 0.978,
+      "median_buildings_touched": 1,
+      "peaks_and_declines_fraction": 1.0,
+      "scope_evaluations_checked": 197600,
+      "threshold_formula_violations": 0,
+      "pass_flag_violations": 0,
+      "selected_without_both_gates": 0,
+      "thresholds_by_level": {
+        "SUITE": 5,
+        "FLOOR": 12,
+        "BUILDING": 23,
+        "CAMPUS": 45
+      },
+      "roster_refusals": 5217,
+      "roster_refusal_levels": {
+        "SUITE": 5124,
+        "FLOOR": 93
+      },
+      "runs_with_a_roster_refusal": 475,
+      "n_established": 475,
+      "n_disclosed": 475,
+      "mean_fire_delay": 7.294736842105263,
+      "mean_disclosure_delay": 9,
+      "mean_gap": 1.7052631578947368,
+      "infections_before_disclosure": 117.90736842105264,
+      "infections_before_disclosure_pct": 5.895368421052631,
+      "finest_level_histogram": {
+        "SUITE": 301,
+        "FLOOR": 66,
+        "BUILDING": 108
+      },
+      "false_alarm_rate": 0.84,
+      "fizzle_rate": 0.050000000000000044,
+      "relative_fired_days": 6772,
+      "absolute_fired_days": 4441,
+      "errors": 0
+    }
+  ]
+}

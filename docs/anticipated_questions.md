@@ -62,58 +62,68 @@ project demonstrates, and it is stated prominently rather than buried.
 
 ## 3. Are the privacy gates principled, or tuned until the demo looked good?
 
-The **shapes** are principled; the **shipped values** are defaults, not
-optima.
+The **shapes** are principled and now have an exact name; the **shipped
+values** are defaults, not optima. The full mapping is in
+`docs/privacy_guarantee.md` and on the privacy page.
 
-`qualifying >= max(5, ceil(sqrt(n)))` encodes "evidence should scale with
-the size of the claim." `sqrt(n)` is a reasonable growth rate for that,
-not a theorem, and `config.py` says so. `n >= 20` and
-`qualifying / n <= 0.5` encode "do not name a group small enough or
-covered enough that naming it is naming its members." The specific
-constants (5, 20, 0.5) are round numbers chosen to land in sensible
-regimes for a 25 / 75 / 150 structure.
+What the two gates jointly guarantee, on every named group, by construction:
+at least 20 people (a **k-anonymity-style group-size floor**, k >= 20), at
+least `max(5, ceil(sqrt(n)))` supporting reports (a **minimum-support
+threshold rule**), and at most half the group among the reporters (a
+**prevalence cap** that bounds the homogeneity attack, in the spirit of
+l-diversity and the dominance rule but not literally either). That invariant
+held on about 543,000 independently re-checked evaluations up to 2,000 agents.
 
-Instead of claiming they are optimal, the project makes their cost
-visible: the disclosure-gate sweep runs 500 outbreaks at each of several
-settings and reports how much later disclosure happens and how many more
-infections result. A deployer picks the point on that curve they can
-defend. The sweep and the ML benchmark are separate and neither feeds back
-into the constants, so the gates were not tuned against "how good the demo
-looks."
+What they are **not**: differential privacy. They add no noise and use hard
+thresholds on exact counts, so one report can flip "nothing" to "names S"
+and the output change from one person is unbounded (epsilon is infinite);
+there is no privacy budget, so daily releases over overlapping data do not
+compose accountably; and there is no protection against an adversary who
+knows almost all the reports (the threshold boundary itself leaks a bit).
 
-**Verdict: partial.** "It is a policy, and here is its cost curve" is a
-fair answer, but a judge who wants the shipped values *derived* from a
-stated risk model will not get that. There is no formal privacy guarantee
-(no epsilon), only a suppression rule and its measured price.
+The constants (5, 20, 0.5, `sqrt(n)`) are round policies for a 25 / 75 / 150
+structure; the sweep shows their cost rather than deriving them. Neither the
+sweep nor the benchmark feeds back into them.
+
+**Verdict: partial, and now precisely bounded.** The property is real,
+deterministic and named, and the write-up says exactly what it does not
+promise. A judge who wants the constants derived from a risk model, or a
+formal epsilon, still will not get either.
 
 ---
 
 ## 4. Everything is tested at 150 people and three scope levels. What happens at a real building — 500 residents, a 2,000-person campus with hundreds of suites?
 
-We do not know, and nothing in the repo validates it past 150. The default
-structure is one campus / one building / two floors / three suites / 25
-agents, and every result runs on it.
+It is now tested at 500, 1,000 and 2,000 agents with four distinct scope
+populations (campus / building / floor / suite), 500 seeds each
+(`docs/stress_tests.md`, `results/scale.json`). No detection or disclosure
+code changed. **Nothing fails**: zero crashes, zero violations of the evidence
+formula on about 543,000 evaluations, no scope named without passing both
+gates, runtime linear (0.1 s per run at 2,000; about 0.5 s at 10,000).
 
-Several things are untested at scale and could break:
+What that showed, including the parts that do not look good:
 
-- The relative detector compares a location to its **contemporaneous
-  peers**. With three suites the peer pool is two. At hundreds of suites
-  the pooled control rate behaves very differently, and the
-  `RELATIVE_SMOOTHING` constant that keeps the ratio finite was tuned for
-  the small case.
-- `sqrt(n)` at campus n = 2,000 demands 45 reports before a campus-level
-  claim, which may be too slow to be useful.
-- Scope stability and wandering were measured over a handful of scopes.
-  Over hundreds, "how many distinct groups a run names" could be much
-  worse.
-- The degenerate case the sweep already flags (`MIN_SCOPE_POPULATION` =
-  200 against a 150-person campus makes every disclosure structurally
-  impossible) is a small taste of the configuration cliffs that appear
-  when the structure and the constants are not co-designed.
+- **The outbreak model hits a ceiling, not the engine.** Every multi-building
+  run stays inside one building (no campus-level contact exists) and then
+  saturates it (92 to 98% attack rate), because the per-contact building
+  probability does not dilute as buildings grow. The scale results describe
+  "one large building on fire", not a campus.
+- **Policy cost shrinks in days and grows in people.** The fire-to-disclosure
+  gap falls from 6.0 to about 1.7 days, but infections before disclosure rise
+  from 35 (150 agents) to 118 (2,000).
+- **The privacy gate binds much more**: 95% of runs at 1,000 and 2,000 hit a
+  roster refusal, almost all at suite level, so disclosure repeatedly retreats
+  a level.
+- **False alarms rise to 84 to 86%** (small denominators, about 22 to 25 runs).
+- **A campus-wide disclosure never wins at scale**: its threshold (32 to 45)
+  exceeds the building's and the outbreak sits in one building.
+- Still untested: hundreds of suites per floor, suites of other sizes, more
+  than one seeded outbreak, and any real contact structure.
 
-**Verdict: real limitation.** The approach is defined for arbitrary
-hierarchies but demonstrated only at toy scale. The on-page limitations
-statement now says so.
+**Verdict: restated, no longer "unknown".** The machinery scales to at least
+2,000 agents; what does not scale credibly is the simulated epidemic, and the
+false-alarm rate gets worse. Nothing past a single synthetic building
+structure is validated.
 
 ---
 
@@ -145,29 +155,38 @@ engineering and a real trade-off measurement will be.
 
 ## 6. Your detector consumes a `reporting_probability`. Real people do not report like that. Would it work at all on real reporting behavior?
 
-The detector consumes report **counts** and is agnostic to how they are
-generated, but every performance number assumes the simulator's reporting
-model, and that model is deliberately simple: each agent gets a fixed
-personal reporting probability drawn once from [0.3, 0.7], applied
-independently each symptomatic day, no memory, no feedback.
+Now stress-tested against a deliberately harsher process
+(`SimulationConfig(reporting_model="realistic")`, default unchanged):
+heterogeneous baselines (Beta(0.5, 0.5), same mean, U-shaped), correlated
+reporting (probability rises after suite-mates report, worried-well filers
+included) and stigma (probability halves in a named group). Same outbreaks,
+paired, 500 runs (`docs/stress_tests.md`).
 
-Real reporting is none of those things. It is correlated (people report
-once they hear others are sick — which would help detection but also
-creates a feedback loop the simulator lacks), biased (the worried-well
-flood in during a scare; genuinely sick people under-report when they feel
-worst), bursty and day-of-week patterned, and directly manipulable. The
-background-noise term is a flat trickle where real baseline reporting has
-structure.
+| | clean | realistic |
+|---|---|---|
+| first disclosure (day) | 14.1 | 14.2 |
+| infected before disclosure | 35.2 | 35.8 |
+| false-alarm rate | 60% | 90% |
+| false disclosures (fizzles that still named a scope) | 0% | 3% |
+| disclosure continuity | 74% | 59% |
 
-So: the detector's **logic** (relative excess vs peers, absolute excess vs
-a baseline, inside a rolling window) is not tied to the clean model, but
-its measured precision, recall and delay are, and real reporting could
-degrade all three — or, through reporting cascades, flatter the recall
-while making false alarms worse.
+The timing looks robust. **It is not; it is cancellation.** Heterogeneity
+alone makes disclosure later (14.9 days, 40.9 infected) and correlation alone
+earlier (12.4, 27.1). Across a 4 x 4 strength grid infections before
+disclosure range 24 to 44 (minus 31% to plus 24%). The direction depends on
+which unmeasured effect dominates.
 
-**Verdict: real limitation.** The detector has never seen a realistic
-reporting process. The limitations statement now says it is exercised only
-against a clean, memoryless model.
+The false-alarm rate **does** depend on the clean assumption: 60% clean, 78
+to 100% once any correlation is present, and at high correlation about a
+quarter of outbreaks that never took off produce a false named disclosure.
+Stigma never changes first disclosure but erodes sustained disclosure (74% to
+57%), which the timing columns cannot show.
+
+**Verdict: the limitation survived testing and is restated.** Timing degrades
+gracefully; low-false-alarm behaviour depends on memoryless reporting, and a
+plausible correlated process makes it worse and can produce false
+disclosures. Both processes are still simulated with chosen constants; the
+detector has never seen a real report.
 
 ---
 
@@ -314,16 +333,19 @@ In rough order of how much they would hurt:
    session_ids still injects a false cluster or targeted false disclosure
    at the same report cost. Closing it needs identity binding, which the
    design refuses.
-2. **No realistic reporting model (Q6).** Every performance number
-   assumes a clean, memoryless reporting process the detector has never
-   been tested without.
-3. **Unvalidated at scale (Q4).** Nothing is tested past 150 people and
-   three scope levels; several components have scale-sensitive
-   assumptions.
+2. **Reporting realism (Q6).** Tested against a harsher simulated process:
+   timing survives only by cancellation, false alarms rise from 60% to 78 to
+   100% under correlation, and false disclosures appear. Never tested on real
+   reports.
+3. **Scale (Q4).** The machinery holds to 2,000 agents (and 10,000 for
+   runtime), but the simulated epidemic saturates one building and the
+   false-alarm rate reaches 84 to 86%. Nothing real is validated.
 4. **60% false-alarm rate (Q8).** Honestly disclosed, defensible in
-   principle, still a bad number.
-5. **No formal privacy guarantee (Q3).** The gates are a suppression
-   policy with a measured cost curve, not a mechanism with a proof.
+   principle, still a bad number, and worse at scale and under correlation.
+5. **No formal privacy guarantee (Q3).** The property is now named exactly
+   (k-anonymity-style floor, threshold rule, prevalence cap) and is
+   explicitly not differential privacy: no noise, unbounded epsilon, no
+   composition accounting.
 
 Q9's loose thesis phrasing has been fixed (the tagline now states the
 individual claim and the group bound separately).

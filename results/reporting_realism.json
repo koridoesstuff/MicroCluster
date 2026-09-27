@@ -1,0 +1,218 @@
+{
+  "seeds": 500,
+  "days": 30,
+  "variants": {
+    "clean (shipped)": {
+      "n_runs": 500,
+      "n_established": 345,
+      "n_disclosed": 322,
+      "disclosed_fraction": 0.9333333333333333,
+      "fire_delay": 8.055900621118013,
+      "disclosure_delay": 14.062111801242237,
+      "gap": 6.0062111801242235,
+      "infections_before_disclosure": 35.18550724637681,
+      "false_alarm_rate": 0.6,
+      "false_disclosure_rate": 0.0,
+      "disclosure_continuity": 0.7440250692930398,
+      "mean_reports_per_run": 81.958,
+      "finest_level": "SUITE"
+    },
+    "realistic (all three)": {
+      "n_runs": 500,
+      "n_established": 345,
+      "n_disclosed": 323,
+      "disclosed_fraction": 0.936231884057971,
+      "fire_delay": 7.356037151702786,
+      "disclosure_delay": 14.21671826625387,
+      "gap": 6.860681114551084,
+      "infections_before_disclosure": 35.76231884057971,
+      "false_alarm_rate": 0.896774193548387,
+      "false_disclosure_rate": 0.03225806451612903,
+      "disclosure_continuity": 0.5904233632116163,
+      "mean_reports_per_run": 82.882,
+      "finest_level": "SUITE"
+    },
+    "heterogeneity only": {
+      "n_runs": 500,
+      "n_established": 345,
+      "n_disclosed": 316,
+      "disclosed_fraction": 0.9159420289855073,
+      "fire_delay": 8.715189873417721,
+      "disclosure_delay": 14.936708860759493,
+      "gap": 6.2215189873417724,
+      "infections_before_disclosure": 40.91884057971014,
+      "false_alarm_rate": 0.6064516129032258,
+      "false_disclosure_rate": 0.0,
+      "disclosure_continuity": 0.6494636721914339,
+      "mean_reports_per_run": 73.452,
+      "finest_level": "SUITE"
+    },
+    "correlation only": {
+      "n_runs": 500,
+      "n_established": 345,
+      "n_disclosed": 326,
+      "disclosed_fraction": 0.9449275362318841,
+      "fire_delay": 6.662576687116564,
+      "disclosure_delay": 12.371165644171779,
+      "gap": 5.708588957055214,
+      "infections_before_disclosure": 27.092753623188404,
+      "false_alarm_rate": 0.9096774193548387,
+      "false_disclosure_rate": 0.03870967741935484,
+      "disclosure_continuity": 0.7965468343044231,
+      "mean_reports_per_run": 111.954,
+      "finest_level": "SUITE"
+    },
+    "stigma only": {
+      "n_runs": 500,
+      "n_established": 345,
+      "n_disclosed": 322,
+      "disclosed_fraction": 0.9333333333333333,
+      "fire_delay": 8.055900621118013,
+      "disclosure_delay": 14.062111801242237,
+      "gap": 6.0062111801242235,
+      "infections_before_disclosure": 35.18550724637681,
+      "false_alarm_rate": 0.6,
+      "false_disclosure_rate": 0.0,
+      "disclosure_continuity": 0.5745956545655768,
+      "mean_reports_per_run": 68.954,
+      "finest_level": "SUITE"
+    }
+  },
+  "grid": [
+    {
+      "beta": null,
+      "correlation_gain": 0.0,
+      "disclosure_delay": 14.062111801242237,
+      "infections_before_disclosure": 35.18550724637681,
+      "false_alarm_rate": 0.6,
+      "false_disclosure_rate": 0.0
+    },
+    {
+      "beta": null,
+      "correlation_gain": 0.25,
+      "disclosure_delay": 12.954128440366972,
+      "infections_before_disclosure": 29.214492753623187,
+      "false_alarm_rate": 0.7870967741935484,
+      "false_disclosure_rate": 0.0
+    },
+    {
+      "beta": null,
+      "correlation_gain": 0.5,
+      "disclosure_delay": 12.371165644171779,
+      "infections_before_disclosure": 27.092753623188404,
+      "false_alarm_rate": 0.9096774193548387,
+      "false_disclosure_rate": 0.03870967741935484
+    },
+    {
+      "beta": null,
+      "correlation_gain": 1.0,
+      "disclosure_delay": 11.93731343283582,
+      "infections_before_disclosure": 24.310144927536232,
+      "false_alarm_rate": 0.9935483870967742,
+      "false_disclosure_rate": 0.2645161290322581
+    },
+    {
+      "beta": 2.0,
+      "correlation_gain": 0.0,
+      "disclosure_delay": 14.478395061728396,
+      "infections_before_disclosure": 36.94202898550725,
+      "false_alarm_rate": 0.5935483870967742,
+      "false_disclosure_rate": 0.0
+    },
+    {
+      "beta": 2.0,
+      "correlation_gain": 0.25,
+      "disclosure_delay": 13.483076923076924,
+      "infections_before_disclosure": 31.63478260869565,
+      "false_alarm_rate": 0.7806451612903226,
+      "false_disclosure_rate": 0.0
+    },
+    {
+      "beta": 2.0,
+      "correlation_gain": 0.5,
+      "disclosure_delay": 12.957055214723926,
+      "infections_before_disclosure": 29.37391304347826,
+      "false_alarm_rate": 0.9032258064516129,
+      "false_disclosure_rate": 0.03870967741935484
+    },
+    {
+      "beta": 2.0,
+      "correlation_gain": 1.0,
+      "disclosure_delay": 12.120845921450151,
+      "infections_before_disclosure": 25.75072463768116,
+      "false_alarm_rate": 0.9935483870967742,
+      "false_disclosure_rate": 0.23870967741935484
+    },
+    {
+      "beta": 0.5,
+      "correlation_gain": 0.0,
+      "disclosure_delay": 14.936708860759493,
+      "infections_before_disclosure": 40.91884057971014,
+      "false_alarm_rate": 0.6064516129032258,
+      "false_disclosure_rate": 0.0
+    },
+    {
+      "beta": 0.5,
+      "correlation_gain": 0.25,
+      "disclosure_delay": 14.336477987421384,
+      "infections_before_disclosure": 37.31884057971015,
+      "false_alarm_rate": 0.8,
+      "false_disclosure_rate": 0.0
+    },
+    {
+      "beta": 0.5,
+      "correlation_gain": 0.5,
+      "disclosure_delay": 14.21671826625387,
+      "infections_before_disclosure": 35.76231884057971,
+      "false_alarm_rate": 0.896774193548387,
+      "false_disclosure_rate": 0.03225806451612903
+    },
+    {
+      "beta": 0.5,
+      "correlation_gain": 1.0,
+      "disclosure_delay": 13.308157099697885,
+      "infections_before_disclosure": 30.82608695652174,
+      "false_alarm_rate": 0.9935483870967742,
+      "false_disclosure_rate": 0.2129032258064516
+    },
+    {
+      "beta": 0.25,
+      "correlation_gain": 0.0,
+      "disclosure_delay": 15.39873417721519,
+      "infections_before_disclosure": 43.52173913043478,
+      "false_alarm_rate": 0.6193548387096774,
+      "false_disclosure_rate": 0.0
+    },
+    {
+      "beta": 0.25,
+      "correlation_gain": 0.25,
+      "disclosure_delay": 14.952830188679245,
+      "infections_before_disclosure": 40.44347826086957,
+      "false_alarm_rate": 0.7935483870967742,
+      "false_disclosure_rate": 0.0
+    },
+    {
+      "beta": 0.25,
+      "correlation_gain": 0.5,
+      "disclosure_delay": 14.423676012461058,
+      "infections_before_disclosure": 37.904347826086955,
+      "false_alarm_rate": 0.9096774193548387,
+      "false_disclosure_rate": 0.03225806451612903
+    },
+    {
+      "beta": 0.25,
+      "correlation_gain": 1.0,
+      "disclosure_delay": 13.850152905198776,
+      "infections_before_disclosure": 34.46086956521739,
+      "false_alarm_rate": 1.0,
+      "false_disclosure_rate": 0.23870967741935484
+    }
+  ],
+  "variant_names": [
+    "clean (shipped)",
+    "realistic (all three)",
+    "heterogeneity only",
+    "correlation only",
+    "stigma only"
+  ]
+}

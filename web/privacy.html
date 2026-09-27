@@ -4,13 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MicroCluster Privacy policy</title>
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
 <p class="limitations" role="note">
   Illustrative simulation. Transmission, reporting, contact and incubation values are
-  chosen for demonstration, not measured from any real population. This predicts nothing
-  about any real building, and no one is diagnosed or treated by this tool.
+  chosen for demonstration, not measured from any real population. Tested at 150 to 2,000
+  simulated people and against a harsher simulated reporting model, never against real
+  reports. This predicts nothing about any real building, and no one is diagnosed or
+  treated by this tool.
 </p>
 <article class="static-page">
   <p class="back"><a href="index.html">Back to the simulator</a></p>
@@ -55,25 +57,66 @@
     scope is disclosed only if it passes <strong>both</strong> of two gates, which are
     evaluated independently and never combined into one number:
   </p>
-  <ul>
-    <li>
-      <strong>Statistical gate.</strong> The number of qualifying reports must be at
-      least <code>max(5, ceil(sqrt(n)))</code> for a declared population <code>n</code>.
-      This scales up with <code>n</code>: a claim about a larger group needs more evidence.
-    </li>
-    <li>
-      <strong>Privacy gate.</strong> The declared population must be at least 20, and the
-      qualifying reports must be at most half of it. This scales down with <code>n</code>:
-      small groups are the identifying ones, and naming a group when a large share of it
-      has reported is effectively publishing a roster.
-    </li>
-  </ul>
+  <div class="gate-rule">
+    <p><strong>Evidence gate.</strong> The bigger the group you want to name, the more
+    reports you need before the system will name it, and never fewer than
+    <span data-gate-const="statistical.floor">5</span>.</p>
+    <p class="gate-formula">In symbols:
+    <math aria-label="at least five, or the square root of the population rounded up, whichever is larger"><mrow><mi>needed</mi><mo>=</mo><mi>max</mi><mo>(</mo><mn data-gate-const="statistical.floor">5</mn><mo>,</mo><mo>&lceil;</mo><msqrt><mi>n</mi></msqrt><mo>&rceil;</mo><mo>)</mo></mrow></math>,
+    where <math aria-label="n"><mi>n</mi></math> is how many people are in the group.</p>
+    <div class="gate-examples" data-gate-examples="statistical">Worked numbers load from the running server.</div>
+  </div>
+  <div class="gate-rule">
+    <p><strong>Privacy gate.</strong> The system never names a group with fewer than
+    <span data-gate-const="privacy.min_population">20</span> people, and never names a group where
+    more than <span data-gate-const="privacy.max_fraction_words">half</span> of the members have
+    reported, because that announcement would be close to a list of who is ill.</p>
+    <p class="gate-formula">In symbols, with <math aria-label="q"><mi>q</mi></math> reports from a group of
+    <math aria-label="n"><mi>n</mi></math> people:
+    <math aria-label="the group has at least twenty people"><mrow><mi>n</mi><mo>&ge;</mo><mn data-gate-const="privacy.min_population">20</mn></mrow></math>
+    and
+    <math aria-label="the reports divided by the group size is at most one half"><mrow><mfrac><mi>q</mi><mi>n</mi></mfrac><mo>&le;</mo><mn data-gate-const="privacy.max_fraction">0.5</mn></mrow></math>.</p>
+    <div class="gate-examples" data-gate-examples="privacy">Worked numbers load from the running server.</div>
+  </div>
   <p>
     The two gates pull in opposite directions by design. The system discloses the finest
     scope that clears both; if none does, it discloses nothing. Every candidate scope,
     including the rejected ones, gets a full evaluation record with the reason for its
     outcome. The disclosure engine is only ever handed aggregate per-scope counts and
     declared populations, never individual reports.
+  </p>
+
+  <h2>What the gates guarantee, and what they do not</h2>
+  <p>
+    In established terms, the two gates together enforce three things about every group the
+    system names, every time, by construction:
+  </p>
+  <ul>
+    <li><strong>A group-size floor.</strong> The named group has at least 20 people. This is a
+      k-anonymity-style property (k of at least 20): the statement is about a group, and
+      any member is indistinguishable from the others in it, because reports carry nothing
+      finer than a group.</li>
+    <li><strong>Minimum support.</strong> The statement rests on at least 5 reports, more for
+      bigger groups. This is a standard small-count threshold rule.</li>
+    <li><strong>A prevalence cap.</strong> At most half of the group can be among the reporters,
+      so knowing someone is in the named group never makes them more than 50% likely to be a
+      reporter. This limits the homogeneity weakness of k-anonymity. It is a simple cap, not
+      a full l-diversity or t-closeness guarantee.</li>
+  </ul>
+  <p>
+    That is all the gates promise. They do <strong>not</strong> provide differential privacy. Differential
+    privacy adds calibrated random noise so that any one person's data changes what is
+    released by at most a bounded amount. These gates add no noise and use hard thresholds on
+    exact counts: one extra report can be the difference between naming a group and saying
+    nothing, so the change in output from one person is not bounded. They also keep no
+    privacy budget, so many daily releases over overlapping data are not accounted for, and
+    they give no protection against someone who already knows almost all of the reports.
+  </p>
+  <p>
+    They also do not guarantee protection from the operator who holds the reports, do not
+    stop an attacker who injects reports, do not verify that a group's declared size is
+    true, and do not make being named as a group with unusual illness harmless to its
+    members. The full write-up is in docs/privacy_guarantee.md in the repository.
   </p>
 
   <h2>What the bands are for</h2>
@@ -100,5 +143,6 @@
 
   <p class="back"><a href="index.html">Back to the simulator</a></p>
 </article>
+<script src="gates.js?v=11"></script>
 </body>
 </html>

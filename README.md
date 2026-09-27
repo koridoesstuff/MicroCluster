@@ -20,10 +20,11 @@ and no one is diagnosed or treated by it.
 | `simulation/` | agent-based SIR-style model, tiered contact, anonymous report generation, and the pipeline that feeds the real engines day by day. |
 | `simulation/experiments.py` | the disclosure-gate sweep: how much later disclosure happens, and how many more infections, as each privacy gate is tightened. |
 | `simulation/benchmark.py` | a small classifier trained on the three detection findings, scored against the authored threshold rules on held-out runs, in and out of the training regime. |
+| `simulation/scale.py`, `simulation/realism.py` | the limitation-closing stress tests: 500 to 2,000 agents with four scope levels, and an opt-in harsher reporting model (heterogeneous, correlated, stigma). Write-up in `docs/stress_tests.md`. |
 | `adversarial/` | a self-test: an observer who sees only what the UI shows runs the differencing attack against exact counts and against bands. |
 | `api/` + `web/` | a FastAPI service and a plain-JS floor-plan animation with a live gate table, a resolution slider, and the precomputed results panels. |
 | `scripts/` | `precompute_results.py` (caches the three analyses to `results/*.json`), `verify_epidemic_curves.py` (Week-1 curve sanity check). |
-| `docs/` | demo video script, one-page submission doc (`.md` source, `.html` print source, generated `.pdf`), a red-team `anticipated_questions.md`, deployment notes. |
+| `docs/` | demo video script, one-page submission doc (`.md` source, `.html` print source, generated `.pdf`), a red-team `anticipated_questions.md`, `privacy_guarantee.md` (what the gates guarantee, in k-anonymity terms, and why it is not differential privacy), `stress_tests.md`, deployment notes. |
 
 ## Run it
 
@@ -33,9 +34,10 @@ release).
 
 ```
 pip install -r requirements.txt
-python -m pytest                         # full suite: 223 passing
+python -m pytest                         # full suite: 237 passing
 python -m unittest discover -s tests     # same tests, stdlib runner
 python -m scripts.precompute_results     # regenerate results/*.json (~30s)
+python -m scripts.stress_tests           # scale + reporting-realism sweeps (~4 min)
 uvicorn api.app:app                      # then open http://127.0.0.1:8000/
 ```
 
@@ -96,3 +98,22 @@ Stated in full on every page of the web UI and in
 real-world validation, indirect health impact (understanding, not
 intervention). The learned model is kept beside the authored rules for
 comparison and never replaces them.
+
+What has now been tested, and what survived:
+
+- **Scale.** 150 to 2,000 simulated people with four scope levels: no
+  failures, and the evidence gate matched its formula on about 543,000
+  evaluations. But every outbreak stays in one building and saturates it
+  (92 to 98%), the false-alarm rate rises to 84 to 86%, and infections before
+  disclosure grow from 35 to 118 people even as the delay in days shrinks.
+- **Reporting realism.** Against heterogeneous, correlated, stigmatising
+  reporting, disclosure timing barely moves (14.1 to 14.2 days) only because
+  opposing effects cancel; false alarms rise from 60% to 78 to 100% under
+  correlation, false disclosures appear, and sustained disclosure erodes.
+- **Privacy property.** The two gates give a k-anonymity-style group-size
+  floor (20), a minimum-support rule and a cap on the reporting share. They
+  are not differential privacy. See `docs/privacy_guarantee.md`.
+
+Still untested: real reports, real contact structure, hundreds of suites.
+Report injection by an attacker rotating session ids still succeeds at the
+same report cost.

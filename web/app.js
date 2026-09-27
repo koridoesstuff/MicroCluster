@@ -383,7 +383,7 @@ function renderGateTable(frame) {
     tr.appendChild(td(`${e.level} ${e.label}`));
     tr.appendChild(td(String(e.population)));
     tr.appendChild(td(e.qualifying_band));
-    tr.appendChild(gateCell(e.statistical_pass, `need ≥ ${e.statistical_threshold}`));
+    tr.appendChild(gateCell(e.statistical_pass, `needs at least ${e.statistical_threshold}`));
     tr.appendChild(gateCell(e.privacy_pass, ""));
     tr.appendChild(td(e.reason));
     body.appendChild(tr);

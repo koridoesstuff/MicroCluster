@@ -24,7 +24,7 @@ from microcluster.engine import analyze
 from microcluster.models import Report
 
 from . import reporting
-from .config import DEFAULT_SIMULATION_CONFIG, SimulationConfig
+from .config import DEFAULT_SIMULATION_CONFIG, REPORTING_MODEL_CLEAN, SimulationConfig
 from .infection import InfectionState
 from .population import StructureSpec
 from .simulator import Simulation
@@ -34,6 +34,7 @@ __all__ = [
     "SimulationRun",
     "SimulatedReports",
     "simulate_and_report",
+    "StreamAnalyzer",
     "analyze_report_stream",
     "run_with_detection",
 ]
@@ -120,11 +121,22 @@ def simulate_and_report(
     """Run the simulator for ``days`` days and generate each day's
     anonymous reports, WITHOUT analysing them.
 
+    Only the CLEAN reporting model can be simulated ahead of analysis: the
+    realistic model's stigma suppression reacts to yesterday's disclosure,
+    so it needs the interleaved loop in ``simulation.realism`` (reached
+    through :func:`run_with_detection`).
+
     Report generation uses its own RNG stream (``f"reporting-{seed}"``),
     independent of the simulation's own, and is interleaved with the daily
     steps exactly as :func:`run_with_detection` does it -- so the two
     produce byte-identical report streams for the same seed.
     """
+    if config.reporting_model != REPORTING_MODEL_CLEAN:
+        raise ValueError(
+            "simulate_and_report only supports the clean reporting model; "
+            "use run_with_detection for the realistic model (it needs the "
+            "day-by-day disclosure feedback)"
+        )
     sim = Simulation(seed=seed, spec=spec, config=config, seed_infections=seed_infections)
     report_rng = random.Random(f"reporting-{seed}")
 
@@ -137,6 +149,83 @@ def simulate_and_report(
             reporting.generate_daily_reports(sim.agents, day_state.day, report_rng, config)
         )
     return SimulatedReports(simulation=sim, config=config, daily_reports=daily_reports)
+
+
+class StreamAnalyzer:
+    """One day at a time version of :func:`analyze_report_stream`.
+
+    Holds the state the daily replay threads (accumulated reports,
+    hysteresis, disclosure scope-stability anchor, first-fired /
+    first-disclosed days) so a caller that must react to yesterday's
+    disclosure while generating today's reports (the stigma feedback in
+    ``simulation.realism``) can drive the very same analysis step. The
+    batch function below is now a loop over this class, so both paths
+    are byte-identical for the same report stream.
+    """
+
+    def __init__(
+        self,
+        simulation: Simulation,
+        config: SimulationConfig,
+        *,
+        detection_config: DetectionConfig = DEFAULT_DETECTION_CONFIG,
+        disclosure_config: DisclosureConfig = DEFAULT_DISCLOSURE_CONFIG,
+        thread_scope_stability: bool = True,
+    ) -> None:
+        self.sim = simulation
+        self.config = config
+        self.detection_config = detection_config
+        self.disclosure_config = disclosure_config
+        self.thread_scope_stability = thread_scope_stability
+        self.all_reports: list[Report] = []
+        self.hysteresis_state: HysteresisState | None = None
+        self.prior_disclosed_scope_id: str | None = None
+        self.first_fired_day: int | None = None
+        self.first_disclosed_day: int | None = None
+
+    def step(self, day: int, new_reports: list[Report]) -> DailyRecord:
+        self.all_reports.extend(new_reports)
+        now = self.config.simulation_start + timedelta(days=day)
+        analysis = analyze(
+            self.all_reports,
+            self.sim.registry,
+            now=now,
+            detection_config=self.detection_config,
+            disclosure_config=self.disclosure_config,
+            hysteresis_state=self.hysteresis_state,
+            prior_disclosed_scope_id=(
+                self.prior_disclosed_scope_id if self.thread_scope_stability else None
+            ),
+        )
+        self.hysteresis_state = analysis.detection.hysteresis_state
+        # The stability "anchor" only moves when a scope is actually named
+        # today; a quiet day (nothing disclosed) does not reset it, so the
+        # NEXT disclosure still prefers the last-named scope's lineage.
+        if analysis.disclosed_scope_id is not None:
+            self.prior_disclosed_scope_id = analysis.disclosed_scope_id
+
+        if self.first_fired_day is None and analysis.detection.fired:
+            self.first_fired_day = day
+        if self.first_disclosed_day is None and analysis.disclosed_scope_id is not None:
+            self.first_disclosed_day = day
+
+        day_state = self.sim.history[day]
+        true_infected = day_state.count(InfectionState.INCUBATING) + day_state.count(
+            InfectionState.SYMPTOMATIC
+        )
+        return DailyRecord(
+            day=day,
+            true_infected_count=true_infected,
+            reports_submitted_today=len(new_reports),
+            reports_accumulated=len(self.all_reports),
+            detection_fired=analysis.detection.fired,
+            relative_fired=analysis.detection.relative_detector_fired,
+            absolute_fired=analysis.detection.absolute_detector_fired,
+            disclosed_scope_id=analysis.disclosed_scope_id,
+            first_fired_day=self.first_fired_day,
+            first_disclosed_day=self.first_disclosed_day,
+            disclosure_evaluations=analysis.disclosure.evaluations,
+        )
 
 
 def analyze_report_stream(
@@ -160,62 +249,17 @@ def analyze_report_stream(
     ``prior_disclosed_scope_id``, so each day's disclosure is the plain
     finest-eligible pick with no continuity preference.
     """
-    sim = simulated.simulation
-    config = simulated.config
-
-    all_reports: list[Report] = []
-    daily_records: list[DailyRecord] = []
-    hysteresis_state: HysteresisState | None = None
-    prior_disclosed_scope_id: str | None = None
-    first_fired_day: int | None = None
-    first_disclosed_day: int | None = None
-
-    for day, new_reports in enumerate(simulated.daily_reports):
-        all_reports.extend(new_reports)
-        now = config.simulation_start + timedelta(days=day)
-        analysis = analyze(
-            all_reports,
-            sim.registry,
-            now=now,
-            detection_config=detection_config,
-            disclosure_config=disclosure_config,
-            hysteresis_state=hysteresis_state,
-            prior_disclosed_scope_id=(
-                prior_disclosed_scope_id if thread_scope_stability else None
-            ),
-        )
-        hysteresis_state = analysis.detection.hysteresis_state
-        # The stability "anchor" only moves when a scope is actually named
-        # today; a quiet day (nothing disclosed) does not reset it, so the
-        # NEXT disclosure still prefers the last-named scope's lineage.
-        if analysis.disclosed_scope_id is not None:
-            prior_disclosed_scope_id = analysis.disclosed_scope_id
-
-        if first_fired_day is None and analysis.detection.fired:
-            first_fired_day = day
-        if first_disclosed_day is None and analysis.disclosed_scope_id is not None:
-            first_disclosed_day = day
-
-        day_state = sim.history[day]
-        true_infected = day_state.count(InfectionState.INCUBATING) + day_state.count(
-            InfectionState.SYMPTOMATIC
-        )
-        daily_records.append(
-            DailyRecord(
-                day=day,
-                true_infected_count=true_infected,
-                reports_submitted_today=len(new_reports),
-                reports_accumulated=len(all_reports),
-                detection_fired=analysis.detection.fired,
-                relative_fired=analysis.detection.relative_detector_fired,
-                absolute_fired=analysis.detection.absolute_detector_fired,
-                disclosed_scope_id=analysis.disclosed_scope_id,
-                first_fired_day=first_fired_day,
-                first_disclosed_day=first_disclosed_day,
-                disclosure_evaluations=analysis.disclosure.evaluations,
-            )
-        )
-    return daily_records
+    analyzer = StreamAnalyzer(
+        simulated.simulation,
+        simulated.config,
+        detection_config=detection_config,
+        disclosure_config=disclosure_config,
+        thread_scope_stability=thread_scope_stability,
+    )
+    return [
+        analyzer.step(day, new_reports)
+        for day, new_reports in enumerate(simulated.daily_reports)
+    ]
 
 
 def run_with_detection(
@@ -235,6 +279,18 @@ def run_with_detection(
     ``analyze_report_stream``; kept as one call for the common case where
     a caller wants a single run under a single set of configs.
     """
+    if config.reporting_model != REPORTING_MODEL_CLEAN:
+        from .realism import run_realistic  # lazy: realism imports this module
+
+        return run_realistic(
+            seed=seed,
+            days=days,
+            spec=spec,
+            config=config,
+            seed_infections=seed_infections,
+            detection_config=detection_config,
+            disclosure_config=disclosure_config,
+        )
     simulated = simulate_and_report(
         seed=seed, days=days, spec=spec, config=config, seed_infections=seed_infections
     )

@@ -51,6 +51,8 @@ from simulation.pipeline import (
     analyze_report_stream,
     simulate_and_report,
 )
+from microcluster.config import DEFAULT_DISCLOSURE_CONFIG
+from microcluster.disclosure import statistical_threshold
 from simulation.population import StructureSpec
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
@@ -67,8 +69,10 @@ MAX_WINDOW_HOURS = 168
 
 DISCLAIMER = (
     "Illustrative simulation. Transmission, reporting, contact and incubation values "
-    "are chosen for demonstration, not measured from any real population. This predicts "
-    "nothing about any real building, and no one is diagnosed or treated by this tool."
+    "are chosen for demonstration, not measured from any real population. Tested at 150 to "
+    "2,000 simulated people and against a harsher simulated reporting model, never against "
+    "real reports. This predicts nothing about any real building, and no one is diagnosed "
+    "or treated by this tool."
 )
 
 
@@ -417,6 +421,51 @@ def get_results(name: str) -> dict:
         )
     _RESULTS_CACHE[name] = json.loads(path.read_text())
     return _RESULTS_CACHE[name]
+
+
+@app.get("/api/gates")
+def get_gates() -> dict:
+    """Worked examples for the gate explanations, computed by the engine's
+    own threshold function and the configured privacy constants -- never
+    typed into the page. Populations are the default structure's scope
+    sizes (suite / floor / building)."""
+    spec = StructureSpec()
+    suite = spec.agents_per_suite
+    floor = suite * spec.suites_per_floor
+    building = floor * spec.floors_per_building
+    cfg = DEFAULT_DISCLOSURE_CONFIG
+    scopes = (("Suite", suite), ("Floor", floor), ("Building", building))
+
+    def first_refused(n: int) -> int:
+        # smallest report count the privacy gate refuses: the same
+        # comparison disclosure.py makes, qualifying / n <= max fraction
+        q = 0
+        while q / n <= cfg.max_report_fraction:
+            q += 1
+        return q
+
+    return {
+        "statistical": {
+            "floor": cfg.statistical_gate_floor,
+            "rows": [
+                {"scope": name, "population": n, "required": statistical_threshold(n, cfg)}
+                for name, n in scopes
+            ],
+        },
+        "privacy": {
+            "min_population": cfg.min_scope_population,
+            "max_fraction": cfg.max_report_fraction,
+            "rows": [
+                {
+                    "scope": name,
+                    "population": n,
+                    "meets_minimum": n >= cfg.min_scope_population,
+                    "refused_from": first_refused(n),
+                }
+                for name, n in scopes
+            ],
+        },
+    }
 
 
 @app.get("/api/health")

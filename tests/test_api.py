@@ -233,6 +233,44 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(data["params"]["total_population"], 180)
         self.assertEqual(self.client.get("/api/layout?population=5").status_code, 422)
 
+    def test_gates_endpoint_uses_the_real_threshold_function(self) -> None:
+        from microcluster.disclosure import statistical_threshold
+
+        data = self.client.get("/api/gates").json()
+        rows = data["statistical"]["rows"]
+        self.assertEqual([r["population"] for r in rows], [25, 75, 150])
+        for r in rows:
+            self.assertEqual(r["required"], statistical_threshold(r["population"]))
+        self.assertEqual([r["required"] for r in rows], [5, 9, 13])
+        privacy = data["privacy"]
+        self.assertEqual(privacy["min_population"], 20)
+        self.assertEqual(privacy["max_fraction"], 0.5)
+        # 12 of 25 is exactly half (allowed); the 13th report is refused
+        self.assertEqual([r["refused_from"] for r in privacy["rows"]], [13, 38, 76])
+        self.assertTrue(all(r["meets_minimum"] for r in privacy["rows"]))
+
+    def test_gate_constants_typed_in_the_html_match_the_config(self) -> None:
+        # the pages ship fallback text for the thresholds; gates.js overwrites
+        # it from /api/gates, but the fallback must not be able to drift
+        import re
+        from pathlib import Path
+
+        from microcluster.config import DEFAULT_DISCLOSURE_CONFIG as cfg
+
+        expected = {
+            "statistical.floor": str(cfg.statistical_gate_floor),
+            "privacy.min_population": str(cfg.min_scope_population),
+            "privacy.max_fraction": str(cfg.max_report_fraction),
+            "privacy.max_fraction_words": "half",
+        }
+        web = Path(__file__).resolve().parent.parent / "web"
+        for page in ("index.html", "privacy.html"):
+            html = (web / page).read_text(encoding="utf-8")
+            found = re.findall(r'data-gate-const="([^"]+)">([^<]*)<', html)
+            self.assertTrue(found, page)
+            for key, text in found:
+                self.assertEqual(text, expected[key], f"{page}: {key}")
+
     def test_web_index_is_served(self) -> None:
         res = self.client.get("/")
         self.assertEqual(res.status_code, 200)

@@ -21,18 +21,19 @@ one of four symptom categories, a coarse onset, one location group. No
 name, no free text, no room. Two detectors watch the stream, one relative
 to a location's neighbours, one against a background rate; when one fires,
 a disclosure engine decides what may be said and at what scope. A headless
-agent-based simulator generates the reports and measures the policy.
+simulator generates the reports and measures the policy.
 
 **The mechanism: two gates, pulling opposite ways.** A scope is named only
 if it clears both gates, evaluated separately, never merged into one
 score:
 
-- **Statistical gate:** qualifying reports >= max(5, ceil(sqrt(n))) for
-  declared population n. Scales *up* with n: a bigger claim needs more
-  evidence.
-- **Privacy gate:** n >= 20, and qualifying / n <= 0.5. Scales *down* with
-  n: a small, near-fully-covered group is the identifying one, and naming
-  it publishes a roster.
+- **Evidence gate:** the bigger the group, the more reports it takes to
+  name it, and never fewer than 5 (reports >= max(5, ceil(sqrt(n))) for a
+  group of n people).
+- **Privacy gate:** never name a group under 20 people, or one where more
+  than half the members have reported, because that is a list of who is ill
+  (n >= 20 and reports / n <= 0.5): a k-anonymity-style floor plus a
+  reporting-share cap, not differential privacy.
 
 The system discloses the finest scope clearing both; if none does, it says
 nothing. Report counts render as bands ("5-9", "10-19"), never exact
@@ -61,36 +62,33 @@ The detector fires around day 8; disclosure is not permitted until about
 day 14, and that six-day gap, roughly 35 people infected, is the
 measurable cost of the policy. The learned model is about a day faster for
 about three points of precision, so the authored rules ship and the model
-stays a benchmark. Differencing the banded output pins an exact one-person
-overnight change on 0 days, against 358 for exact counts; the direction of
-change still leaks on 204 of 1,171 same-scope day-pairs, reported not
-hidden.
+stays a benchmark. Differencing the banded output pins a one-person overnight
+change on 0 days (358 for exact counts); its direction still leaks on 204 of
+1,171 same-scope day-pairs.
 
 ---
 
 **Limitations — read this.** Every transmission, reporting, contact and
 incubation value is chosen for demonstration, not measured; there is no
-real dataset, and the system is validated only at one population size
-(150). The detector is exercised only against a clean, memoryless
-reporting model, and fires on roughly 60% of outbreaks that never
-establish. It predicts nothing about a real building and treats no one;
-the claim is understanding, not intervention. It rate-limits submissions
-per session but does not authenticate reporters, so a determined attacker
-using multiple sessions can still inject signal; anonymity is chosen over
-abuse-resistance by design.
+real dataset. Tested at 150 to 2,000 simulated people (the gates held, but
+outbreaks saturate one building) and against a harsher correlated reporting
+model, where timing barely moves but false alarms rise from 60% to about
+90%. It predicts nothing about a real building and treats no one; the claim
+is understanding, not intervention. It rate-limits submissions per session
+but does not authenticate reporters, so a determined attacker using multiple
+sessions can still inject signal.
 
-Agent-based epidemic modelling and small-cell suppression are both mature
-prior art. The contribution is wiring the suppression policy directly onto
-a live anomaly detector as one server-side pipeline, and measuring the
+Epidemic simulation and small-cell suppression are mature prior art; the
+contribution is wiring suppression onto a live detector and measuring the
 trade-off it forces.
 
 The ten hardest questions a skeptical judge could ask, with honest
-answers, are in [`anticipated_questions.md`](anticipated_questions.md).
+answers, are in [`anticipated_questions.md`](anticipated_questions.md); the
+exact privacy property is in [`privacy_guarantee.md`](privacy_guarantee.md).
 
 **Tech.** Python, FastAPI + Uvicorn; detection and disclosure run
-server-side only. Plain HTML/CSS/vanilla JS with a hand-drawn SVG chart,
-no framework, no build step. scikit-learn is used only for the offline
-benchmark. 223 tests, all green; contrast-checked, keyboard-navigable.
+server-side only. Plain HTML/CSS/JS, no framework or build step. scikit-learn is used only
+for the offline benchmark. 237 tests, all green.
 
 **Links.** Repository <https://github.com/koridoesstuff/MicroCluster> ·
 Live demo <https://microcluster.onrender.com> · Video `<VIDEO URL>`

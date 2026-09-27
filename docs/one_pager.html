@@ -129,13 +129,14 @@
   <p>A scope is named only if it clears both gates, evaluated separately, never
   merged into one score:</p>
   <ul>
-    <li><span class="lead">Statistical gate:</span> qualifying reports &ge;
-      max(5, &lceil;&radic;n&rceil;) for declared population n. Scales <em>up</em>
-      with n: a bigger claim needs more evidence.</li>
-    <li><span class="lead">Privacy gate:</span> n &ge; 20, and
-      qualifying / n &le; 0.5. Scales <em>down</em> with n: a small,
-      near-fully-covered group is the identifying one, and naming it publishes a
-      roster.</li>
+    <li><span class="lead">Evidence gate:</span> the bigger the group, the
+      more reports it takes to name it, and never fewer than 5 (reports
+      &ge; max(5, &lceil;&radic;n&rceil;) for a group of n people).</li>
+    <li><span class="lead">Privacy gate:</span> never name a group under 20
+      people, or one where more than half the members have reported, because
+      that is a list of who is ill (n &ge; 20 and reports / n &le; 0.5): a
+      k-anonymity-style floor plus a reporting-share cap, not differential
+      privacy.</li>
   </ul>
   <p>The system discloses the finest scope clearing both; if none does, it says
   nothing. Report counts render as bands ("5&ndash;9", "10&ndash;19"), never
@@ -169,31 +170,29 @@
   day 14, and that six-day gap, roughly 35 people infected, is the measurable
   cost of the policy. The learned model is about a day faster for about three
   points of precision, so the authored rules ship and the model stays a
-  benchmark. Differencing the banded output pins an exact one-person overnight
-  change on 0 days, against 358 for exact counts; the direction of change still
-  leaks on 204 of 1,171 same-scope day-pairs, reported not hidden.</p>
+  benchmark. Differencing the banded output pins a one-person overnight change on
+  0 days (358 for exact counts); its direction still leaks on 204 of 1,171
+  same-scope day-pairs.</p>
 
   <div class="limitations">
     <h2>Limitations &mdash; read this</h2>
     <p>Every transmission, reporting, contact and incubation value is chosen for
-    demonstration, not measured; there is no real dataset, and the system is
-    validated only at one population size (150). The detector is exercised only
-    against a clean, memoryless reporting model, and fires on roughly 60% of
-    outbreaks that never establish. It predicts nothing about a real building
-    and treats no one; the claim is understanding, not intervention. It
-    rate-limits submissions per session but does not authenticate reporters, so
-    a determined attacker using multiple sessions can still inject signal.</p>
-    <p>Agent-based epidemic modelling and small-cell suppression are both mature
-    prior art. The contribution is wiring the suppression policy directly onto a
-    live anomaly detector as one server-side pipeline, and measuring the
+    demonstration, not measured; there is no real dataset. Tested at 150 to
+    2,000 simulated people (the gates held, but outbreaks saturate one building)
+    and against a harsher correlated reporting model, where timing barely moves
+    but false alarms rise from 60% to about 90%. It predicts nothing about a real
+    building and treats no one; the claim is understanding, not intervention. It
+    rate-limits submissions per session but does not authenticate reporters, so a
+    determined attacker using multiple sessions can still inject signal.</p>
+    <p>Epidemic simulation and small-cell suppression are mature prior art; the
+    contribution is wiring suppression onto a live detector and measuring the
     trade-off it forces.</p>
   </div>
 
   <div class="meta">
     <p><span class="lead">Tech.</span> Python, FastAPI + Uvicorn; detection and
-    disclosure run server-side only. Plain HTML/CSS/JS, hand-drawn SVG chart, no
-    framework or build step. scikit-learn for the offline benchmark only. 223
-    tests green; contrast-checked, keyboard-navigable.</p>
+    disclosure run server-side only. Plain HTML/CSS/JS, no framework or build step.
+    scikit-learn for the offline benchmark only. 237 tests green.</p>
     <p><span class="lead">Links.</span> Repository
     github.com/koridoesstuff/MicroCluster &nbsp;&middot;&nbsp; Live demo
     microcluster.onrender.com &nbsp;&middot;&nbsp; Video
