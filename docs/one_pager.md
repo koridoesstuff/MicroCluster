@@ -44,25 +44,24 @@ integers.
 ### Results — 500-seed sweep, 300-seed benchmark, 200-seed self-test
 
 **The delay the policy buys** (detection fixed, disclosure gate tightened;
-the detector fires around day 8 in both rows):
+independent reporting):
 
 | Disclosure gate | First disclosure | Infected by then | Finest scope |
 |---|---|---|---|
 | shipped | day 14 | ~35 | one suite |
 | tightest tested | day 19 | ~82 | floor only |
 
-**Authored rules vs a learned model** (held out by run):
+**Authored rules vs a learned model** (held out by run, independent reporting):
 
 | Detector | Precision | Recall | Mean delay |
 |---|---|---|---|
 | authored threshold rules | 0.95 | 0.78 | 3.7 days |
 | logistic-regression model | 0.93 | 0.82 | 2.8 days |
 
-The detector fires around day 8; disclosure is not permitted until about
+With independent reporting the detector fires around day 8; disclosure is not permitted until about
 day 14, and that six-day gap, roughly 35 people infected, is the
-measurable cost of the policy. The learned model is about a day faster for
-about three points of precision, so the authored rules ship and the model
-stays a benchmark. Differencing the banded output pins a one-person overnight
+measurable cost of the policy. The learned model is about a day faster for three points of
+precision, so the rules ship and the model stays a benchmark. Differencing the banded output pins a one-person overnight
 change on 0 days (358 for exact counts); its direction still leaks on 204 of
 1,171 same-scope day-pairs.
 
@@ -76,19 +75,18 @@ model, where timing barely moves but false alarms rise from 60% to about
 90%. It predicts nothing about a real building and treats no one; the claim
 is understanding, not intervention. It rate-limits submissions per session
 but does not authenticate reporters, so a determined attacker using multiple
-sessions can still inject signal.
+sessions can still inject signal; anonymity is chosen over abuse-resistance by design.
 
-Epidemic simulation and small-cell suppression are mature prior art; the
-contribution is wiring suppression onto a live detector and measuring the
-trade-off it forces.
+Simulation and small-cell suppression are prior art; the contribution is
+wiring them into one pipeline and measuring the trade-off.
 
 The ten hardest questions a skeptical judge could ask, with honest
 answers, are in [`anticipated_questions.md`](anticipated_questions.md); the
 exact privacy property is in [`privacy_guarantee.md`](privacy_guarantee.md).
 
-**Tech.** Python, FastAPI + Uvicorn; detection and disclosure run
-server-side only. Plain HTML/CSS/JS, no framework or build step. scikit-learn is used only
-for the offline benchmark. 237 tests, all green.
+**Tech.** Python, FastAPI + Uvicorn, plain JS; detection and disclosure run
+server-side only. scikit-learn is used only for the offline benchmark. 237
+tests, all green.
 
 **Links.** Repository <https://github.com/koridoesstuff/MicroCluster> ·
 Live demo <https://microcluster.onrender.com> · Video `<VIDEO URL>`

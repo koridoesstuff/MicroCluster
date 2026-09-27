@@ -162,7 +162,8 @@ said, the finest scope clearing both is disclosed or nothing is.
 sentences. Let each land.
 
 **Narration:**
-> We ran this hundreds of times and measured three things. One: the
+> We ran this hundreds of times, with reporting simulated as independent, and
+> measured three things. One: the
 > detector fires around day eight, but the privacy rules do not allow
 > disclosure until about day fourteen, and roughly thirty-five people are
 > infected in that gap. Two: a learned model is about a day faster than

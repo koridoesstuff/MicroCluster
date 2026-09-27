@@ -99,7 +99,10 @@ real-world validation, indirect health impact (understanding, not
 intervention). The learned model is kept beside the authored rules for
 comparison and never replaces them.
 
-What has now been tested, and what survived:
+What has now been tested, and what survived. Every headline figure (detection
+around day 8, disclosure around day 14, precision 0.95 and recall 0.78, a 60%
+false-alarm rate) assumes independent, memoryless reporting; the reporting bullet
+below says what correlated reporting does to them.
 
 - **Scale.** 150 to 2,000 simulated people with four scope levels: no
   failures, and the evidence gate matched its formula on about 543,000

@@ -355,3 +355,13 @@ and the model never ships (Q1); the prior art is credited rather than
 obscured (Q5); the differencing-attack residual is measured and reported,
 not waved away (Q7); and the unmeasured-parameter problem is stated as a
 hard limit on what the project claims, not hidden (Q2).
+
+## Small open items (noted, not fixed)
+
+- The reporting-scope sentence in the results area quotes figures from
+  `results/reporting_realism.json` as typed text. Unlike the three headline
+  findings it is not read from a served results file, so it would drift if that
+  sweep were rerun with different constants.
+- The gate table's Reason column still shows the disclosure engine's own
+  notation-first reason strings (for example "1-4 qualifying reports < required
+  5"); changing them means changing engine text, which is outside presentation.

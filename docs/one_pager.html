@@ -145,7 +145,7 @@
   <h2>Results &mdash; 500-seed sweep, 300-seed benchmark, 200-seed self-test</h2>
 
   <table>
-    <caption>The delay the policy buys (detection fixed, disclosure gate tightened; the detector fires around day 8 in both rows).</caption>
+    <caption>The delay the policy buys (independent reporting; detection fixed, disclosure gate tightened).</caption>
     <thead>
       <tr><th>Disclosure gate</th><th>First disclosure</th><th>Infected by then</th><th>Finest scope</th></tr>
     </thead>
@@ -156,7 +156,7 @@
   </table>
 
   <table>
-    <caption>Authored rules vs a learned model, held out by run.</caption>
+    <caption>Authored rules vs a learned model, held out by run, independent reporting.</caption>
     <thead>
       <tr><th>Detector</th><th>Precision</th><th>Recall</th><th>Mean delay</th></tr>
     </thead>
@@ -166,11 +166,10 @@
     </tbody>
   </table>
 
-  <p>The detector fires around day 8; disclosure is not permitted until about
-  day 14, and that six-day gap, roughly 35 people infected, is the measurable
-  cost of the policy. The learned model is about a day faster for about three
-  points of precision, so the authored rules ship and the model stays a
-  benchmark. Differencing the banded output pins a one-person overnight change on
+  <p>With independent reporting the detector fires around day 8; disclosure is not
+  permitted until about day 14, and that six-day gap, roughly 35 people infected, is the measurable
+  cost of the policy. The learned model is about a day faster for three points of
+  precision, so the rules ship and the model stays a benchmark. Differencing the banded output pins a one-person overnight change on
   0 days (358 for exact counts); its direction still leaks on 204 of 1,171
   same-scope day-pairs.</p>
 
@@ -183,16 +182,15 @@
     but false alarms rise from 60% to about 90%. It predicts nothing about a real
     building and treats no one; the claim is understanding, not intervention. It
     rate-limits submissions per session but does not authenticate reporters, so a
-    determined attacker using multiple sessions can still inject signal.</p>
-    <p>Epidemic simulation and small-cell suppression are mature prior art; the
-    contribution is wiring suppression onto a live detector and measuring the
-    trade-off it forces.</p>
+    determined attacker using multiple sessions can still inject signal; anonymity is chosen over abuse-resistance by design.</p>
+    <p>Simulation and small-cell suppression are prior art; the contribution is
+    wiring them into one pipeline and measuring the trade-off.</p>
   </div>
 
   <div class="meta">
-    <p><span class="lead">Tech.</span> Python, FastAPI + Uvicorn; detection and
-    disclosure run server-side only. Plain HTML/CSS/JS, no framework or build step.
-    scikit-learn for the offline benchmark only. 237 tests green.</p>
+    <p><span class="lead">Tech.</span> Python, FastAPI + Uvicorn, plain JS; detection and
+    disclosure run server-side only. scikit-learn for the offline benchmark only.
+    237 tests green.</p>
     <p><span class="lead">Links.</span> Repository
     github.com/koridoesstuff/MicroCluster &nbsp;&middot;&nbsp; Live demo
     microcluster.onrender.com &nbsp;&middot;&nbsp; Video

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MicroCluster simulator</title>
-<link rel="stylesheet" href="style.css?v=11">
+<link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -212,10 +212,11 @@
 
 <section class="results-summary" aria-label="headline findings">
   <h2>What the experiments found</h2>
-  <p class="panel-caption">Three numbers from the precomputed runs. Read these alone and you have the point of the project.</p>
+  <p class="panel-caption">Three findings from the precomputed runs, all with reports generated independently of one another.</p>
   <ul id="summary-list">
     <li class="muted">Loading findings.</li>
   </ul>
+  <p class="results-conclusion" id="reporting-scope">These figures assume independent, memoryless reporting. Under correlated reporting the measured effect is a large rise in false alarms, from 60% to 78 to 100% of outbreaks that never take off, with about 3% of those then naming a group falsely.</p>
 </section>
 
 <section class="results" id="result-cost" aria-label="the cost of the privacy policy">
@@ -227,7 +228,7 @@
   </p>
   <p class="results-note">
     Each point is one setting of the statistical gate, over 500 simulated outbreaks
-    with detection held fixed. Non-disclosing outbreaks count their full day-30 total.
+    with detection held fixed and independent reporting. Non-disclosing outbreaks count their full day-30 total.
   </p>
   <div id="cost-chart" class="chart"></div>
 </section>
@@ -241,8 +242,8 @@
   </p>
   <p class="results-note">
     A logistic-regression detector trained on the three detection findings, scored
-    against the authored threshold rules on held-out simulation runs. Both stay in the
-    product; the model never replaces the rules.
+    against the authored threshold rules on held-out simulation runs with independent
+    reporting. Both stay in the product; the model never replaces the rules.
   </p>
   <div class="table-scroll">
   <table id="benchmark-table">
@@ -268,7 +269,8 @@
   </p>
   <p class="results-note">
     The circularity risk stated plainly: a classifier trained on this simulator learns
-    this simulator. This panel reports what happens when the regime shifts.
+    this simulator. This panel reports what happens when the transmission regime shifts;
+    reporting stays independent in every regime.
   </p>
   <div class="table-scroll">
   <table id="robustness-table">
@@ -293,7 +295,7 @@
   </p>
   <p class="results-note">
     An observer who sees only the disclosed scope and its report-count band, day after
-    day, runs the differencing attack: subtract consecutive disclosures of the same
+    day, in simulated runs with independent reporting, runs the differencing attack: subtract consecutive disclosures of the same
     scope to infer how many people changed state overnight.
   </p>
   <div class="bignums">
@@ -313,7 +315,7 @@
   <a href="privacy.html">Privacy policy</a>
 </footer>
 
-<script src="app.js?v=11"></script>
-<script src="gates.js?v=11"></script>
+<script src="app.js?v=12"></script>
+<script src="gates.js?v=12"></script>
 </body>
 </html>

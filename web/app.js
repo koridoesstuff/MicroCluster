@@ -650,7 +650,7 @@ function renderCostChart(data) {
   const caption = document.createElement("p");
   caption.className = "results-note";
   caption.textContent =
-    `point labels are the ${data.primary_sweep} value; the shipped default is ${rows[0].value}.`;
+    `point labels are the ${data.primary_sweep} value; the shipped default is ${rows[0].value}. Independent reporting.`;
   host.appendChild(caption);
 }
 
@@ -729,7 +729,8 @@ function renderSummary(sweep, bench, adv) {
     const gap = shipped.disc_delay - shipped.fire_delay;
     items.push(
       `Averaged over ${sweep.seeds.toLocaleString()} simulated outbreaks at the default ` +
-      `transmission rate, the detector fires around day ${shipped.fire_delay.toFixed(0)} ` +
+      `transmission rate, with independent reporting, the detector fires around day ` +
+      `${shipped.fire_delay.toFixed(0)} ` +
       `but the privacy rules hold disclosure until about day ${shipped.disc_delay.toFixed(0)}. ` +
       `That gap of roughly ${gap.toFixed(0)} days, during which about ` +
       `${Math.round(shipped.inf_before_disclosure_unbiased)} people are infected, ` +
@@ -739,14 +740,16 @@ function renderSummary(sweep, bench, adv) {
 
   const r = bench.in_distribution.rules, m = bench.in_distribution.model;
   items.push(
-    `On held-out runs in the training regime, the authored rules score precision ` +
+    `On held-out runs in the training regime, with independent reporting, the authored ` +
+    `rules score precision ` +
     `${r.precision.toFixed(2)}, recall ${r.recall.toFixed(2)}. A learned model is about ` +
     `${(r.delay - m.delay).toFixed(1)} day faster but less precise (${m.precision.toFixed(2)}), ` +
     `so the rules ship and the model stays a benchmark.`
   );
 
   items.push(
-    `Banding the report counts stops an observer pinning an exact one-person overnight ` +
+    `In simulated runs with independent reporting, banding the report counts stops an ` +
+    `observer pinning an exact one-person overnight ` +
     `change: ${adv.exact_one_person_pins} days against exact counts, ` +
     `${adv.band_one_person_pins} against the bands. On about ` +
     `${adv.band_direction_known} of ${adv.same_scope_pairs.toLocaleString()} same-scope ` +
