@@ -228,9 +228,11 @@ input[type="range"] { accent-color: var(--ink); }
 }
 .dirty {
   margin: var(--sp-2) 0 0;
+  padding: var(--sp-1) 10px;
   font-size: 12px;
   color: var(--flag);
   font-weight: 600;
+  border: 2px solid var(--flag);
 }
 
 .daycount {
@@ -404,6 +406,21 @@ input[type="range"] { accent-color: var(--ink); }
   border-radius: 50%;
 }
 
+/* ---- end-of-run summary card --------------------------------------- */
+
+.run-summary dl, .run-summary dt, .run-summary dd { margin: 0; }
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 13px;
+}
+.summary-row:last-child { border-bottom: none; }
+.summary-row dt { color: var(--muted); font-weight: 600; }
+.summary-row dd { font-variant-numeric: tabular-nums; text-align: right; }
+
 /* ---- gate table -------------------------------------------------- */
 
 .gates h2 {
@@ -437,6 +454,35 @@ input[type="range"] { accent-color: var(--ink); }
 .gate-cell small { display: block; color: var(--muted); }
 
 /* ---- results --------------------------------------------------- */
+
+/* unmistakable break between the run just watched and the precomputed
+   validation panels below it -- same bg token as .limitations, so no new
+   colour, just a second use of the existing "this is a system note" bar */
+.precomputed-divider {
+  margin: 0;
+  padding: var(--sp-2) var(--edge);
+  background: var(--panel-head);
+  border-top: 2px solid var(--line);
+  border-bottom: 1px solid var(--line-soft);
+}
+.precomputed-divider p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* plain-language title first, technical term demoted to a second line */
+.results h2 .h2-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--muted);
+}
 
 .results-summary {
   padding: var(--sp-3) var(--edge);

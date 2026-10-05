@@ -45,6 +45,14 @@ const els = {
   disclaimer: document.getElementById("disclaimer"),
   resSlider: document.getElementById("res-slider"),
   resReadout: document.getElementById("res-readout"),
+  resEndCoarse: document.getElementById("res-end-coarse"),
+  resEndFine: document.getElementById("res-end-fine"),
+  runSummary: document.getElementById("run-summary"),
+  sumDetected: document.getElementById("sum-detected"),
+  sumDetectedDay: document.getElementById("sum-detected-day"),
+  sumDisclosure: document.getElementById("sum-disclosure"),
+  sumRefused: document.getElementById("sum-refused"),
+  sumRefusedDay: document.getElementById("sum-refused-day"),
   gateDay: document.getElementById("gate-day"),
   gateBody: document.getElementById("gate-body"),
   pPopulation: document.getElementById("p-population"),
@@ -70,7 +78,12 @@ const state = {
   maxResIdx: 0,        // furthest the slider may travel (the wall, inclusive)
   resIdx: 0,           // slider position
   lastDisclosedScopeId: undefined, // undefined = no paint yet; null = disclosed nothing
+  summary: null,        // running end-of-run summary, built while frames load
 };
+
+// SUITE is the finest scope level; used to compare disclosures across a run
+// to find the most specific one ever made (never hardcoded against a tier list)
+const LEVEL_RANK = { CAMPUS: 1, BUILDING: 2, FLOOR: 3, SUITE: 4 };
 
 // scope ids nest by "-" prefix: "C-B1-F2" covers "C-B1-F2-S1".
 function scopeCoversSuite(scopeId, suiteId) {
@@ -324,6 +337,12 @@ function renderResolution(frame) {
     return;
   }
 
+  // label the slider ends with the actual scope levels this day offers,
+  // coarsest -> finest (the server already orders evaluations that way),
+  // instead of the generic "coarsest"/"finest" placeholder shown pre-run
+  els.resEndCoarse.textContent = evals[0].level.toLowerCase();
+  els.resEndFine.textContent = evals[evals.length - 1].level.toLowerCase();
+
   state.wallIdx = evals.findIndex((e) => !e.privacy_pass);
   state.maxResIdx = state.wallIdx === -1 ? evals.length - 1 : state.wallIdx;
   const selIdx = evals.findIndex((e) => e.selected);
@@ -462,6 +481,46 @@ function renderGateTable(frame, prevFrame) {
   }
 }
 
+// ---- end-of-run summary -------------------------------------------------
+
+// Built while every day's frame is fetched in startRun's prefetch loop, not
+// recomputed from a single day's frame -- "most specific disclosure" and
+// "was a finer scope ever refused" are properties of the whole run.
+function noteSummaryFrame(summary, n, frame) {
+  if (frame.detection.fired && summary.firedDay === null) {
+    summary.fired = true;
+    summary.firedDay = n;
+  }
+  const d = frame.disclosure;
+  if (d) {
+    const rank = LEVEL_RANK[d.level] || 0;
+    if (!summary.finest || rank > LEVEL_RANK[summary.finest.level]) {
+      summary.finest = d;
+      summary.finestDay = n;
+    }
+  }
+  if (!summary.refused) {
+    const r = (frame.evaluations || []).find((e) => e.statistical_pass && !e.privacy_pass);
+    if (r) {
+      summary.refused = true;
+      summary.refusedDay = n;
+    }
+  }
+}
+
+function renderRunSummary() {
+  const s = state.summary;
+  if (!s) return;
+  els.sumDetected.textContent = s.fired ? "Yes" : "No";
+  els.sumDetectedDay.textContent = s.fired ? String(s.firedDay) : "n/a";
+  els.sumDisclosure.textContent = s.finest
+    ? `${s.finest.level} ${s.finest.label} (day ${s.finestDay})`
+    : "Nothing disclosed";
+  els.sumRefused.textContent = s.refused ? "Yes" : "No";
+  els.sumRefusedDay.textContent = s.refused ? String(s.refusedDay) : "n/a";
+  els.runSummary.hidden = false;
+}
+
 // ---- run + playback -----------------------------------------------------
 
 async function startRun() {
@@ -478,6 +537,8 @@ async function startRun() {
   els.resReadout.textContent = "Loading";
   els.gateBody.innerHTML = "";
   els.gateDay.textContent = "0";
+  els.runSummary.hidden = true;
+  state.summary = { fired: false, firedDay: null, finest: null, finestDay: null, refused: false, refusedDay: null };
 
   const reporting = Number(els.pReporting.value);
   const body = {
@@ -549,12 +610,14 @@ async function startRun() {
       return;
     }
     state.frames[n] = await res.json();
+    noteSummaryFrame(state.summary, n, state.frames[n]);
     if (n === 0) paintDay(0);
   }
 
   setPlaybackEnabled(true);
   els.run.disabled = false;
   paintDay(0);
+  renderRunSummary();
 }
 
 function advance() {
@@ -750,6 +813,12 @@ function _fmtScore(v) {
   return v == null ? "n/a" : v.toFixed(2);
 }
 
+// precision/recall are fractions of 1 -- also show the percentage so the
+// number reads without translating it in your head
+function _fmtFraction(v) {
+  return v == null ? "n/a" : `${v.toFixed(2)} (${Math.round(v * 100)}%)`;
+}
+
 function _detectorRows(scores, cols) {
   // scores: {rules, model}; cols: extra leading cell text per row or null
   const rules = document.createElement("tr");
@@ -762,14 +831,14 @@ function _detectorRows(scores, cols) {
   }
   rules.append(
     _cell("authored rules"),
-    _cell(_fmtScore(scores.rules.precision)),
-    _cell(_fmtScore(scores.rules.recall)),
+    _cell(_fmtFraction(scores.rules.precision)),
+    _cell(_fmtFraction(scores.rules.recall)),
     _cell(_fmtScore(scores.rules.delay))
   );
   model.append(
     _cell("learned model"),
-    _cell(_fmtScore(scores.model.precision)),
-    _cell(_fmtScore(scores.model.recall)),
+    _cell(_fmtFraction(scores.model.precision)),
+    _cell(_fmtFraction(scores.model.recall)),
     _cell(_fmtScore(scores.model.delay))
   );
   return [rules, model];

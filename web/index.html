@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MicroCluster simulator</title>
-<link rel="stylesheet" href="style.css?v=13">
+<link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -70,8 +70,8 @@
     <fieldset class="panel">
       <legend>Run</legend>
       <div class="btn-row">
-        <button type="button" id="run-guided" class="primary">Run the guided example</button>
-        <button type="button" id="run">Run</button>
+        <button type="button" id="run-guided" class="primary">Run example settings</button>
+        <button type="button" id="run">Run custom simulation</button>
       </div>
       <p class="run-hint" id="guided-hint">
         The guided example is the scenario to watch. In this single run, at these exact
@@ -82,9 +82,13 @@
       </p>
       <div class="field-row">
         <label for="seed">Seed
-          <input type="number" id="seed" value="4" min="0" step="1"></label>
-        <label for="days">Days
-          <input type="number" id="days" value="30" min="1" max="120" step="1"></label>
+          <input type="number" id="seed" value="4" min="0" step="1" aria-describedby="seed-hint"></label>
+        <label for="days">Simulation length (days)
+          <input type="number" id="days" value="30" min="1" max="120" step="1" aria-describedby="days-hint"></label>
+      </div>
+      <div class="field-row">
+        <span class="hint" id="seed-hint">fixes the random numbers, so the same seed always reproduces the same outbreak</span>
+        <span class="hint" id="days-hint">how many days the simulation runs before stopping</span>
       </div>
       <p id="params-dirty" class="dirty" hidden>Parameters changed. Press Run to apply.</p>
     </fieldset>
@@ -118,34 +122,38 @@
       <legend>Model parameters (applied on Run)</legend>
       <label class="param">Suite size
         <input type="number" id="p-population" value="25" min="21" max="40" step="1"
-          aria-describedby="p-population-hint">
+          aria-describedby="p-population-hint p-population-help">
         <span class="hint" id="p-population-hint">6 suites, 150 people</span>
+        <span class="hint" id="p-population-help">people sharing one suite &ndash; also the detector's smallest group</span>
       </label>
       <label class="param">Transmission (per contact / day)
         <input type="range" id="p-transmission" min="0.001" max="0.04" step="0.001" value="0.008"
-          aria-describedby="p-transmission-hint">
+          aria-describedby="p-transmission-hint p-transmission-help">
         <span class="hint" id="p-transmission-hint">0.008</span>
+        <span class="hint" id="p-transmission-help">chance an infected person passes it to each person they're near, per day</span>
       </label>
       <label class="param">Reporting rate (while symptomatic)
         <input type="range" id="p-reporting" min="0.1" max="1" step="0.05" value="0.5"
-          aria-describedby="p-reporting-hint">
+          aria-describedby="p-reporting-hint p-reporting-help">
         <span class="hint" id="p-reporting-hint">0.50</span>
+        <span class="hint" id="p-reporting-help">chance a symptomatic person files a report at all</span>
       </label>
       <label class="param">Detection window (hours)
         <input type="number" id="p-window" value="72" min="24" max="168" step="12"
-          aria-describedby="p-window-hint">
+          aria-describedby="p-window-hint p-window-help">
         <span class="hint" id="p-window-hint">rolling window for &ldquo;current&rdquo; reports</span>
+        <span class="hint" id="p-window-help">hours of recent reports the detector treats as happening right now</span>
       </label>
     </fieldset>
 
     <section class="panel resolution" aria-label="privacy / resolution control">
-      <h2>Resolution</h2>
+      <h2>Location detail shown</h2>
       <p class="panel-caption">Drag toward finer detail. It stops at the point where naming the group would expose its members.</p>
       <div class="res-row">
-        <span class="res-end" aria-hidden="true">coarsest</span>
+        <span class="res-end" id="res-end-coarse" aria-hidden="true">coarsest</span>
         <input type="range" id="res-slider" min="0" max="0" value="0" step="1" disabled
-          aria-label="Disclosure resolution, coarsest to finest">
-        <span class="res-end" aria-hidden="true">finest</span>
+          aria-label="Location detail shown, coarsest to finest">
+        <span class="res-end" id="res-end-fine" aria-hidden="true">finest</span>
       </div>
       <p id="res-readout" class="res-readout" role="status">Run a simulation to explore the candidate scopes.</p>
     </section>
@@ -180,6 +188,17 @@
       <p class="empty-note" id="empty-note">Loading the building layout.</p>
     </div>
 
+    <section id="run-summary" class="panel run-summary" aria-label="end of run summary" hidden>
+      <h2>This run, summarised</h2>
+      <dl class="summary-grid">
+        <div class="summary-row"><dt>Outbreak detected</dt><dd id="sum-detected">n/a</dd></div>
+        <div class="summary-row"><dt>Detected on day</dt><dd id="sum-detected-day">n/a</dd></div>
+        <div class="summary-row"><dt>Most specific safe disclosure</dt><dd id="sum-disclosure">n/a</dd></div>
+        <div class="summary-row"><dt>Finer scope refused</dt><dd id="sum-refused">n/a</dd></div>
+        <div class="summary-row"><dt>Refused on day</dt><dd id="sum-refused-day">n/a</dd></div>
+      </dl>
+    </section>
+
     <section class="gates" aria-label="gate table for the current day">
       <h2>Gate table, day <output id="gate-day">0</output></h2>
       <p class="panel-caption">
@@ -208,6 +227,10 @@
     </section>
 
   </div>
+</div>
+
+<div class="precomputed-divider" role="note">
+  <p>Below: precomputed results from many independent simulated runs &ndash; not the run you just watched above.</p>
 </div>
 
 <section class="results-summary" aria-label="headline findings">
@@ -245,6 +268,11 @@
     against the authored threshold rules on held-out simulation runs with independent
     reporting. Both stay in the product; the model never replaces the rules.
   </p>
+  <p class="results-note">
+    Precision is how often an alert is correct. Recall is how many of the real outbreaks
+    get caught. Mean detection delay is measured between the outbreak actually taking
+    hold in the simulation and the detector firing.
+  </p>
   <div class="table-scroll">
   <table id="benchmark-table">
     <thead>
@@ -261,7 +289,7 @@
 </section>
 
 <section class="results" id="result-robustness" aria-label="cross-parameter robustness">
-  <h2>Cross-parameter robustness check</h2>
+  <h2>Does the result hold up on data it wasn't trained on?<span class="h2-sub">Cross-parameter robustness check</span></h2>
   <p class="panel-caption">
     Whether the model's small edge is real or just memorised: it is trained at one
     transmission probability and tested at another. If the edge disappears here, it was
@@ -271,6 +299,11 @@
     The circularity risk stated plainly: a classifier trained on this simulator learns
     this simulator. This panel reports what happens when the transmission regime shifts;
     reporting stays independent in every regime.
+  </p>
+  <p class="results-note">
+    Precision is how often an alert is correct. Recall is how many of the real outbreaks
+    get caught. Mean delay is measured between the outbreak actually taking hold and the
+    detector firing.
   </p>
   <div class="table-scroll">
   <table id="robustness-table">
@@ -288,7 +321,7 @@
 </section>
 
 <section class="results" id="result-adversarial" aria-label="attacking our own system">
-  <h2>Attacking our own system</h2>
+  <h2>What can a bystander still figure out about one person?<span class="h2-sub">Attacking our own system</span></h2>
   <p class="panel-caption">
     What someone watching only this page can still work out about individuals. A good
     result is that the banded output leaves them almost nothing.
@@ -300,12 +333,13 @@
   </p>
   <div class="bignums">
     <div class="bignum"><span class="bignum-value" id="adv-exact">0</span>
-      <span class="bignum-label">days an exact one-person change is pinned, against exact counts</span></div>
+      <span class="bignum-label">days an outsider could pin the exact overnight change, if exact report counts were shown</span></div>
     <div class="bignum"><span class="bignum-value" id="adv-band">0</span>
-      <span class="bignum-label">against the bands this page ships</span></div>
+      <span class="bignum-label">the same measure, against the rounded bands this page actually ships</span></div>
   </div>
   <p id="adv-residual" class="results-conclusion"></p>
 </section>
+
 
 </main>
 
@@ -315,7 +349,7 @@
   <a href="privacy.html">Privacy policy</a>
 </footer>
 
-<script src="app.js?v=13"></script>
-<script src="gates.js?v=13"></script>
+<script src="app.js?v=14"></script>
+<script src="gates.js?v=14"></script>
 </body>
 </html>
