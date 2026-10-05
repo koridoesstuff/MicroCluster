@@ -4,8 +4,8 @@ Reconciled with the redesigned UI (asset v=9). The page a viewer now sees:
   - title "MicroCluster", a one-line tagline, a ~50-word explainer paragraph
   - a collapsed "How it works" panel (native <details>)
   - a two-column workbench above ~1000px wide: LEFT column has the Run,
-    Playback, Model parameters and Resolution panels; RIGHT column has the
-    colour key, the "System says:" status line, the (initially hidden)
+    Playback, Model parameters and Location detail shown panels; RIGHT
+    column has the colour key, the "System says:" status line, the (initially hidden)
     red-bordered refusal box, the floor-plan caption, the floor plan
     itself (drawn on load, everyone susceptible), and the gate table
   - below the workbench, full width: "What the experiments found" (three
@@ -42,7 +42,7 @@ in the submission rules.
 ~1440px wide so the two-column layout is in effect and the sticky
 limitations bar sits on one line. One unhurried voice.
 
-**The single run used throughout:** the **Run the guided example** button.
+**The single run used throughout:** the **Run example settings** button.
 It sets seed `4`, suite size `25`, transmission `0.025`, reporting `0.80`,
 30 days, and starts playback. Do not set these by hand.
 
@@ -85,7 +85,7 @@ said, the finest scope clearing both is disclosed or nothing is.
 ## Beat 3 — The spreading animation · 0:36–1:08 (32s)
 
 **On screen:**
-- Click **Run the guided example**. A one-line hint under the button
+- Click **Run example settings**. A one-line hint under the button
   already says what to watch for. Skeleton blocks flash, then the plan
   repopulates and playback starts on its own.
 - Let it run to about day 12. In suite C-B1-F2-S1 one circle goes amber
@@ -135,7 +135,7 @@ said, the finest scope clearing both is disclosed or nothing is.
   C-B1-F2-S1, but will not: report fraction over the limit of 0.50
   (disclosure would name so large a share of the group that the statement
   is effectively a roster). It disclosed FLOOR C-B1-F2 instead."*
-- Grab the **Resolution** slider in the left column and drag toward
+- Grab the **Location detail shown** slider in the left column and drag toward
   *finest*. It travels a little, then stops hard. The readout box turns a
   heavy red:
   *"Resolution stops at SUITE C-B1-F2-S1. Rejected: report fraction over
