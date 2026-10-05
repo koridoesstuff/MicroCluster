@@ -11,7 +11,9 @@ async function apiFetch(url, opts, tries = 4) {
   for (let attempt = 0; attempt < tries; attempt++) {
     if (attempt > 0) await new Promise((r) => setTimeout(r, 300 * 2 ** (attempt - 1)));
     try {
-      const res = await fetch(url, opts);
+      // a stalled connection should surface as a plain "timed out" error,
+      // not hang the UI (and the "Running..." label) forever
+      const res = await fetch(url, { ...opts, signal: AbortSignal.timeout(20000) });
       if (res.ok) return res;
       if (![404, 502, 503, 504].includes(res.status) || attempt === tries - 1) return res;
       lastErr = new Error(res.status + " " + (await res.clone().text()).slice(0, 120));
@@ -64,6 +66,11 @@ const els = {
   pReportingHint: document.getElementById("p-reporting-hint"),
   paramsDirty: document.getElementById("params-dirty"),
 };
+
+// captured once at load, before either button's label can be swapped to
+// "Running..." while a fetch is in flight
+const RUN_LABEL = els.run.textContent;
+const GUIDED_LABEL = els.runGuided.textContent;
 
 const state = {
   runId: null,
@@ -523,13 +530,33 @@ function renderRunSummary() {
 
 // ---- run + playback -----------------------------------------------------
 
-async function startRun() {
+// Both run buttons are disabled and the clicked one relabelled for the
+// couple of seconds the fetch takes, so the page never just sits there
+// looking inert. Always restored together, win or lose.
+function setRunningFeedback(triggerButton) {
+  els.run.disabled = true;
+  els.runGuided.disabled = true;
+  if (triggerButton) triggerButton.textContent = "Running…";
+}
+function clearRunningFeedback() {
+  els.run.disabled = false;
+  els.runGuided.disabled = false;
+  els.run.textContent = RUN_LABEL;
+  els.runGuided.textContent = GUIDED_LABEL;
+}
+
+// opts.triggerButton: the button clicked, so its label can say "Running...".
+// opts.autoplay (default true): start playback once frames land, same as
+// the page-load autoplay -- the ?auto= smoke-test path below passes false
+// because it drives its own jump-to-day / play().
+async function startRun(opts = {}) {
+  const autoplay = opts.autoplay !== false;
   stopTimer();
   setPlaybackEnabled(false);
-  els.run.disabled = true;
+  setRunningFeedback(opts.triggerButton);
   els.emptyNote && (els.emptyNote.style.display = "none");
   renderSkeleton();
-  els.status.textContent = "System says: loading";
+  els.status.textContent = "System says: starting the simulation…";
   els.status.classList.remove("flagged");
   els.refusal.replaceChildren();
   els.resSlider.disabled = true;
@@ -539,6 +566,12 @@ async function startRun() {
   els.gateDay.textContent = "0";
   els.runSummary.hidden = true;
   state.summary = { fired: false, firedDay: null, finest: null, finestDay: null, refused: false, refusedDay: null };
+  // reset the scrubber immediately, not just once frames arrive -- otherwise
+  // a disabled slider sits at the previous run's end position while this
+  // fetch is still in flight
+  els.scrub.value = "0";
+  els.dayLabel.textContent = "0";
+  els.dayMax.textContent = "0";
 
   const reporting = Number(els.pReporting.value);
   const body = {
@@ -567,6 +600,7 @@ async function startRun() {
   if (qs.has("detection_window_hours")) els.pWindow.value = body.detection_window_hours;
   refreshParamHints();
   els.paramsDirty.hidden = true;
+  els.status.textContent = `System says: simulating ${body.days} days…`;
 
   let meta;
   try {
@@ -580,8 +614,8 @@ async function startRun() {
   } catch (err) {
     els.plan.classList.remove("loading");
     els.plan.innerHTML = "";
-    els.status.textContent = "Error: " + err.message;
-    els.run.disabled = false;
+    els.status.textContent = "System says: the simulation could not be started (" + err.message + "). Try again.";
+    clearRunningFeedback();
     return;
   }
 
@@ -600,13 +634,13 @@ async function startRun() {
     try {
       res = await apiFetch(`/api/run/${state.runId}/day/${n}`);
     } catch (err) {
-      els.status.textContent = "Error loading day " + n + ": " + err.message;
-      els.run.disabled = false;
+      els.status.textContent = "System says: the simulation stopped partway through (day " + n + ": " + err.message + "). Try again.";
+      clearRunningFeedback();
       return;
     }
     if (!res.ok) {
-      els.status.textContent = "Error loading day " + n + ": " + res.status;
-      els.run.disabled = false;
+      els.status.textContent = "System says: the simulation stopped partway through (day " + n + ": HTTP " + res.status + "). Try again.";
+      clearRunningFeedback();
       return;
     }
     state.frames[n] = await res.json();
@@ -615,9 +649,10 @@ async function startRun() {
   }
 
   setPlaybackEnabled(true);
-  els.run.disabled = false;
+  clearRunningFeedback();
   paintDay(0);
   renderRunSummary();
+  if (autoplay) play();
 }
 
 function advance() {
@@ -645,7 +680,7 @@ function runGuidedScenario() {
   els.pReporting.value = "0.8";
   els.pWindow.value = "72";
   refreshParamHints();
-  return startRun().then(() => { if (state.runId) play(); });
+  return startRun({ triggerButton: els.runGuided });
 }
 
 // once the user has touched Run, the guided button, or any Playback
@@ -658,8 +693,8 @@ for (const el of [els.run, els.runGuided, els.play, els.pause, els.step, els.res
 }
 els.scrub.addEventListener("input", noteUserAction);
 
-els.run.addEventListener("click", startRun);
-els.runGuided.addEventListener("click", runGuidedScenario);
+els.run.addEventListener("click", () => startRun({ triggerButton: els.run }));
+els.runGuided.addEventListener("click", () => runGuidedScenario());
 els.play.addEventListener("click", play);
 els.pause.addEventListener("click", stopTimer);
 els.step.addEventListener("click", () => { stopTimer(); advance(); });
@@ -974,7 +1009,7 @@ autoplayOnLoad(layoutReady, resultsReady);
 // ?auto=day30 also jumps to the final day. Harmless otherwise.
 const auto = new URLSearchParams(location.search).get("auto");
 if (auto !== null) {
-  startRun().then(() => {
+  startRun({ autoplay: false }).then(() => {
     const m = /^day(\d+)$/.exec(auto);
     if (auto === "end") paintDay(state.totalDays);
     else if (m) paintDay(Math.min(state.totalDays, Number(m[1])));
