@@ -422,7 +422,7 @@ dashes in copy, Inter / Geist / Space Grotesk, colored left stripes, fake
 testimonials, bento grids, terminal window mockups, "it's not X, it's Y"
 phrasing, checkmark bullets, three pricing tiers, soft corner radii,
 purple-and-black, radial orbs, dot grids, sparkle icons, animated arrows,
-hover animations, neon colors, basic pastels.
+neon colors, basic pastels.
 
 **Required:** real working product demos (not mockups); skeleton loaders
 for async states; a Terms of Service page; and a privacy policy that
@@ -432,3 +432,27 @@ the thresholds work) rather than boilerplate.
 **Visual direction:** flat, high contrast, documentary / clinical.
 Off-white or light gray background. Fonts limited to the system UI stack,
 IBM Plex, Source Sans, or a serif such as Charter.
+
+**Motion (amended after the Week-4 freeze):** the rule used to be "no
+transitions, no animation," full stop. Changed because the shipped UI was
+correct but inert -- nothing moved until a judge clicked a button they
+might not click, which is worse than the gradients/glassmorphism/emoji
+this list exists to keep out. Motion is now permitted ONLY where it:
+
+- carries a state change already happening in the simulation (an agent's
+  colour changing because its infection state changed; a gate table row's
+  background flashing, once, because its PASS/FAIL changed; the refusal
+  box or status line settling in when what they say changes), or
+- gives ordinary interaction feedback (hover/focus background and border
+  on a control).
+
+Every transition or animation is capped at 400ms, plays once, and never
+loops -- no `infinite`, no continuously repeating `@keyframes`. The one
+purely decorative exception, and the only one permitted anywhere, is a
+single ~350ms monochrome ring on the instant a circle turns symptomatic
+during real playback. Every rule above must be inert under
+`prefers-reduced-motion: reduce`. "Hover animations" is removed from the
+prohibited list above for exactly this narrow case; it is not open to
+further motion beyond what is described here. Gradients, shadows,
+glassmorphism/blur, and anything that loops remain banned without
+exception, and `tests/test_motion_constraints.py` enforces that.

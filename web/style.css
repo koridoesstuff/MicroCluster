@@ -1,6 +1,9 @@
 /* Flat, high-contrast, documentary/clinical. Off-white ground, no
-   gradients, no shadows, no transitions. Square panels; the only circles
-   are agent / legend data marks. System UI / IBM Plex stack. */
+   gradients, no shadows. Square panels; the only circles are agent /
+   legend data marks. Motion is permitted only for state-change and
+   interaction feedback, capped at 400ms, never looping -- see the MOTION
+   section near the end of this file and CLAUDE.md UI CONSTRAINTS.
+   System UI / IBM Plex stack. */
 
 :root {
   --ground: #f4f3ef;
@@ -609,3 +612,68 @@ math {
   text-align: left;
 }
 .gate-example th { background: var(--panel-head); border-color: var(--line); font-weight: 600; }
+
+
+/* ---- motion: state-change and interaction feedback only ---------------
+   CLAUDE.md UI CONSTRAINTS, "Motion" -- added because the page was fully
+   static and nothing moved until a judge clicked a button they might not
+   click. Every rule below either (a) carries a state change already
+   happening in the simulation, or (b) is ordinary interaction feedback.
+   Nothing loops, nothing exceeds 400ms, nothing here is purely decorative
+   except the single symptomatic-onset ring. Every rule is neutralised
+   under prefers-reduced-motion: reduce, at the bottom of this section.
+   This section is purely additive -- it sets no property any other rule
+   in this file also sets, so no existing rest-state appearance changes. */
+
+.agent { transition: background-color 180ms ease-out, border-color 180ms ease-out; }
+
+/* one-shot ring, monochrome, no repeat -- app.js adds .pulse for exactly
+   one frame on the instant a circle turns symptomatic during a real
+   forward playback step, and only then (never on load, scrub, or
+   ?auto=dayN), so no screenshot ever shows it mid-flight */
+.agent.pulse::before {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 16px; height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  opacity: 0.5;
+  pointer-events: none;
+  animation: agent-ring 350ms ease-out;
+}
+@keyframes agent-ring {
+  from { transform: scale(0.9); opacity: 0.5; }
+  to   { transform: scale(1.9); opacity: 0; }
+}
+
+@keyframes fade-rise-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* :not(:empty) starting to match IS the refusal box appearing; animation-name
+   goes none -> fade-rise-in right then, so this needs no JS trigger */
+.refusal:not(:empty) { animation: fade-rise-in 200ms ease-out; }
+/* app.js toggles .change-in for one tick when the disclosed scope changes */
+.status.change-in { animation: fade-rise-in 200ms ease-out; }
+
+/* app.js toggles .verdict-changed on a row for one tick, only on a real
+   forward step, only when that scope's PASS/FAIL actually changed; the
+   removal (not the arrival) is what transitions, so it reads as a fade,
+   and it always settles back to no background -- nothing persists */
+#gate-table tr { transition: background-color 150ms ease-out; }
+#gate-table tr.verdict-changed { background-color: var(--panel-head); }
+
+button, input[type="number"], input[type="range"], select {
+  transition: background-color 120ms ease-out, border-color 120ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agent, #gate-table tr, button, input[type="number"], input[type="range"], select {
+    transition: none !important;
+  }
+  .agent.pulse::before { content: none; }
+  #gate-table tr.verdict-changed { background-color: transparent; }
+  .refusal:not(:empty), .status.change-in { animation: none !important; }
+}

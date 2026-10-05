@@ -12,6 +12,15 @@ This is an illustrative simulation. Every parameter is chosen for
 demonstration, not measured; it predicts nothing about any real building,
 and no one is diagnosed or treated by it.
 
+The web UI autoplays the guided example a couple of seconds after it
+loads, so the outbreak is already spreading with no click needed; Pause
+is right there, and clicking anything in Playback (or starting your own
+run) takes over immediately and the autoplay does not return. Every
+transition this adds is capped at 400ms, plays once, and is disabled
+under `prefers-reduced-motion: reduce` -- which also makes the autoplay
+itself jump day to day instead of transitioning, a deliberate
+accessibility choice, not an oversight.
+
 ## What is here
 
 | Package | Purpose |

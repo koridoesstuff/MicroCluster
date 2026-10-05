@@ -69,6 +69,7 @@ const state = {
   wallIdx: -1,         // first index that FAILED the privacy gate, or -1
   maxResIdx: 0,        // furthest the slider may travel (the wall, inclusive)
   resIdx: 0,           // slider position
+  lastDisclosedScopeId: undefined, // undefined = no paint yet; null = disclosed nothing
 };
 
 // scope ids nest by "-" prefix: "C-B1-F2" covers "C-B1-F2-S1".
@@ -158,21 +159,54 @@ function buildPlan(layout) {
   }
 }
 
-function paintDay(n) {
+// a one-shot ring, nothing else, on the instant a circle turns symptomatic.
+// restart-safe (remove, force reflow, re-add) so a rapid re-trigger still plays.
+function triggerPulse(cell) {
+  cell.classList.remove("pulse");
+  void cell.offsetWidth;
+  cell.classList.add("pulse");
+  setTimeout(() => cell.classList.remove("pulse"), 400);
+}
+
+function triggerStatusChange() {
+  els.status.classList.remove("change-in");
+  void els.status.offsetWidth;
+  els.status.classList.add("change-in");
+  setTimeout(() => els.status.classList.remove("change-in"), 250);
+}
+
+// `stepped` is true only for a genuine single forward step during real
+// playback (advance(), driven by Step or the timer) -- never on initial
+// load, a scrub jump, or ?auto=dayN. That is what keeps every screenshot
+// (which always jumps straight to a day) free of the pulse / row-flash
+// motion below: there is no previous rendered day to diff against.
+function paintDay(n, opts = {}) {
   const frame = state.frames[n];
   if (!frame) return;
+  const stepped = Boolean(opts.stepped) && n === state.currentDay + 1 && Boolean(state.frames[n - 1]);
+  const prevFrame = stepped ? state.frames[n - 1] : null;
   state.currentDay = n;
 
-  for (const cell of state.agentCells.values()) {
-    cell.className = "agent s-susceptible";
+  const prevAgentState = new Map();
+  if (prevFrame) {
+    for (const a of prevFrame.agents) prevAgentState.set(a.suite + "#" + a.i, a.state);
   }
+  // diffed, not reset-then-set: every agent is present in every frame, so
+  // only cells whose state actually changed get a new class -- a colour
+  // transition on every cell every day would read as the grid flashing
   for (const a of frame.agents) {
-    const cell = state.agentCells.get(a.suite + "#" + a.i);
-    if (cell) cell.className = "agent s-" + a.state;
+    const key = a.suite + "#" + a.i;
+    const cell = state.agentCells.get(key);
+    if (!cell) continue;
+    const cls = "agent s-" + a.state;
+    if (cell.className !== cls) cell.className = cls;
+    if (prevFrame && a.state === "symptomatic" && prevAgentState.get(key) !== "symptomatic") {
+      triggerPulse(cell);
+    }
   }
 
   renderResolution(frame);
-  renderGateTable(frame);
+  renderGateTable(frame, prevFrame);
 
   const d = frame.disclosure;
   const resScope = state.evals[state.resIdx];
@@ -200,6 +234,13 @@ function paintDay(n) {
   els.dayLabel.textContent = String(n);
   els.scrub.value = String(n);
 
+  // undefined only before the very first paint -- a fresh load (including
+  // every ?auto=dayN screenshot) never sees this as a "change"
+  const newScopeId = d ? d.scope_id : null;
+  const scopeChanged =
+    state.lastDisclosedScopeId !== undefined && state.lastDisclosedScopeId !== newScopeId;
+  state.lastDisclosedScopeId = newScopeId;
+
   if (d) {
     els.status.textContent =
       `System says: ${d.level} ${d.label} disclosed` +
@@ -213,6 +254,7 @@ function paintDay(n) {
     els.status.textContent = "System says: nothing";
     els.status.classList.remove("flagged");
   }
+  if (scopeChanged) triggerStatusChange();
 
   renderRefusal(frame);
 }
@@ -358,7 +400,14 @@ function gateCell(pass, sub) {
   return el;
 }
 
-function renderGateTable(frame) {
+function _verdictSignature(e) {
+  return `${e.statistical_pass}|${e.privacy_pass}|${e.selected}`;
+}
+
+// prevFrame is only passed for a genuine single forward step (see paintDay);
+// rows are always rebuilt fresh either way, so a jump/scrub/screenshot load
+// never sees the flash (there is nothing to diff against, prevFrame is null)
+function renderGateTable(frame, prevFrame) {
   els.gateDay.textContent = String(frame.day);
   const body = els.gateBody;
   body.innerHTML = "";
@@ -377,6 +426,12 @@ function renderGateTable(frame) {
     return;
   }
 
+  const prevVerdict = new Map();
+  if (prevFrame) {
+    for (const e of prevFrame.evaluations || []) prevVerdict.set(e.scope_id, _verdictSignature(e));
+  }
+
+  const flashRows = [];
   for (const e of evals) {
     const tr = document.createElement("tr");
     if (e.selected) tr.className = "selected";
@@ -387,6 +442,23 @@ function renderGateTable(frame) {
     tr.appendChild(gateCell(e.privacy_pass, ""));
     tr.appendChild(td(e.reason));
     body.appendChild(tr);
+
+    if (prevFrame) {
+      const before = prevVerdict.get(e.scope_id);
+      if (before !== undefined && before !== _verdictSignature(e)) {
+        tr.classList.add("verdict-changed");
+        flashRows.push(tr);
+      }
+    }
+  }
+  // double rAF: let the browser paint the flash once, THEN remove the class,
+  // so the removal (not the arrival) is what transitions -- a fade out, not a snap
+  if (flashRows.length) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        for (const tr of flashRows) tr.classList.remove("verdict-changed");
+      });
+    });
   }
 }
 
@@ -490,7 +562,7 @@ function advance() {
     stopTimer();
     return;
   }
-  paintDay(state.currentDay + 1);
+  paintDay(state.currentDay + 1, { stepped: true });
 }
 
 function play() {
@@ -500,10 +572,9 @@ function play() {
   state.timer = setInterval(advance, interval);
 }
 
-els.run.addEventListener("click", startRun);
-
-// guided example: the exact scenario from docs/demo_video_script.md
-els.runGuided.addEventListener("click", () => {
+// guided example: the exact scenario from docs/demo_video_script.md.
+// Shared by the button and the autoplay-on-load below.
+function runGuidedScenario() {
   els.seed.value = "4";
   els.days.value = "30";
   els.pPopulation.value = "25";
@@ -511,9 +582,21 @@ els.runGuided.addEventListener("click", () => {
   els.pReporting.value = "0.8";
   els.pWindow.value = "72";
   refreshParamHints();
-  startRun().then(() => { if (state.runId) play(); });
-});
+  return startRun().then(() => { if (state.runId) play(); });
+}
 
+// once the user has touched Run, the guided button, or any Playback
+// control, the scheduled autoplay (below) must not start a run on top of
+// whatever they are doing
+let userActed = false;
+function noteUserAction() { userActed = true; }
+for (const el of [els.run, els.runGuided, els.play, els.pause, els.step, els.reset]) {
+  el.addEventListener("click", noteUserAction);
+}
+els.scrub.addEventListener("input", noteUserAction);
+
+els.run.addEventListener("click", startRun);
+els.runGuided.addEventListener("click", runGuidedScenario);
 els.play.addEventListener("click", play);
 els.pause.addEventListener("click", stopTimer);
 els.step.addEventListener("click", () => { stopTimer(); advance(); });
@@ -559,20 +642,22 @@ function layoutQuery() {
 }
 
 async function preloadLayout() {
-  if (state.runId) return;
+  if (state.runId) return false;
   try {
     const res = await apiFetch("/api/layout" + layoutQuery());
-    if (!res.ok) return;
+    if (!res.ok) return false;
     const data = await res.json();
-    if (state.runId) return;                 // a real run started meanwhile
+    if (state.runId) return false;            // a real run started meanwhile
     buildPlan(data.layout);
     if (data.params && data.params.total_population) {
       els.planPop.textContent = String(data.params.total_population);
     }
     if (data.disclaimer) els.disclaimer.textContent = data.disclaimer;
+    return true;
   } catch (_) {
     const note = document.getElementById("empty-note");
     if (note) note.textContent = "Press Run to draw the building and start an outbreak.";
+    return false;
   }
 }
 
@@ -776,15 +861,45 @@ async function loadResults() {
     renderBenchmark(bench);
     renderRobustness(bench);
     renderAdversarial(adv);
+    return true;
   } catch (err) {
     document.getElementById("cost-chart").textContent =
       "precomputed results unavailable: run python -m scripts.precompute_results";
     els.summaryList.innerHTML = "<li class=\"muted\">Findings unavailable.</li>";
+    return false;
   }
 }
 
-preloadLayout();
-loadResults();
+// Autoplay the guided example once the layout and the precomputed results
+// have both loaded, so a visitor sees motion with no click. Does nothing if:
+//   - ?auto=... is present (that query param already drives its own
+//     playback below -- used for every gallery/verification screenshot),
+//   - ?autoplay=0 is present (escape hatch to capture the plain pre-run
+//     state deliberately),
+//   - loading is slow (over AUTOPLAY_TIMEOUT_MS) or either fetch failed --
+//     falls back to the static pre-run state rather than a broken run,
+//   - the visitor has already clicked Run, the guided button, or anything
+//     in the Playback panel first.
+const AUTOPLAY_TIMEOUT_MS = 5000;
+async function autoplayOnLoad(layoutReady, resultsReady) {
+  const qs = new URLSearchParams(location.search);
+  if (qs.get("auto") !== null || qs.get("autoplay") === "0") return;
+  let ok = false;
+  try {
+    ok = await Promise.race([
+      Promise.all([layoutReady, resultsReady]).then((results) => results.every(Boolean)),
+      new Promise((resolve) => setTimeout(() => resolve(false), AUTOPLAY_TIMEOUT_MS)),
+    ]);
+  } catch (_) {
+    ok = false;
+  }
+  if (!ok || userActed || state.runId) return;
+  runGuidedScenario();
+}
+
+const layoutReady = preloadLayout();
+const resultsReady = loadResults();
+autoplayOnLoad(layoutReady, resultsReady);
 
 // Optional: ?auto runs a seed on load (used for smoke screenshots).
 // ?auto=day30 also jumps to the final day. Harmless otherwise.
