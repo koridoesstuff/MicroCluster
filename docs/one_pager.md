@@ -89,4 +89,5 @@ server-side only. scikit-learn is used only for the offline benchmark. 237
 tests, all green.
 
 **Links.** Repository <https://github.com/koridoesstuff/MicroCluster> ·
-Live demo <https://microcluster.onrender.com> · Video `<VIDEO URL>`
+Live demo <https://microcluster.onrender.com> ·
+Video <https://youtu.be/AGhy-LUEJf8?si=zMKrK61qs1y5K6ZY>

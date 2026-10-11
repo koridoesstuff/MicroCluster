@@ -21,6 +21,9 @@ under `prefers-reduced-motion: reduce` -- which also makes the autoplay
 itself jump day to day instead of transitioning, a deliberate
 accessibility choice, not an oversight.
 
+**Links.** Live demo <https://microcluster.onrender.com> · Demo video
+<https://youtu.be/AGhy-LUEJf8?si=zMKrK61qs1y5K6ZY>.
+
 ## What is here
 
 | Package | Purpose |
