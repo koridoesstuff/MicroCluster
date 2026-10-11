@@ -36,7 +36,7 @@ accessibility choice, not an oversight.
 | `adversarial/` | a self-test: an observer who sees only what the UI shows runs the differencing attack against exact counts and against bands. |
 | `api/` + `web/` | a FastAPI service and a plain-JS floor-plan animation with a live gate table, a resolution slider, and the precomputed results panels. |
 | `scripts/` | `precompute_results.py` (caches the three analyses to `results/*.json`), `verify_epidemic_curves.py` (Week-1 curve sanity check). |
-| `docs/` | demo video script, one-page submission doc (`.md` source, `.html` print source, generated `.pdf`), a red-team `anticipated_questions.md`, `privacy_guarantee.md` (what the gates guarantee, in k-anonymity terms, and why it is not differential privacy), `stress_tests.md`, deployment notes. |
+| `docs/` | demo video script, one-page submission doc (`.md` source, `.html` print source, generated `.pdf`), `code.pdf` (every hand-written source file, for a judge to read without cloning), a red-team `anticipated_questions.md`, `privacy_guarantee.md` (what the gates guarantee, in k-anonymity terms, and why it is not differential privacy), `stress_tests.md`, deployment notes. |
 
 ## Run it
 
@@ -53,7 +53,7 @@ python -m scripts.stress_tests           # scale + reporting-realism sweeps (~4 
 uvicorn api.app:app                      # then open http://127.0.0.1:8000/
 ```
 
-**Regenerate the submission PDF.** `docs/one_pager.html` is the print
+**Regenerate the submission PDFs.** `docs/one_pager.html` is the print
 source for `docs/one_pager.pdf`. With any Chromium on PATH:
 
 ```
@@ -62,6 +62,13 @@ chrome --headless --disable-gpu --no-pdf-header-footer \
 ```
 
 Keep the prose in `docs/one_pager.html` and `docs/one_pager.md` in sync.
+
+`docs/code.pdf` is every hand-written source file in one PDF, for a judge
+to read without cloning. It's built the same way -- generate HTML, print
+it with headless Chrome -- via `python -m scripts.build_code_pdf` (needs
+Chromium on PATH and `pip install pypdf`, used only by the build script,
+to look up each file's real page number for the table of contents; neither
+is a dependency of the project itself).
 
 `python -m microcluster.demo` prints the seven reference disclosure
 scenarios; `python -m adversarial` prints the differencing-attack numbers;
