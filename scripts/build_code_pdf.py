@@ -82,7 +82,7 @@ def collect_files() -> list[tuple[str, list[str]]]:
     return groups
 
 
-def render_file_section(relpath: str) -> tuple[str, int]:
+def render_file_section(relpath: str, anchor_id: str) -> tuple[str, int]:
     text = (ROOT / relpath).read_text(encoding="utf-8")
     lines = text.splitlines()
     width = max(len(str(len(lines))), 2)
@@ -90,7 +90,7 @@ def render_file_section(relpath: str) -> tuple[str, int]:
     if not body:
         body = "(empty file)"
     section = (
-        f'<section class="file">\n'
+        f'<section class="file" id="{anchor_id}">\n'
         f'  <h2>{html.escape(relpath)}</h2>\n'
         f'  <pre>{body}</pre>\n'
         f'</section>\n'
@@ -104,16 +104,22 @@ def build_html(groups: list[tuple[str, list[str]]], toc_pages: dict[str, int] | 
     total_lines = 0
     toc_rows: list[str] = []
 
+    file_num = 0
     for label, files in groups:
         toc_rows.append(f'<tr class="toc-group"><td colspan="2">{html.escape(label)}</td></tr>')
         for relpath in files:
-            section, n = render_file_section(relpath)
+            file_num += 1
+            anchor_id = f"file-{file_num}"
+            # a plain same-document "#fragment" href -- verified this prints
+            # as an internal PDF GoTo destination (/Dest), never a file://
+            # URI, which is the bug this anchor scheme exists to avoid
+            section, n = render_file_section(relpath, anchor_id)
             sections.append(section)
             ordered_files.append(relpath)
             total_lines += n
             page = toc_pages.get(relpath, "\u2013") if toc_pages else "\u2013"
             toc_rows.append(
-                f'<tr><td class="toc-path">{html.escape(relpath)}</td>'
+                f'<tr><td class="toc-path"><a href="#{anchor_id}">{html.escape(relpath)}</a></td>'
                 f'<td class="toc-page">{page}</td></tr>'
             )
 
@@ -151,6 +157,7 @@ def build_html(groups: list[tuple[str, list[str]]], toc_pages: dict[str, int] | 
     font-family: "IBM Plex Mono", Consolas, "Courier New", monospace;
   }}
   .toc-path {{ font-family: "IBM Plex Mono", Consolas, "Courier New", monospace; }}
+  .toc-path a {{ color: #161616; text-decoration: none; }}
   .toc-page {{ text-align: right; width: 34pt; font-variant-numeric: tabular-nums; }}
   section.file {{ page-break-before: always; break-before: page; }}
   section.file h2 {{

@@ -31,6 +31,7 @@
     font-family: "IBM Plex Mono", Consolas, "Courier New", monospace;
   }
   .toc-path { font-family: "IBM Plex Mono", Consolas, "Courier New", monospace; }
+  .toc-path a { color: #161616; text-decoration: none; }
   .toc-page { text-align: right; width: 34pt; font-variant-numeric: tabular-nums; }
   section.file { page-break-before: always; break-before: page; }
   section.file h2 {
@@ -52,17 +53,17 @@
   <p>Source code, submitted for review.</p>
   <p>https://github.com/koridoesstuff/MicroCluster</p>
   <p>2026-10-10</p>
-  <p>12,586 lines across 65 files.</p>
+  <p>12,845 lines across 66 files.</p>
 </div>
 
 <div class="toc">
   <h1>Contents</h1>
   <table class="toc-table">
-<tr class="toc-group"><td colspan="2">microcluster/</td></tr><tr><td class="toc-path">microcluster/__init__.py</td><td class="toc-page">4</td></tr><tr><td class="toc-path">microcluster/config.py</td><td class="toc-page">5</td></tr><tr><td class="toc-path">microcluster/demo.py</td><td class="toc-page">10</td></tr><tr><td class="toc-path">microcluster/detection.py</td><td class="toc-page">13</td></tr><tr><td class="toc-path">microcluster/disclosure.py</td><td class="toc-page">20</td></tr><tr><td class="toc-path">microcluster/engine.py</td><td class="toc-page">27</td></tr><tr><td class="toc-path">microcluster/intake.py</td><td class="toc-page">29</td></tr><tr><td class="toc-path">microcluster/models.py</td><td class="toc-page">32</td></tr><tr class="toc-group"><td colspan="2">simulation/</td></tr><tr><td class="toc-path">simulation/__init__.py</td><td class="toc-page">36</td></tr><tr><td class="toc-path">simulation/agent.py</td><td class="toc-page">38</td></tr><tr><td class="toc-path">simulation/benchmark.py</td><td class="toc-page">40</td></tr><tr><td class="toc-path">simulation/config.py</td><td class="toc-page">50</td></tr><tr><td class="toc-path">simulation/contact.py</td><td class="toc-page">57</td></tr><tr><td class="toc-path">simulation/detection_demo.py</td><td class="toc-page">60</td></tr><tr><td class="toc-path">simulation/experiments.py</td><td class="toc-page">62</td></tr><tr><td class="toc-path">simulation/infection.py</td><td class="toc-page">75</td></tr><tr><td class="toc-path">simulation/pipeline.py</td><td class="toc-page">77</td></tr><tr><td class="toc-path">simulation/population.py</td><td class="toc-page">83</td></tr><tr><td class="toc-path">simulation/realism.py</td><td class="toc-page">86</td></tr><tr><td class="toc-path">simulation/reporting.py</td><td class="toc-page">94</td></tr><tr><td class="toc-path">simulation/scale.py</td><td class="toc-page">96</td></tr><tr><td class="toc-path">simulation/simulator.py</td><td class="toc-page">102</td></tr><tr><td class="toc-path">simulation/smoke.py</td><td class="toc-page">106</td></tr><tr class="toc-group"><td colspan="2">api/</td></tr><tr><td class="toc-path">api/__init__.py</td><td class="toc-page">108</td></tr><tr><td class="toc-path">api/app.py</td><td class="toc-page">109</td></tr><tr><td class="toc-path">api/bands.py</td><td class="toc-page">118</td></tr><tr class="toc-group"><td colspan="2">adversarial/</td></tr><tr><td class="toc-path">adversarial/__init__.py</td><td class="toc-page">120</td></tr><tr><td class="toc-path">adversarial/__main__.py</td><td class="toc-page">121</td></tr><tr><td class="toc-path">adversarial/differencing.py</td><td class="toc-page">122</td></tr><tr><td class="toc-path">adversarial/injection.py</td><td class="toc-page">125</td></tr><tr><td class="toc-path">adversarial/observer.py</td><td class="toc-page">129</td></tr><tr><td class="toc-path">adversarial/selftest.py</td><td class="toc-page">131</td></tr><tr><td class="toc-path">adversarial/wandering.py</td><td class="toc-page">134</td></tr><tr class="toc-group"><td colspan="2">web/</td></tr><tr><td class="toc-path">web/app.js</td><td class="toc-page">135</td></tr><tr><td class="toc-path">web/gates.js</td><td class="toc-page">155</td></tr><tr><td class="toc-path">web/index.html</td><td class="toc-page">157</td></tr><tr><td class="toc-path">web/privacy.html</td><td class="toc-page">165</td></tr><tr><td class="toc-path">web/style.css</td><td class="toc-page">169</td></tr><tr><td class="toc-path">web/terms.html</td><td class="toc-page">183</td></tr><tr class="toc-group"><td colspan="2">tests/</td></tr><tr><td class="toc-path">tests/__init__.py</td><td class="toc-page">185</td></tr><tr><td class="toc-path">tests/fixtures.py</td><td class="toc-page">186</td></tr><tr><td class="toc-path">tests/test_adversarial.py</td><td class="toc-page">188</td></tr><tr><td class="toc-path">tests/test_api.py</td><td class="toc-page">191</td></tr><tr><td class="toc-path">tests/test_bands.py</td><td class="toc-page">197</td></tr><tr><td class="toc-path">tests/test_benchmark.py</td><td class="toc-page">199</td></tr><tr><td class="toc-path">tests/test_detection.py</td><td class="toc-page">202</td></tr><tr><td class="toc-path">tests/test_disclosure.py</td><td class="toc-page">210</td></tr><tr><td class="toc-path">tests/test_engine.py</td><td class="toc-page">217</td></tr><tr><td class="toc-path">tests/test_experiments.py</td><td class="toc-page">220</td></tr><tr><td class="toc-path">tests/test_intake.py</td><td class="toc-page">226</td></tr><tr><td class="toc-path">tests/test_models.py</td><td class="toc-page">229</td></tr><tr><td class="toc-path">tests/test_motion_constraints.py</td><td class="toc-page">231</td></tr><tr><td class="toc-path">tests/test_pipeline.py</td><td class="toc-page">233</td></tr><tr><td class="toc-path">tests/test_reporting.py</td><td class="toc-page">238</td></tr><tr><td class="toc-path">tests/test_scale_and_realism.py</td><td class="toc-page">240</td></tr><tr><td class="toc-path">tests/test_simulation.py</td><td class="toc-page">243</td></tr><tr class="toc-group"><td colspan="2">scripts/</td></tr><tr><td class="toc-path">scripts/__init__.py</td><td class="toc-page">254</td></tr><tr><td class="toc-path">scripts/precompute_results.py</td><td class="toc-page">255</td></tr><tr><td class="toc-path">scripts/stress_tests.py</td><td class="toc-page">259</td></tr><tr><td class="toc-path">scripts/verify_epidemic_curves.py</td><td class="toc-page">261</td></tr><tr class="toc-group"><td colspan="2">other</td></tr><tr><td class="toc-path">render.yaml</td><td class="toc-page">263</td></tr><tr><td class="toc-path">requirements.txt</td><td class="toc-page">264</td></tr><tr><td class="toc-path">requirements-runtime.txt</td><td class="toc-page">265</td></tr><tr><td class="toc-path">Procfile</td><td class="toc-page">266</td></tr><tr><td class="toc-path">CLAUDE.md</td><td class="toc-page">267</td></tr>
+<tr class="toc-group"><td colspan="2">microcluster/</td></tr><tr><td class="toc-path"><a href="#file-1">microcluster/__init__.py</a></td><td class="toc-page">4</td></tr><tr><td class="toc-path"><a href="#file-2">microcluster/config.py</a></td><td class="toc-page">5</td></tr><tr><td class="toc-path"><a href="#file-3">microcluster/demo.py</a></td><td class="toc-page">10</td></tr><tr><td class="toc-path"><a href="#file-4">microcluster/detection.py</a></td><td class="toc-page">13</td></tr><tr><td class="toc-path"><a href="#file-5">microcluster/disclosure.py</a></td><td class="toc-page">20</td></tr><tr><td class="toc-path"><a href="#file-6">microcluster/engine.py</a></td><td class="toc-page">27</td></tr><tr><td class="toc-path"><a href="#file-7">microcluster/intake.py</a></td><td class="toc-page">29</td></tr><tr><td class="toc-path"><a href="#file-8">microcluster/models.py</a></td><td class="toc-page">32</td></tr><tr class="toc-group"><td colspan="2">simulation/</td></tr><tr><td class="toc-path"><a href="#file-9">simulation/__init__.py</a></td><td class="toc-page">36</td></tr><tr><td class="toc-path"><a href="#file-10">simulation/agent.py</a></td><td class="toc-page">38</td></tr><tr><td class="toc-path"><a href="#file-11">simulation/benchmark.py</a></td><td class="toc-page">40</td></tr><tr><td class="toc-path"><a href="#file-12">simulation/config.py</a></td><td class="toc-page">50</td></tr><tr><td class="toc-path"><a href="#file-13">simulation/contact.py</a></td><td class="toc-page">57</td></tr><tr><td class="toc-path"><a href="#file-14">simulation/detection_demo.py</a></td><td class="toc-page">60</td></tr><tr><td class="toc-path"><a href="#file-15">simulation/experiments.py</a></td><td class="toc-page">62</td></tr><tr><td class="toc-path"><a href="#file-16">simulation/infection.py</a></td><td class="toc-page">75</td></tr><tr><td class="toc-path"><a href="#file-17">simulation/pipeline.py</a></td><td class="toc-page">77</td></tr><tr><td class="toc-path"><a href="#file-18">simulation/population.py</a></td><td class="toc-page">83</td></tr><tr><td class="toc-path"><a href="#file-19">simulation/realism.py</a></td><td class="toc-page">86</td></tr><tr><td class="toc-path"><a href="#file-20">simulation/reporting.py</a></td><td class="toc-page">94</td></tr><tr><td class="toc-path"><a href="#file-21">simulation/scale.py</a></td><td class="toc-page">96</td></tr><tr><td class="toc-path"><a href="#file-22">simulation/simulator.py</a></td><td class="toc-page">102</td></tr><tr><td class="toc-path"><a href="#file-23">simulation/smoke.py</a></td><td class="toc-page">106</td></tr><tr class="toc-group"><td colspan="2">api/</td></tr><tr><td class="toc-path"><a href="#file-24">api/__init__.py</a></td><td class="toc-page">108</td></tr><tr><td class="toc-path"><a href="#file-25">api/app.py</a></td><td class="toc-page">109</td></tr><tr><td class="toc-path"><a href="#file-26">api/bands.py</a></td><td class="toc-page">118</td></tr><tr class="toc-group"><td colspan="2">adversarial/</td></tr><tr><td class="toc-path"><a href="#file-27">adversarial/__init__.py</a></td><td class="toc-page">120</td></tr><tr><td class="toc-path"><a href="#file-28">adversarial/__main__.py</a></td><td class="toc-page">121</td></tr><tr><td class="toc-path"><a href="#file-29">adversarial/differencing.py</a></td><td class="toc-page">122</td></tr><tr><td class="toc-path"><a href="#file-30">adversarial/injection.py</a></td><td class="toc-page">125</td></tr><tr><td class="toc-path"><a href="#file-31">adversarial/observer.py</a></td><td class="toc-page">129</td></tr><tr><td class="toc-path"><a href="#file-32">adversarial/selftest.py</a></td><td class="toc-page">131</td></tr><tr><td class="toc-path"><a href="#file-33">adversarial/wandering.py</a></td><td class="toc-page">134</td></tr><tr class="toc-group"><td colspan="2">web/</td></tr><tr><td class="toc-path"><a href="#file-34">web/app.js</a></td><td class="toc-page">135</td></tr><tr><td class="toc-path"><a href="#file-35">web/gates.js</a></td><td class="toc-page">155</td></tr><tr><td class="toc-path"><a href="#file-36">web/index.html</a></td><td class="toc-page">157</td></tr><tr><td class="toc-path"><a href="#file-37">web/privacy.html</a></td><td class="toc-page">165</td></tr><tr><td class="toc-path"><a href="#file-38">web/style.css</a></td><td class="toc-page">169</td></tr><tr><td class="toc-path"><a href="#file-39">web/terms.html</a></td><td class="toc-page">183</td></tr><tr class="toc-group"><td colspan="2">tests/</td></tr><tr><td class="toc-path"><a href="#file-40">tests/__init__.py</a></td><td class="toc-page">185</td></tr><tr><td class="toc-path"><a href="#file-41">tests/fixtures.py</a></td><td class="toc-page">186</td></tr><tr><td class="toc-path"><a href="#file-42">tests/test_adversarial.py</a></td><td class="toc-page">188</td></tr><tr><td class="toc-path"><a href="#file-43">tests/test_api.py</a></td><td class="toc-page">191</td></tr><tr><td class="toc-path"><a href="#file-44">tests/test_bands.py</a></td><td class="toc-page">197</td></tr><tr><td class="toc-path"><a href="#file-45">tests/test_benchmark.py</a></td><td class="toc-page">199</td></tr><tr><td class="toc-path"><a href="#file-46">tests/test_detection.py</a></td><td class="toc-page">202</td></tr><tr><td class="toc-path"><a href="#file-47">tests/test_disclosure.py</a></td><td class="toc-page">210</td></tr><tr><td class="toc-path"><a href="#file-48">tests/test_engine.py</a></td><td class="toc-page">217</td></tr><tr><td class="toc-path"><a href="#file-49">tests/test_experiments.py</a></td><td class="toc-page">220</td></tr><tr><td class="toc-path"><a href="#file-50">tests/test_intake.py</a></td><td class="toc-page">226</td></tr><tr><td class="toc-path"><a href="#file-51">tests/test_models.py</a></td><td class="toc-page">229</td></tr><tr><td class="toc-path"><a href="#file-52">tests/test_motion_constraints.py</a></td><td class="toc-page">231</td></tr><tr><td class="toc-path"><a href="#file-53">tests/test_pipeline.py</a></td><td class="toc-page">233</td></tr><tr><td class="toc-path"><a href="#file-54">tests/test_reporting.py</a></td><td class="toc-page">238</td></tr><tr><td class="toc-path"><a href="#file-55">tests/test_scale_and_realism.py</a></td><td class="toc-page">240</td></tr><tr><td class="toc-path"><a href="#file-56">tests/test_simulation.py</a></td><td class="toc-page">243</td></tr><tr class="toc-group"><td colspan="2">scripts/</td></tr><tr><td class="toc-path"><a href="#file-57">scripts/__init__.py</a></td><td class="toc-page">254</td></tr><tr><td class="toc-path"><a href="#file-58">scripts/build_code_pdf.py</a></td><td class="toc-page">255</td></tr><tr><td class="toc-path"><a href="#file-59">scripts/precompute_results.py</a></td><td class="toc-page">260</td></tr><tr><td class="toc-path"><a href="#file-60">scripts/stress_tests.py</a></td><td class="toc-page">264</td></tr><tr><td class="toc-path"><a href="#file-61">scripts/verify_epidemic_curves.py</a></td><td class="toc-page">266</td></tr><tr class="toc-group"><td colspan="2">other</td></tr><tr><td class="toc-path"><a href="#file-62">render.yaml</a></td><td class="toc-page">268</td></tr><tr><td class="toc-path"><a href="#file-63">requirements.txt</a></td><td class="toc-page">269</td></tr><tr><td class="toc-path"><a href="#file-64">requirements-runtime.txt</a></td><td class="toc-page">270</td></tr><tr><td class="toc-path"><a href="#file-65">Procfile</a></td><td class="toc-page">271</td></tr><tr><td class="toc-path"><a href="#file-66">CLAUDE.md</a></td><td class="toc-page">272</td></tr>
   </table>
 </div>
 
-<section class="file">
+<section class="file" id="file-1">
   <h2>microcluster/__init__.py</h2>
   <pre> 1 | &quot;&quot;&quot;MicroCluster: privacy-preserving health-signal detection and disclosure.
  2 | 
@@ -79,7 +80,7 @@
 13 | 
 14 | __all__ = [&quot;config&quot;, &quot;detection&quot;, &quot;disclosure&quot;, &quot;engine&quot;, &quot;models&quot;]</pre>
 </section>
-<section class="file">
+<section class="file" id="file-2">
   <h2>microcluster/config.py</h2>
   <pre>  1 | &quot;&quot;&quot;Policy constants and configuration for MicroCluster.
   2 | 
@@ -303,7 +304,7 @@
 220 | DEFAULT_DISCLOSURE_CONFIG = DisclosureConfig()
 221 | DEFAULT_INTAKE_CONFIG = IntakeConfig()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-3">
   <h2>microcluster/demo.py</h2>
   <pre>  1 | &quot;&quot;&quot;Print the six reference scenarios and their evaluation tables.
   2 | 
@@ -461,7 +462,7 @@
 154 | if __name__ == &quot;__main__&quot;:
 155 |     main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-4">
   <h2>microcluster/detection.py</h2>
   <pre>  1 | &quot;&quot;&quot;Detection engine: is anything unusual happening?
   2 | 
@@ -828,7 +829,7 @@
 363 |         ),
 364 |     )</pre>
 </section>
-<section class="file">
+<section class="file" id="file-5">
   <h2>microcluster/disclosure.py</h2>
   <pre>  1 | &quot;&quot;&quot;Disclosure engine: what, if anything, may be said, and at what scope?
   2 | 
@@ -1178,7 +1179,7 @@
 346 | 
 347 |     return DisclosureResult(evaluations=evaluations, disclosed_scope_id=selected_id)</pre>
 </section>
-<section class="file">
+<section class="file" id="file-6">
   <h2>microcluster/engine.py</h2>
   <pre> 1 | &quot;&quot;&quot;Thin wiring between the engines.
  2 | 
@@ -1277,7 +1278,7 @@
 95 |     )
 96 |     return AnalysisResult(det, dis, intake_result)</pre>
 </section>
-<section class="file">
+<section class="file" id="file-7">
   <h2>microcluster/intake.py</h2>
   <pre>  1 | &quot;&quot;&quot;Intake submission caps (rule 11).
   2 | 
@@ -1394,7 +1395,7 @@
 113 | 
 114 |     return IntakeResult(accepted=tuple(accepted), rejected=tuple(rejected))</pre>
 </section>
-<section class="file">
+<section class="file" id="file-8">
   <h2>microcluster/models.py</h2>
   <pre>  1 | &quot;&quot;&quot;Data model: the fixed checklist, scopes, and reports.
   2 | 
@@ -1574,7 +1575,7 @@
 176 |                 f&quot;category {self.category.value!r}&quot;
 177 |             )</pre>
 </section>
-<section class="file">
+<section class="file" id="file-9">
   <h2>simulation/__init__.py</h2>
   <pre> 1 | &quot;&quot;&quot;Headless outbreak simulator.
  2 | 
@@ -1633,7 +1634,7 @@
 55 |     &quot;run_with_detection&quot;,
 56 | ]</pre>
 </section>
-<section class="file">
+<section class="file" id="file-10">
   <h2>simulation/agent.py</h2>
   <pre> 1 | &quot;&quot;&quot;The Agent: one simulated person.&quot;&quot;&quot;
  2 | 
@@ -1689,7 +1690,7 @@
 52 |     state: InfectionState
 53 |     state_changed_day: int</pre>
 </section>
-<section class="file">
+<section class="file" id="file-11">
   <h2>simulation/benchmark.py</h2>
   <pre>  1 | &quot;&quot;&quot;Learned detector vs the hand-authored threshold rules.
   2 | 
@@ -2216,7 +2217,7 @@
 523 | if __name__ == &quot;__main__&quot;:
 524 |     main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-12">
   <h2>simulation/config.py</h2>
   <pre>  1 | &quot;&quot;&quot;Tunable constants for the outbreak simulator.
   2 | 
@@ -2575,7 +2576,7 @@
 355 | 
 356 | DEFAULT_SIMULATION_CONFIG = SimulationConfig()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-13">
   <h2>simulation/contact.py</h2>
   <pre>  1 | &quot;&quot;&quot;Contact model: tiered transmission on a single day.
   2 | 
@@ -2694,7 +2695,7 @@
 115 |         )
 116 |     return within_suite, cross_suite</pre>
 </section>
-<section class="file">
+<section class="file" id="file-14">
   <h2>simulation/detection_demo.py</h2>
   <pre>  1 | &quot;&quot;&quot;End-to-end demo: simulate an outbreak, generate anonymous reports from
   2 | it, and feed them to the UNCHANGED detection engine, once per simulated
@@ -2797,7 +2798,7 @@
  99 | if __name__ == &quot;__main__&quot;:
 100 |     main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-15">
   <h2>simulation/experiments.py</h2>
   <pre>  1 | &quot;&quot;&quot;Experiment runner: statistics over many simulated outbreaks.
   2 | 
@@ -3460,7 +3461,7 @@
 659 | if __name__ == &quot;__main__&quot;:
 660 |     main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-16">
   <h2>simulation/infection.py</h2>
   <pre> 1 | &quot;&quot;&quot;Infection state machine.
  2 | 
@@ -3560,7 +3561,7 @@
 96 |             return True
 97 |     return False</pre>
 </section>
-<section class="file">
+<section class="file" id="file-17">
   <h2>simulation/pipeline.py</h2>
   <pre>  1 | &quot;&quot;&quot;End-to-end wiring: simulated agents -&gt; anonymous reports -&gt; the
   2 | EXISTING, UNMODIFIED detection engine -&gt; disclosure.
@@ -3870,7 +3871,7 @@
 306 |         daily_records=daily_records,
 307 |     )</pre>
 </section>
-<section class="file">
+<section class="file" id="file-18">
   <h2>simulation/population.py</h2>
   <pre>  1 | &quot;&quot;&quot;Population and scope-registry builder.
   2 | 
@@ -4017,7 +4018,7 @@
 143 |     registry = ScopeRegistry(scopes)  # runs ScopeRegistry&#x27;s own validation
 144 |     return agents, registry</pre>
 </section>
-<section class="file">
+<section class="file" id="file-19">
   <h2>simulation/realism.py</h2>
   <pre>  1 | &quot;&quot;&quot;Reporting-realism stress test.
   2 | 
@@ -4404,7 +4405,7 @@
 383 | if __name__ == &quot;__main__&quot;:
 384 |     main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-20">
   <h2>simulation/reporting.py</h2>
   <pre>  1 | &quot;&quot;&quot;Turns simulated infection state into anonymous Reports.
   2 | 
@@ -4510,7 +4511,7 @@
 102 | 
 103 |     return reports</pre>
 </section>
-<section class="file">
+<section class="file" id="file-21">
   <h2>simulation/scale.py</h2>
   <pre>  1 | &quot;&quot;&quot;Scale validation: does the pipeline still behave at 500 / 1,000 / 2,000
   2 | people with four scope levels (campus &gt; building &gt; floor &gt; suite)?
@@ -4768,7 +4769,7 @@
 254 | if __name__ == &quot;__main__&quot;:
 255 |     main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-22">
   <h2>simulation/simulator.py</h2>
   <pre>  1 | &quot;&quot;&quot;The run loop.
   2 | 
@@ -4934,7 +4935,7 @@
 162 |             )
 163 |         return DayState(day=self.day, counts=counts, agents=tuple(agent_snapshots))</pre>
 </section>
-<section class="file">
+<section class="file" id="file-23">
   <h2>simulation/smoke.py</h2>
   <pre>  1 | &quot;&quot;&quot;Smoke test entry point.
   2 | 
@@ -5041,7 +5042,7 @@
 103 | if __name__ == &quot;__main__&quot;:
 104 |     main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-24">
   <h2>api/__init__.py</h2>
   <pre> 1 | &quot;&quot;&quot;FastAPI layer for the MicroCluster outbreak simulator.
  2 | 
@@ -5056,7 +5057,7 @@
 11 | count-banding rules.
 12 | &quot;&quot;&quot;</pre>
 </section>
-<section class="file">
+<section class="file" id="file-25">
   <h2>api/app.py</h2>
   <pre>  1 | &quot;&quot;&quot;HTTP API: start a run, then read one day at a time.
   2 | 
@@ -5537,7 +5538,7 @@
 477 | if WEB_DIR.is_dir():
 478 |     app.mount(&quot;/&quot;, StaticFiles(directory=str(WEB_DIR), html=True), name=&quot;web&quot;)</pre>
 </section>
-<section class="file">
+<section class="file" id="file-26">
   <h2>api/bands.py</h2>
   <pre> 1 | &quot;&quot;&quot;Report-count banding for the API&#x27;s presentation boundary.
  2 | 
@@ -5624,7 +5625,7 @@
 83 |     )
 84 |     return out</pre>
 </section>
-<section class="file">
+<section class="file" id="file-27">
   <h2>adversarial/__init__.py</h2>
   <pre> 1 | &quot;&quot;&quot;Adversarial self-test for the privacy claim.
  2 | 
@@ -5662,14 +5663,14 @@
 34 |     &quot;measure_injection&quot;,
 35 | ]</pre>
 </section>
-<section class="file">
+<section class="file" id="file-28">
   <h2>adversarial/__main__.py</h2>
   <pre> 1 | from .selftest import main
  2 | 
  3 | if __name__ == &quot;__main__&quot;:
  4 |     main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-29">
   <h2>adversarial/differencing.py</h2>
   <pre>  1 | &quot;&quot;&quot;The differencing attack.
   2 | 
@@ -5794,7 +5795,7 @@
 121 |         residual=_residual(mode, pairs),
 122 |     )</pre>
 </section>
-<section class="file">
+<section class="file" id="file-30">
   <h2>adversarial/injection.py</h2>
   <pre>  1 | &quot;&quot;&quot;What the intake submission cap actually buys against report injection.
   2 | 
@@ -5993,7 +5994,7 @@
 195 | if __name__ == &quot;__main__&quot;:
 196 |     main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-31">
   <h2>adversarial/observer.py</h2>
   <pre> 1 | &quot;&quot;&quot;What a day-by-day observer of the shipped UI can see, and nothing else.&quot;&quot;&quot;
  2 | 
@@ -6054,7 +6055,7 @@
 57 |         )
 58 |     return views</pre>
 </section>
-<section class="file">
+<section class="file" id="file-32">
   <h2>adversarial/selftest.py</h2>
   <pre>  1 | &quot;&quot;&quot;Run the adversarial self-test across many seeds and summarise.&quot;&quot;&quot;
   2 | 
@@ -6193,7 +6194,7 @@
 135 | if __name__ == &quot;__main__&quot;:
 136 |     main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-33">
   <h2>adversarial/wandering.py</h2>
   <pre> 1 | &quot;&quot;&quot;What scope wandering leaks: distinct groups named across a run.
  2 | 
@@ -6234,7 +6235,7 @@
 37 |     )
 38 |     return WanderingOutcome(len(on), len(off), tuple(on), tuple(off))</pre>
 </section>
-<section class="file">
+<section class="file" id="file-34">
   <h2>web/app.js</h2>
   <pre>   1 | &quot;use strict&quot;;
    2 | 
@@ -7260,7 +7261,7 @@
 1022 |   });
 1023 | }</pre>
 </section>
-<section class="file">
+<section class="file" id="file-35">
   <h2>web/gates.js</h2>
   <pre> 1 | &quot;use strict&quot;;
  2 | 
@@ -7358,7 +7359,7 @@
 94 |   load(4);
 95 | })();</pre>
 </section>
-<section class="file">
+<section class="file" id="file-36">
   <h2>web/index.html</h2>
   <pre>  1 | &lt;!doctype html&gt;
   2 | &lt;html lang=&quot;en&quot;&gt;
@@ -7716,7 +7717,7 @@
 354 | &lt;/body&gt;
 355 | &lt;/html&gt;</pre>
 </section>
-<section class="file">
+<section class="file" id="file-37">
   <h2>web/privacy.html</h2>
   <pre>  1 | &lt;!doctype html&gt;
   2 | &lt;html lang=&quot;en&quot;&gt;
@@ -7867,7 +7868,7 @@
 147 | &lt;/body&gt;
 148 | &lt;/html&gt;</pre>
 </section>
-<section class="file">
+<section class="file" id="file-38">
   <h2>web/style.css</h2>
   <pre>  1 | /* Flat, high-contrast, documentary/clinical. Off-white ground, no
   2 |    gradients, no shadows. Square panels; the only circles are agent /
@@ -8595,7 +8596,7 @@
 724 |   .refusal:not(:empty), .status.change-in { animation: none !important; }
 725 | }</pre>
 </section>
-<section class="file">
+<section class="file" id="file-39">
   <h2>web/terms.html</h2>
   <pre> 1 | &lt;!doctype html&gt;
  2 | &lt;html lang=&quot;en&quot;&gt;
@@ -8660,11 +8661,11 @@
 61 | &lt;/body&gt;
 62 | &lt;/html&gt;</pre>
 </section>
-<section class="file">
+<section class="file" id="file-40">
   <h2>tests/__init__.py</h2>
   <pre>(empty file)</pre>
 </section>
-<section class="file">
+<section class="file" id="file-41">
   <h2>tests/fixtures.py</h2>
   <pre> 1 | &quot;&quot;&quot;Shared test fixtures: a reference scope registry and report builders.&quot;&quot;&quot;
  2 | 
@@ -8762,7 +8763,7 @@
 94 | def reports(location_id: str, count: int, **kwargs) -&gt; list[Report]:
 95 |     return [report(location_id, **kwargs) for _ in range(count)]</pre>
 </section>
-<section class="file">
+<section class="file" id="file-42">
   <h2>tests/test_adversarial.py</h2>
   <pre>  1 | &quot;&quot;&quot;Adversarial self-test tests.
   2 | 
@@ -8913,7 +8914,7 @@
 147 | if __name__ == &quot;__main__&quot;:
 148 |     unittest.main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-43">
   <h2>tests/test_api.py</h2>
   <pre>  1 | &quot;&quot;&quot;API-layer tests.
   2 | 
@@ -9227,7 +9228,7 @@
 310 | if __name__ == &quot;__main__&quot;:
 311 |     unittest.main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-44">
   <h2>tests/test_bands.py</h2>
   <pre> 1 | &quot;&quot;&quot;api.bands: count banding and reason sanitisation.
  2 | 
@@ -9315,7 +9316,7 @@
 84 | if __name__ == &quot;__main__&quot;:
 85 |     unittest.main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-45">
   <h2>tests/test_benchmark.py</h2>
   <pre>  1 | &quot;&quot;&quot;Benchmark tests.
   2 | 
@@ -9476,7 +9477,7 @@
 157 | if __name__ == &quot;__main__&quot;:
 158 |     unittest.main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-46">
   <h2>tests/test_detection.py</h2>
   <pre>  1 | &quot;&quot;&quot;Detection engine tests -- independent of the disclosure engine.&quot;&quot;&quot;
   2 | 
@@ -9871,7 +9872,7 @@
 391 | if __name__ == &quot;__main__&quot;:
 392 |     unittest.main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-47">
   <h2>tests/test_disclosure.py</h2>
   <pre>  1 | &quot;&quot;&quot;Disclosure engine tests -- independent of the detection engine.
   2 | 
@@ -10196,7 +10197,7 @@
 321 | if __name__ == &quot;__main__&quot;:
 322 |     unittest.main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-48">
   <h2>tests/test_engine.py</h2>
   <pre>  1 | &quot;&quot;&quot;End-to-end tests: detection wired to disclosure (rule 10 ordering).&quot;&quot;&quot;
   2 | 
@@ -10336,7 +10337,7 @@
 136 | if __name__ == &quot;__main__&quot;:
 137 |     unittest.main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-49">
   <h2>tests/test_experiments.py</h2>
   <pre>  1 | &quot;&quot;&quot;Experiment-runner tests.
   2 | 
@@ -10622,7 +10623,7 @@
 282 | if __name__ == &quot;__main__&quot;:
 283 |     unittest.main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-50">
   <h2>tests/test_intake.py</h2>
   <pre>  1 | &quot;&quot;&quot;Intake submission-cap tests (rule 11).
   2 | 
@@ -10769,7 +10770,7 @@
 143 | if __name__ == &quot;__main__&quot;:
 144 |     unittest.main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-51">
   <h2>tests/test_models.py</h2>
   <pre> 1 | &quot;&quot;&quot;Model-level validation: the fixed checklist is the only accepted input.&quot;&quot;&quot;
  2 | 
@@ -10848,7 +10849,7 @@
 75 | if __name__ == &quot;__main__&quot;:
 76 |     unittest.main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-52">
   <h2>tests/test_motion_constraints.py</h2>
   <pre> 1 | &quot;&quot;&quot;CLAUDE.md UI CONSTRAINTS, &quot;Motion&quot; -- the durable version of the ad hoc
  2 | grep that used to just ban transition/animation outright.
@@ -10941,7 +10942,7 @@
 89 | if __name__ == &quot;__main__&quot;:
 90 |     unittest.main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-53">
   <h2>tests/test_pipeline.py</h2>
   <pre>  1 | &quot;&quot;&quot;End-to-end wiring tests: simulation -&gt; reports -&gt; the real detection
   2 | engine, unmodified.
@@ -11157,7 +11158,7 @@
 212 | if __name__ == &quot;__main__&quot;:
 213 |     unittest.main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-54">
   <h2>tests/test_reporting.py</h2>
   <pre>  1 | &quot;&quot;&quot;Report generation: the one place simulated agents turn into anonymous
   2 | ``microcluster.models.Report`` objects.&quot;&quot;&quot;
@@ -11265,7 +11266,7 @@
 104 | if __name__ == &quot;__main__&quot;:
 105 |     unittest.main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-55">
   <h2>tests/test_scale_and_realism.py</h2>
   <pre>  1 | &quot;&quot;&quot;Scale validation and reporting-realism tests.
   2 | 
@@ -11414,7 +11415,7 @@
 145 | if __name__ == &quot;__main__&quot;:
 146 |     unittest.main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-56">
   <h2>tests/test_simulation.py</h2>
   <pre>  1 | &quot;&quot;&quot;Simulation core tests: state machine, contact model, population builder.
   2 | 
@@ -11964,11 +11965,273 @@
 546 | if __name__ == &quot;__main__&quot;:
 547 |     unittest.main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-57">
   <h2>scripts/__init__.py</h2>
   <pre>(empty file)</pre>
 </section>
-<section class="file">
+<section class="file" id="file-58">
+  <h2>scripts/build_code_pdf.py</h2>
+  <pre>  1 | &quot;&quot;&quot;Builds docs/code.pdf: every hand-written source file in this repo, as
+  2 | one PDF, for a judge to read without cloning. Same approach as the
+  3 | one-pager (docs/one_pager.html -&gt; docs/one_pager.pdf): generate HTML, print
+  4 | it with headless Chrome. No PDF-generation library is a runtime dependency
+  5 | of the project; it is only used here, as a build-time helper, to look up
+  6 | which page each file actually landed on for the table of contents.
+  7 | 
+  8 | The file list comes from `git ls-files`, restricted to the directories and
+  9 | names the submission calls for -- so anything .gitignore already excludes
+ 10 | (__pycache__, .venv, .git, .env) or that was never committed is excluded
+ 11 | automatically, and results/*.json, images and the PDFs themselves are
+ 12 | excluded because their directories/names are simply not in the list below.
+ 13 | 
+ 14 | Regenerate: python -m scripts.build_code_pdf
+ 15 | Needs a Chromium browser on PATH or at the hardcoded Windows path below,
+ 16 | and pypdf (`pip install pypdf`) -- a build-time-only tool dependency, not
+ 17 | added to requirements.txt, used solely to find each file&#x27;s starting page
+ 18 | across the two rendering passes this needs (TOC page numbers depend on
+ 19 | where Chrome actually breaks pages, which depends on the TOC&#x27;s own length
+ 20 | -- so pass 1 renders with placeholder numbers to discover real ones, pass
+ 21 | 2 bakes them in, and a 3rd pass runs only if that insertion shifted
+ 22 | anything).
+ 23 | &quot;&quot;&quot;
+ 24 | 
+ 25 | from __future__ import annotations
+ 26 | 
+ 27 | import datetime
+ 28 | import html
+ 29 | import shutil
+ 30 | import subprocess
+ 31 | import sys
+ 32 | from pathlib import Path
+ 33 | 
+ 34 | ROOT = Path(__file__).resolve().parent.parent
+ 35 | REPO_URL = &quot;https://github.com/koridoesstuff/MicroCluster&quot;
+ 36 | PROJECT = &quot;MicroCluster&quot;
+ 37 | 
+ 38 | # order matches the submission&#x27;s own grouping, not strict alphabetical
+ 39 | GROUP_DIRS = [&quot;microcluster&quot;, &quot;simulation&quot;, &quot;api&quot;, &quot;adversarial&quot;, &quot;web&quot;, &quot;tests&quot;, &quot;scripts&quot;]
+ 40 | EXTRA_FILES = [
+ 41 |     &quot;render.yaml&quot;, &quot;requirements.txt&quot;, &quot;requirements-runtime.txt&quot;,
+ 42 |     &quot;Procfile&quot;, &quot;conftest.py&quot;, &quot;CLAUDE.md&quot;,
+ 43 | ]
+ 44 | 
+ 45 | CHROME_CANDIDATES = [
+ 46 |     &quot;chrome&quot;, &quot;google-chrome&quot;, &quot;chromium&quot;,
+ 47 |     r&quot;C:\Program Files\Google\Chrome\Application\chrome.exe&quot;,
+ 48 |     r&quot;C:\Program Files (x86)\Google\Chrome\Application\chrome.exe&quot;,
+ 49 | ]
+ 50 | 
+ 51 | 
+ 52 | def find_chrome() -&gt; str:
+ 53 |     for c in CHROME_CANDIDATES:
+ 54 |         if shutil.which(c) or Path(c).is_file():
+ 55 |             return c
+ 56 |     raise SystemExit(&quot;no Chromium found on PATH or at the usual Windows install locations&quot;)
+ 57 | 
+ 58 | 
+ 59 | def tracked_files() -&gt; set[str]:
+ 60 |     out = subprocess.run([&quot;git&quot;, &quot;ls-files&quot;], cwd=ROOT, capture_output=True, text=True, check=True)
+ 61 |     return set(out.stdout.splitlines())
+ 62 | 
+ 63 | 
+ 64 | def collect_files() -&gt; list[tuple[str, list[str]]]:
+ 65 |     &quot;&quot;&quot;[(group label, [repo-relative paths, sorted]), ...], last group is &quot;other&quot;.&quot;&quot;&quot;
+ 66 |     tracked = tracked_files()
+ 67 |     groups: list[tuple[str, list[str]]] = []
+ 68 |     for name in GROUP_DIRS:
+ 69 |         folder = ROOT / name
+ 70 |         if not folder.is_dir():
+ 71 |             continue
+ 72 |         files = sorted(
+ 73 |             p.relative_to(ROOT).as_posix()
+ 74 |             for p in folder.rglob(&quot;*&quot;)
+ 75 |             if p.is_file() and p.relative_to(ROOT).as_posix() in tracked
+ 76 |         )
+ 77 |         if files:
+ 78 |             groups.append((name + &quot;/&quot;, files))
+ 79 |     extras = [f for f in EXTRA_FILES if f in tracked and (ROOT / f).is_file()]
+ 80 |     if extras:
+ 81 |         groups.append((&quot;other&quot;, extras))
+ 82 |     return groups
+ 83 | 
+ 84 | 
+ 85 | def render_file_section(relpath: str, anchor_id: str) -&gt; tuple[str, int]:
+ 86 |     text = (ROOT / relpath).read_text(encoding=&quot;utf-8&quot;)
+ 87 |     lines = text.splitlines()
+ 88 |     width = max(len(str(len(lines))), 2)
+ 89 |     body = &quot;\n&quot;.join(f&quot;{i:&gt;{width}} | {html.escape(line)}&quot; for i, line in enumerate(lines, start=1))
+ 90 |     if not body:
+ 91 |         body = &quot;(empty file)&quot;
+ 92 |     section = (
+ 93 |         f&#x27;&lt;section class=&quot;file&quot; id=&quot;{anchor_id}&quot;&gt;\n&#x27;
+ 94 |         f&#x27;  &lt;h2&gt;{html.escape(relpath)}&lt;/h2&gt;\n&#x27;
+ 95 |         f&#x27;  &lt;pre&gt;{body}&lt;/pre&gt;\n&#x27;
+ 96 |         f&#x27;&lt;/section&gt;\n&#x27;
+ 97 |     )
+ 98 |     return section, len(lines)
+ 99 | 
+100 | 
+101 | def build_html(groups: list[tuple[str, list[str]]], toc_pages: dict[str, int] | None) -&gt; tuple[str, list[str], int]:
+102 |     sections: list[str] = []
+103 |     ordered_files: list[str] = []
+104 |     total_lines = 0
+105 |     toc_rows: list[str] = []
+106 | 
+107 |     file_num = 0
+108 |     for label, files in groups:
+109 |         toc_rows.append(f&#x27;&lt;tr class=&quot;toc-group&quot;&gt;&lt;td colspan=&quot;2&quot;&gt;{html.escape(label)}&lt;/td&gt;&lt;/tr&gt;&#x27;)
+110 |         for relpath in files:
+111 |             file_num += 1
+112 |             anchor_id = f&quot;file-{file_num}&quot;
+113 |             # a plain same-document &quot;#fragment&quot; href -- verified this prints
+114 |             # as an internal PDF GoTo destination (/Dest), never a file://
+115 |             # URI, which is the bug this anchor scheme exists to avoid
+116 |             section, n = render_file_section(relpath, anchor_id)
+117 |             sections.append(section)
+118 |             ordered_files.append(relpath)
+119 |             total_lines += n
+120 |             page = toc_pages.get(relpath, &quot;\u2013&quot;) if toc_pages else &quot;\u2013&quot;
+121 |             toc_rows.append(
+122 |                 f&#x27;&lt;tr&gt;&lt;td class=&quot;toc-path&quot;&gt;&lt;a href=&quot;#{anchor_id}&quot;&gt;{html.escape(relpath)}&lt;/a&gt;&lt;/td&gt;&#x27;
+123 |                 f&#x27;&lt;td class=&quot;toc-page&quot;&gt;{page}&lt;/td&gt;&lt;/tr&gt;&#x27;
+124 |             )
+125 | 
+126 |     today = datetime.date.today().isoformat()
+127 |     doc = f&quot;&quot;&quot;&lt;!doctype html&gt;
+128 | &lt;html lang=&quot;en&quot;&gt;
+129 | &lt;head&gt;
+130 | &lt;meta charset=&quot;utf-8&quot;&gt;
+131 | &lt;title&gt;{PROJECT} -- source code&lt;/title&gt;
+132 | &lt;style&gt;
+133 |   @page {{
+134 |     size: Letter; margin: 16mm 14mm 20mm 14mm;
+135 |     @bottom-center {{
+136 |       content: counter(page);
+137 |       font-family: &quot;IBM Plex Sans&quot;, sans-serif; font-size: 9pt; color: #5c574e;
+138 |     }}
+139 |   }}
+140 |   * {{ box-sizing: border-box; }}
+141 |   html, body {{
+142 |     margin: 0; background: #ffffff; color: #161616;
+143 |     font-family: &quot;IBM Plex Sans&quot;, &quot;Source Sans Pro&quot;, ui-sans-serif, system-ui,
+144 |       -apple-system, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif;
+145 |   }}
+146 |   .title-page {{
+147 |     height: 225mm; display: flex; flex-direction: column; justify-content: center;
+148 |   }}
+149 |   .title-page h1 {{ font-size: 28pt; margin: 0 0 8pt; }}
+150 |   .title-page p {{ font-size: 12pt; margin: 3pt 0; color: #444; }}
+151 |   .toc {{ page-break-before: always; break-before: page; }}
+152 |   .toc h1 {{ font-size: 16pt; margin: 0 0 10pt; }}
+153 |   table.toc-table {{ width: 100%; border-collapse: collapse; font-size: 9.5pt; }}
+154 |   table.toc-table td {{ padding: 2pt 4pt; border-bottom: 1px dotted #bbb; }}
+155 |   tr.toc-group td {{
+156 |     font-weight: 700; border-bottom: 1px solid #161616; padding-top: 9pt;
+157 |     font-family: &quot;IBM Plex Mono&quot;, Consolas, &quot;Courier New&quot;, monospace;
+158 |   }}
+159 |   .toc-path {{ font-family: &quot;IBM Plex Mono&quot;, Consolas, &quot;Courier New&quot;, monospace; }}
+160 |   .toc-path a {{ color: #161616; text-decoration: none; }}
+161 |   .toc-page {{ text-align: right; width: 34pt; font-variant-numeric: tabular-nums; }}
+162 |   section.file {{ page-break-before: always; break-before: page; }}
+163 |   section.file h2 {{
+164 |     font-family: &quot;IBM Plex Mono&quot;, Consolas, &quot;Courier New&quot;, monospace;
+165 |     font-size: 11pt; font-weight: 700; margin: 0 0 7pt; padding-bottom: 4pt;
+166 |     border-bottom: 1px solid #161616;
+167 |   }}
+168 |   pre {{
+169 |     font-family: &quot;IBM Plex Mono&quot;, Consolas, &quot;Courier New&quot;, monospace;
+170 |     font-size: 9.5pt; line-height: 1.32; margin: 0;
+171 |     white-space: pre-wrap; word-break: break-all; overflow-wrap: anywhere;
+172 |   }}
+173 | &lt;/style&gt;
+174 | &lt;/head&gt;
+175 | &lt;body&gt;
+176 | 
+177 | &lt;div class=&quot;title-page&quot;&gt;
+178 |   &lt;h1&gt;{PROJECT}&lt;/h1&gt;
+179 |   &lt;p&gt;Source code, submitted for review.&lt;/p&gt;
+180 |   &lt;p&gt;{REPO_URL}&lt;/p&gt;
+181 |   &lt;p&gt;{today}&lt;/p&gt;
+182 |   &lt;p&gt;{total_lines:,} lines across {len(ordered_files)} files.&lt;/p&gt;
+183 | &lt;/div&gt;
+184 | 
+185 | &lt;div class=&quot;toc&quot;&gt;
+186 |   &lt;h1&gt;Contents&lt;/h1&gt;
+187 |   &lt;table class=&quot;toc-table&quot;&gt;
+188 | {&quot;&quot;.join(toc_rows)}
+189 |   &lt;/table&gt;
+190 | &lt;/div&gt;
+191 | 
+192 | {&quot;&quot;.join(sections)}
+193 | &lt;/body&gt;
+194 | &lt;/html&gt;
+195 | &quot;&quot;&quot;
+196 |     return doc, ordered_files, total_lines
+197 | 
+198 | 
+199 | def print_pdf(chrome: str, html_path: Path, pdf_path: Path) -&gt; None:
+200 |     subprocess.run(
+201 |         [chrome, &quot;--headless&quot;, &quot;--disable-gpu&quot;, &quot;--no-pdf-header-footer&quot;,
+202 |          f&quot;--print-to-pdf={pdf_path}&quot;, html_path.resolve().as_uri()],
+203 |         check=True, capture_output=True,
+204 |     )
+205 | 
+206 | 
+207 | def discover_pages(pdf_path: Path, files: list[str]) -&gt; dict[str, int]:
+208 |     import pypdf
+209 | 
+210 |     reader = pypdf.PdfReader(str(pdf_path))
+211 |     found: dict[str, int] = {}
+212 |     remaining = set(files)
+213 |     for i, page in enumerate(reader.pages, start=1):
+214 |         text = page.extract_text() or &quot;&quot;
+215 |         # the CSS page-counter footer can extract before the body text, so
+216 |         # a file&#x27;s header may not be the first line -- check the first few
+217 |         # non-blank lines rather than requiring an exact prefix match
+218 |         lead = [ln.strip() for ln in text.splitlines() if ln.strip()][:3]
+219 |         for f in list(remaining):
+220 |             if f in lead:
+221 |                 found[f] = i
+222 |                 remaining.discard(f)
+223 |                 break
+224 |     return found
+225 | 
+226 | 
+227 | def main() -&gt; None:
+228 |     chrome = find_chrome()
+229 |     groups = collect_files()
+230 |     html_path = ROOT / &quot;docs&quot; / &quot;code.html&quot;
+231 |     pdf_path = ROOT / &quot;docs&quot; / &quot;code.pdf&quot;
+232 | 
+233 |     doc, files, total_lines = build_html(groups, None)
+234 |     html_path.write_text(doc, encoding=&quot;utf-8&quot;)
+235 |     print_pdf(chrome, html_path, pdf_path)
+236 |     pages = discover_pages(pdf_path, files)
+237 | 
+238 |     for attempt in range(2):
+239 |         doc, files, total_lines = build_html(groups, pages)
+240 |         html_path.write_text(doc, encoding=&quot;utf-8&quot;)
+241 |         print_pdf(chrome, html_path, pdf_path)
+242 |         new_pages = discover_pages(pdf_path, files)
+243 |         if new_pages == pages:
+244 |             break
+245 |         pages = new_pages
+246 |     else:
+247 |         print(&quot;warning: TOC page numbers had not fully stabilised after 3 passes&quot;, file=sys.stderr)
+248 | 
+249 |     missing = [f for f in files if f not in pages]
+250 |     if missing:
+251 |         print(&quot;warning: could not locate a page for:&quot;, missing, file=sys.stderr)
+252 | 
+253 |     import pypdf
+254 |     page_count = len(pypdf.PdfReader(str(pdf_path)).pages)
+255 |     print(f&quot;built {pdf_path}: {page_count} pages, {total_lines:,} lines across {len(files)} files&quot;)
+256 | 
+257 | 
+258 | if __name__ == &quot;__main__&quot;:
+259 |     main()</pre>
+</section>
+<section class="file" id="file-59">
   <h2>scripts/precompute_results.py</h2>
   <pre>  1 | &quot;&quot;&quot;Run the three heavy analyses once and cache their outputs as JSON.
   2 | 
@@ -12156,7 +12419,7 @@
 184 | if __name__ == &quot;__main__&quot;:
 185 |     main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-60">
   <h2>scripts/stress_tests.py</h2>
   <pre> 1 | &quot;&quot;&quot;Run the two limitation-closing stress tests and cache them as JSON.
  2 | 
@@ -12232,7 +12495,7 @@
 72 | if __name__ == &quot;__main__&quot;:
 73 |     main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-61">
   <h2>scripts/verify_epidemic_curves.py</h2>
   <pre> 1 | &quot;&quot;&quot;Week 1 sanity check: do the simulator&#x27;s epidemic curves look plausible?
  2 | 
@@ -12320,7 +12583,7 @@
 84 | if __name__ == &quot;__main__&quot;:
 85 |     main()</pre>
 </section>
-<section class="file">
+<section class="file" id="file-62">
   <h2>render.yaml</h2>
   <pre> 1 | # Render.com Blueprint. Deploys the FastAPI app + static web/ as one free
  2 | # web service. No database, no build step for the frontend, no secrets.
@@ -12344,7 +12607,7 @@
 20 |       - key: PYTHON_VERSION
 21 |         value: &quot;3.12.7&quot;</pre>
 </section>
-<section class="file">
+<section class="file" id="file-63">
   <h2>requirements.txt</h2>
   <pre> 1 | # This machine runs Python 3.14. Use &gt;= constraints only, never exact pins:
  2 | # exact pins have already caused binary-wheel resolution failures on this
@@ -12366,7 +12629,7 @@
 18 | uvicorn&gt;=0.30
 19 | httpx&gt;=0.27   # FastAPI&#x27;s TestClient (tests/test_api.py) needs it</pre>
 </section>
-<section class="file">
+<section class="file" id="file-64">
   <h2>requirements-runtime.txt</h2>
   <pre> 1 | # Runtime-only dependencies for a deployed server.
  2 | #
@@ -12380,11 +12643,11 @@
 10 | fastapi&gt;=0.115
 11 | uvicorn&gt;=0.30</pre>
 </section>
-<section class="file">
+<section class="file" id="file-65">
   <h2>Procfile</h2>
   <pre> 1 | web: uvicorn api.app:app --host 0.0.0.0 --port ${PORT:-8000}</pre>
 </section>
-<section class="file">
+<section class="file" id="file-66">
   <h2>CLAUDE.md</h2>
   <pre>  1 | # MicroCluster
   2 | 
